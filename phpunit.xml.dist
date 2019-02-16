@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit bootstrap="./vendor/autoload.php" colors="true">
+    <testsuites>
+        <testsuite name="NanofelisJsonRpcBundle">
+            <directory suffix="Test.php">./Tests</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="/disabled/" />
+    </php>
+    <filter>
+        <whitelist>
+            <directory>./</directory>
+            <exclude>
+                <directory>./Resources</directory>
+                <directory>./Tests</directory>
+                <directory>./vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>

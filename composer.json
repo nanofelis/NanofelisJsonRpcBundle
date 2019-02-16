@@ -1,0 +1,40 @@
+{
+    "name": "nanofelis/json-rpc-bundle",
+    "type": "symfony-bundle",
+    "description": "This Bundle provides a json rpc 2.0 implementation for Symfony",
+    "keywords": ["json-rpc"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Gabriel Soullier",
+            "email": "gabriel.soullier@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "doctrine/annotations": "^1.6",
+        "sensio/framework-extra-bundle": "^4.0|^5.0",
+        "symfony/options-resolver": "^3.4|^4.0",
+        "symfony/serializer": "^3.4|^4.0",
+        "symfony/validator": "^3.4|^4.0"
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^3.4|^4.0",
+        "symfony/var-dumper": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nanofelis\\JsonRpcBundle\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\": "Tests/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "master-dev"
+        }
+    }
+}
