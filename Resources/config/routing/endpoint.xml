@@ -5,9 +5,8 @@
         xsi:schemaLocation="http://symfony.com/schema/routing
         http://symfony.com/schema/routing/routing-1.0.xsd">
 
-    <route id="nanofelis_json_rpc.endpoint" path="/" methods="POST">
+    <route id="nanofelis_json_rpc.endpoint" path="/" methods="POST,GET">
         <default key="_controller">nanofelis_json_rpc.controller.rpc</default>
-        <condition>request.headers.get('Content-Type') === 'application/json' || request.headers.get('Content-Type') === 'application/json-rpc'</condition>
     </route>
 
 </routes>

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Tests\EventListener;
+namespace Nanofelis\Bundle\JsonRpcBundle\Tests\EventListener;
 
-use Nanofelis\JsonRpcBundle\Event\RpcBeforeMethodEvent;
-use Nanofelis\JsonRpcBundle\EventListener\RpcRequestListener;
-use Nanofelis\JsonRpcBundle\Request\RpcRequestPayload;
-use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
+use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeMethodEvent;
+use Nanofelis\Bundle\JsonRpcBundle\EventListener\RpcRequestListener;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
+use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\TestCase;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\DateTimeParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterManager;
@@ -37,7 +37,7 @@ class RpcRequestListenerTest extends TestCase
 
     public function testParamConversionWithDate()
     {
-        $payload = new RpcRequestPayload();
+        $payload = new RpcRpcRequest();
         $payload->setMethod('getDateIso');
         $payload->setRequest(Request::create('/fake'));
         $payload->setParams(['date' => '1970-01-01']);

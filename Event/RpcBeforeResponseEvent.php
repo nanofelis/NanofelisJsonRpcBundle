@@ -1,27 +1,25 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Nanofelis\Bundle\JsonRpcBundle\Event;
 
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
-use Symfony\Component\EventDispatcher\Event;
+use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
 
-class RpcBeforeMethodEvent extends Event
+class RpcBeforeResponseEvent
 {
-    const NAME = 'nanofelis_json_rpc.before_request';
-
     /**
      * @var RpcRequest
      */
     private $rpcRequest;
 
     /**
-     * @param RpcRpcRequest $payload
+     * RpcBeforeResponseEvent constructor.
+     *
+     * @param RpcResponse $response
      */
-    public function __construct(RpcRequest $rpcRequest)
+    public function __construct(RpcRequest $payload)
     {
-        $this->rpcRequest = $rpcRequest;
+        $this->rpcRequest = $payload;
     }
 
     /**

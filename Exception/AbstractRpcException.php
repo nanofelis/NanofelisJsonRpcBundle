@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Exception;
+namespace Nanofelis\Bundle\JsonRpcBundle\Exception;
 
-use Nanofelis\JsonRpcBundle\Request\RpcRequestPayload;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Throwable;
 
 abstract class AbstractRpcException extends \Exception
@@ -16,15 +16,15 @@ abstract class AbstractRpcException extends \Exception
     const INTERNAL = -32603;
 
     const MESSAGES = [
-        self::PARSE => 'Parse error ',
-        self::INVALID_REQUEST => 'Invalid Request',
-        self::METHOD_NOT_FOUND => 'Method notfound',
-        self::INVALID_PARAMS => 'Invalid params',
-        self::INTERNAL => 'internal error',
+        self::PARSE => 'invalid json',
+        self::INVALID_REQUEST => 'invalid json-rpc payload',
+        self::METHOD_NOT_FOUND => 'method not found',
+        self::INVALID_PARAMS => 'invalid params',
+        self::INTERNAL => 'internal server error',
     ];
 
     /**
-     * @var RpcRequestPayload|null
+     * @var RpcRpcRequest|null
      */
     private $payload;
 
@@ -33,21 +33,6 @@ abstract class AbstractRpcException extends \Exception
      */
     private $data;
 
-    /**
-     * @return array|null
-     */
-    public function getData(): ?array
-    {
-        return $this->data;
-    }
-
-    /**
-     * AbstractRpcException constructor.
-     *
-     * @param string         $message
-     * @param int            $code
-     * @param Throwable|null $previous
-     */
     public function __construct(string $message = '', int $code = 0, Throwable $previous = null)
     {
         if (empty($message)) {
@@ -58,17 +43,30 @@ abstract class AbstractRpcException extends \Exception
     }
 
     /**
-     * @return RpcRequestPayload|null
+     * @return array|null
      */
-    public function getPayload(): ?RpcRequestPayload
+    public function getData(): ?array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array|null $data
+     */
+    public function setData(?array $data): void
+    {
+        $this->data = $data;
+    }
+
+    public function getPayload(): ?RpcRequest
     {
         return $this->payload;
     }
 
     /**
-     * @param RpcRequestPayload|null $payload
+     * @param RpcRpcRequest|null $payload
      */
-    public function setPayload(?RpcRequestPayload $payload): void
+    public function setPayload(?RpcRequest $payload): void
     {
         $this->payload = $payload;
     }

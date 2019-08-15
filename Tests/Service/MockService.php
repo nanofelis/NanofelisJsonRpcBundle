@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Tests\Service;
+namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
 class MockService
 {

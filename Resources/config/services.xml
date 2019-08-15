@@ -1,40 +1,43 @@
 <?xml version="1.0" ?>
 
 <container xmlns="http://symfony.com/schema/dic/services"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
-        <services>
-                <service id="nanofelis_json_rpc.controller.rpc" class="Nanofelis\JsonRpcBundle\Controller\RpcController" public="true">
-                        <argument type="service" id="validator" />
-                        <argument type="service" id="nanofelis_json_rpc.request.handler" />
-                </service>
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="nanofelis_json_rpc.controller.rpc" class="Nanofelis\Bundle\JsonRpcBundle\Controller\RpcController"
+                 public="true">
+            <argument type="service" id="nanofelis_json_rpc.request.parser"/>
+            <argument type="service" id="nanofelis_json_rpc.request.handler"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
 
-                <service id="nanofelis_json_rpc.request.handler" class="Nanofelis\JsonRpcBundle\Request\RpcRequestHandler" public="false">
-                        <argument type="service" id="nanofelis_json_rpc.service.locator" />
-                        <argument type="service" id="nanofelis_json_rpc.service.annotation_reader" />
-                        <argument type="service" id="event_dispatcher" />
-                        <argument type="service" id="serializer" />
-                        <argument type="service" id="logger" />
-                </service>
+        <service id="nanofelis_json_rpc.request.parser" class="Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestParser"
+                 public="false">
+            <argument type="service" id="validator"/>
+        </service>
 
-                <service id="nanofelis_json_rpc.request.listener" class="Nanofelis\JsonRpcBundle\EventListener\RpcRequestListener" public="false" >
-                        <argument type="service" id="sensio_framework_extra.converter.manager" />
-                        <tag name="kernel.event_subscriber" />
-                </service>
+        <service id="nanofelis_json_rpc.request.handler"
+                 class="Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestHandler" public="false">
+            <argument type="service" id="nanofelis_json_rpc.service.finder"/>
+            <argument type="service" id="nanofelis_bundle_json_rpc.service.method_reader"/>
+            <argument type="service" id="serializer"/>
+        </service>
 
-                <service id="nanofelis_json_rpc.exception.listener" class="Nanofelis\JsonRpcBundle\EventListener\RpcExceptionListener" public="false" >
-                        <argument type="service" id="sensio_framework_extra.converter.manager" />
-                        <tag name="kernel.event_subscriber" />
-                </service>
+        <service id="nanofelis_json_rpc.request.listener"
+                 class="Nanofelis\Bundle\JsonRpcBundle\EventListener\RpcRequestListener" public="false">
+            <argument type="service" id="sensio_framework_extra.converter.manager"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
 
-                <service id="nanofelis_json_rpc.service.locator" class="Nanofelis\JsonRpcBundle\Service\ServiceLocator" public="false" >
-                        <argument type="service" id="sensio_framework_extra.converter.manager" />
-                        <argument type="tagged" tag="nanofelis_json_rpc" />
-                </service>
+        <service id="nanofelis_json_rpc.service.finder" class="Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder"
+                 public="false">
+            <argument type="tagged" tag="nanofelis_json_rpc"/>
+        </service>
 
-                <service id="nanofelis_json_rpc.service.annotation_reader" class="Nanofelis\JsonRpcBundle\Service\ServiceAnnotationReader" public="false" >
-                        <argument type="service" id="sensio_framework_extra.converter.manager" />
-                </service>
-        </services>
+        <service id="nanofelis_bundle_json_rpc.service.method_reader"
+                 class="Nanofelis\Bundle\JsonRpcBundle\Service\MethodReader" public="false">
+            <argument type="service" id="annotations.reader"></argument>
+        </service>
+    </services>
 
 </container>

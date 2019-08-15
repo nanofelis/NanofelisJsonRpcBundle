@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Exception;
+namespace Nanofelis\Bundle\JsonRpcBundle\Exception;
 
 class RpcMethodNotFoundException extends AbstractRpcException
 {

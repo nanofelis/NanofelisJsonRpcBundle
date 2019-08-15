@@ -1,7 +1,7 @@
 {
     "name": "nanofelis/json-rpc-bundle",
     "type": "symfony-bundle",
-    "description": "This Bundle provides a json rpc 2.0 implementation for Symfony",
+    "description": "This bundle provides a json rpc 2.0 implementation for Symfony",
     "keywords": ["json-rpc"],
     "license": "MIT",
     "authors": [
@@ -26,8 +26,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Nanofelis\\JsonRpcBundle\\": ""
-        }
+            "Nanofelis\\Bundle\\JsonRpcBundle\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
     },
     "autoload-dev": {
         "psr-4": { "Tests\\": "Tests/" }

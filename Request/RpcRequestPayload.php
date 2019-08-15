@@ -1,115 +1,64 @@
 <?php
 
-declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Request;
+namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
-use Symfony\Component\HttpFoundation\Request;
-
-class RpcRequestPayload
+class RpcRequestPayload implements \Countable
 {
     /**
-     * @var string|null
+     * @var RpcRequest[]
      */
-    private $id;
+    private $rpcRequests = [];
 
     /**
-     * @var string
+     * @var bool
      */
-    private $serviceId;
+    private $isBatch = false;
 
     /**
-     * @var string
+     * @return RpcRequest[]
      */
-    private $method;
-
-    /**
-     * @var array|null
-     */
-    private $params;
-
-    /**
-     * @var Request
-     */
-    private $request;
-
-    /**
-     * @return string|null
-     */
-    public function getId(): ?string
+    public function getRpcRequests(): array
     {
-        return $this->id;
+        return $this->rpcRequests;
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getServiceId(): string
+    public function isBatch(): bool
     {
-        return $this->serviceId;
+        return $this->isBatch;
     }
 
     /**
-     * @return string
+     * @param bool $isBatch
      */
-    public function getMethod(): string
+    public function setIsBatch(bool $isBatch): void
     {
-        return $this->method;
+        $this->isBatch = $isBatch;
     }
 
     /**
-     * @return array|null
+     * @return RpcRequest[]
      */
-    public function getParams(): ?array
+    public function getValidRpcRequests(): array
     {
-        return $this->params;
+        return array_filter($this->rpcRequests, function(RpcRequest $rpcRequest) {
+            return !$rpcRequest->getResponseError();
+        });
     }
 
     /**
-     * @param string|null $id
+     * @param RpcRequest $rpcRequest
      */
-    public function setId(?string $id): void
+    public function addRpcRequest(RpcRequest $rpcRequest): void
     {
-        $this->id = $id;
+        $this->rpcRequests[] = $rpcRequest;
     }
 
-    /**
-     * @param string $serviceId
-     */
-    public function setServiceId(string $serviceId): void
+    public function count()
     {
-        $this->serviceId = $serviceId;
-    }
-
-    /**
-     * @param string $method
-     */
-    public function setMethod(string $method): void
-    {
-        $this->method = $method;
-    }
-
-    /**
-     * @param array $params
-     */
-    public function setParams(?array $params): void
-    {
-        $this->params = $params;
-    }
-
-    /**
-     * @return Request
-     */
-    public function getRequest(): Request
-    {
-        return $this->request;
-    }
-
-    /**
-     * @param Request $request
-     */
-    public function setRequest(Request $request): void
-    {
-        $this->request = $request;
+        return count($this->rpcRequests);
     }
 }

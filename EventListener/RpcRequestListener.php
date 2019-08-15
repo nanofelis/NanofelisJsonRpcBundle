@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\EventListener;
+namespace Nanofelis\Bundle\JsonRpcBundle\EventListener;
 
-use Nanofelis\JsonRpcBundle\Event\RpcBeforeMethodEvent;
-use Nanofelis\JsonRpcBundle\Exception\RpcInternalException;
-use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
+use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeMethodEvent;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInternalException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -47,7 +47,7 @@ class RpcRequestListener implements EventSubscriberInterface
      */
     public function onRPCBeforeMethodEvent(RpcBeforeMethodEvent $event)
     {
-        if (empty($event->getPayload()->getParams())) {
+        if (empty($event->getRpcRequest()->getParams())) {
             return;
         }
 

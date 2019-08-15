@@ -2,38 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Request;
+namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
-use Nanofelis\JsonRpcBundle\Event\RpcBeforeMethodEvent;
-use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
-use Nanofelis\JsonRpcBundle\Exception\RpcInternalException;
-use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
-use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
-use Nanofelis\JsonRpcBundle\Exception\RpcServerErrorException;
-use Nanofelis\JsonRpcBundle\Service\ServiceAnnotationReader;
-use Nanofelis\JsonRpcBundle\Service\ServiceLocator;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Rpc\Exception\RpcDataExceptionInterface;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcApplicationException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInternalException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidParamsException;
+use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
+use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
+use Nanofelis\Bundle\JsonRpcBundle\Service\MethodDescriptor;
+use Nanofelis\Bundle\JsonRpcBundle\Service\MethodReader;
+use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RpcRequestHandler
 {
     /**
-     * @var ServiceLocator
+     * @var ServiceFinder
      */
-    private $serviceLocator;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $dispatcher;
-
-    /**
-     * @var bool
-     */
-    private $debug;
+    private $serviceFinder;
 
     /**
      * @var NormalizerInterface
@@ -41,101 +30,100 @@ class RpcRequestHandler
     private $normalizer;
 
     /**
-     * @var ServiceAnnotationReader
+     * @var MethodReader
      */
-    private $annotationReader;
+    private $methodReader;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * RpcRequestHandler constructor.
-     *
-     * @param ServiceLocator           $serviceLocator
-     * @param ServiceAnnotationReader  $annotationReader
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param NormalizerInterface      $normalizer
-     */
     public function __construct(
-        ServiceLocator $serviceLocator,
-        ServiceAnnotationReader $annotationReader,
-        EventDispatcherInterface $eventDispatcher,
+        ServiceFinder $serviceFinder,
+        MethodReader $methodReader,
         NormalizerInterface $normalizer
-    ) {
-        $this->serviceLocator = $serviceLocator;
-        $this->dispatcher = $eventDispatcher;
+    )
+    {
+        $this->serviceFinder = $serviceFinder;
         $this->normalizer = $normalizer;
-        $this->annotationReader = $annotationReader;
-        $this->logger = new NullLogger();
+        $this->methodReader = $methodReader;
     }
 
     /**
-     * @required
-     */
-    public function setDebug(bool $debug): void
-    {
-        $this->debug = $debug;
-    }
-
-    /**
-     * @required
-     */
-    public function setLogger(LoggerInterface $logger): void
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * @param RPCRequestPayload $payload
-     *
-     * @return array|bool|float|int|string
+     * @param RpcRequest $rpcRequest
      *
      * @throws AbstractRpcException
      * @throws ExceptionInterface
-     * @throws RpcMethodNotFoundException
      */
-    public function handle(RPCRequestPayload $payload)
+    public function handle(RpcRequest $rpcRequest): void
     {
-        $service = $this->serviceLocator->find($payload);
+        try {
+            $this->execute($rpcRequest);
+        } catch (\Throwable $e) {
+            $e = $this->castToRpcException($e);
+            $rpcRequest->setResponseError(new RpcResponseError($e, $rpcRequest->getId()));
+        }
+    }
 
-        $this->dispatcher->dispatch(RpcBeforeMethodEvent::NAME, new RpcBeforeMethodEvent($payload, $service));
+    private function execute(RpcRequest $rpcRequest): void
+    {
+        [$serviceKey, $method] = explode('.', $rpcRequest->getMethod());
 
-        $return = $this->execute($service, $payload);
+        $service = $this->serviceFinder->find($serviceKey);
+        $methodDescriptor = $this->methodReader->read($service, $method);
+        $method = $methodDescriptor->getName();
+        $params = $this->getOrderedParams($methodDescriptor, $rpcRequest);
 
-        $contexts = $this->annotationReader->getDenormalizationContexts($service, $payload->getMethod());
+        $data = $service->$method(...$params);
 
-        return $this->normalizer->normalize($return, null, $contexts);
+        if ($cache = $methodDescriptor->getCacheConfiguration()) {
+            $rpcRequest->getRequest()->attributes->set('_cache', $cache);
+        }
+
+        $data = $this->normalizer->normalize($data, null, $methodDescriptor->getNormalizationContexts());
+
+        $rpcRequest->setResponse(new RpcResponse($data, $rpcRequest->getId()));
     }
 
     /**
-     * @param                   $service
-     * @param RpcRequestPayload $payload
+     * @param MethodDescriptor  $methodDescriptor
+     * @param RpcRpcRequest $payload
      *
-     * @return mixed
-     *
-     * @throws RpcInvalidRequestException
-     * @throws RpcServerErrorException
+     * @return array
      */
-    private function execute($service, RpcRequestPayload $payload)
+    private function getOrderedParams(MethodDescriptor $methodDescriptor, RpcRequest $payload): array
     {
-        $method = $payload->getMethod();
+        $params = $payload->getParams() ?: [];
+        $orderedParams = [];
+        $reflectionParams = $methodDescriptor->getParameters();
 
-        try {
-            return $service->$method(...array_values($payload->getParams() ?: []));
-        } catch (\TypeError $e) {
-            throw new RpcInvalidRequestException(sprintf('invalid types for method %s of service %s %s', $method, $payload->getServiceId(), $this->debug ? $e->getMessage() : ''));
-        } catch (\InvalidArgumentException $e) {
-            throw new RpcInvalidRequestException($e->getMessage(), $e);
-        } catch (\Exception $e) {
-            $this->logger->error(sprintf('[%s] %s.%s : %s', $e->getCode(), $payload->getServiceId(), $method, $e->getMessage()));
-
-            throw new RpcServerErrorException($e->getMessage(), $e->getCode(), $e);
-        } catch (\Throwable $e) {
-            $this->logger->critical(sprintf('[%s] %s.%s : %s', $e->getCode(), $payload->getServiceId(), $method, $e->getMessage()));
-
-            throw new RpcServerErrorException($this->debug ? $e->getMessage() : '', $e->getCode(), $e);
+        foreach ($reflectionParams as $reflectionParam) {
+            if (array_key_exists($reflectionParam->getName(), $params)) {
+                $orderedParams[] = $params[$reflectionParam->getName()];
+            }
         }
+
+        return empty($orderedParams) ? $params : $orderedParams;
+    }
+
+    /**
+     * @param \Throwable $e
+     *
+     * @return AbstractRpcException
+     */
+    private function castToRpcException(\Throwable $e): AbstractRpcException
+    {
+        switch ($e) {
+            case $e instanceof AbstractRpcException:
+                return $e;
+                break;
+            case $e instanceof \TypeError:
+                $rpcError = new RpcInvalidParamsException();
+                break;
+            default:
+                $rpcError = new RpcApplicationException($e->getMessage(), $e->getCode());
+        }
+
+        if ($e instanceof RpcDataExceptionInterface) {
+            $rpcError->setData($e->getData());
+        }
+
+        return $rpcError;
     }
 }

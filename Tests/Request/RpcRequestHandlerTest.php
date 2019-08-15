@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Request\Tests;
+namespace Nanofelis\Bundle\JsonRpcBundle\Request\Tests;
 
-use Nanofelis\JsonRpcBundle\Exception\RpcInternalException;
-use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
-use Nanofelis\JsonRpcBundle\Request\RpcRequestHandler;
-use Nanofelis\JsonRpcBundle\Request\RpcRequestPayload;
-use Nanofelis\JsonRpcBundle\Service\ServiceAnnotationReader;
-use Nanofelis\JsonRpcBundle\Service\ServiceLocator;
-use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInternalException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestHandler;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
+use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceReader;
+use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
+use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -33,8 +33,8 @@ class RpcRequestHandlerTest extends TestCase
         $services = new \ArrayIterator([
             new MockService(),
         ]);
-        $serviceLocator = new ServiceLocator($services);
-        $annotationReader = $this->createMock(ServiceAnnotationReader::class);
+        $serviceLocator = new ServiceFinder($services);
+        $annotationReader = $this->createMock(ServiceReader::class);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
 
@@ -44,7 +44,7 @@ class RpcRequestHandlerTest extends TestCase
     /**
      * @dataProvider providePayload
      */
-    public function testHandle(RpcRequestPayload $payload, $expectedResult = null, ?string $expectedException = null, ?string $exceptionMessage = null)
+    public function testHandle(RpcRpcRequest $payload, $expectedResult = null, ?string $expectedException = null, ?string $exceptionMessage = null)
     {
         if ($expectedException) {
             $this->expectException($expectedException);
@@ -58,32 +58,32 @@ class RpcRequestHandlerTest extends TestCase
 
     public function providePayload(): \Generator
     {
-        $badTypePayload = new RpcRequestPayload();
+        $badTypePayload = new RpcRpcRequest();
         $badTypePayload->setMethod('add');
         $badTypePayload->setServiceId('mock');
         $badTypePayload->setParams(['arg1' => '5', 'arg2' => 5]);
 
         yield [$badTypePayload, null, RpcInvalidRequestException::class, 'bad types'];
 
-        $badArgumentsPayload = new RpcRequestPayload();
+        $badArgumentsPayload = new RpcRpcRequest();
         $badArgumentsPayload->setMethod('willThrowBadArguments');
         $badArgumentsPayload->setServiceId('mock');
 
         yield [$badArgumentsPayload, null, RpcInvalidRequestException::class, 'bad arguments'];
 
-        $exceptionPayload = new RpcRequestPayload();
+        $exceptionPayload = new RpcRpcRequest();
         $exceptionPayload->setMethod('willThrowException');
         $exceptionPayload->setServiceId('mock');
 
         yield [$exceptionPayload, null, RpcInternalException::class, 'it went wrong'];
 
-        $exceptionPayload = new RpcRequestPayload();
+        $exceptionPayload = new RpcRpcRequest();
         $exceptionPayload->setMethod('willThrowPhpError');
         $exceptionPayload->setServiceId('mock');
 
         yield [$exceptionPayload, null, RpcInternalException::class, 'internal server error'];
 
-        $successPayload = new RpcRequestPayload();
+        $successPayload = new RpcRpcRequest();
         $successPayload->setMethod('add');
         $successPayload->setServiceId('mock');
         $successPayload->setParams(['arg1' => 5, 'arg2' => 5]);

@@ -2,48 +2,46 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Response;
+namespace Nanofelis\Bundle\JsonRpcBundle\Response;
 
-use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
-use Nanofelis\JsonRpcBundle\Validator\Constraints\RequestPayload;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
+use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequest;
 use Symfony\Component\HttpFoundation\Response;
 
-class RpcResponseError extends JsonResponse
+class RpcResponseError implements RpcResponseInterface
 {
-    const HTTP_ERROR_MAPPING = [
-        AbstractRpcException::METHOD_NOT_FOUND => Response::HTTP_NOT_FOUND,
-        AbstractRpcException::INVALID_REQUEST => Response::HTTP_BAD_REQUEST,
-        AbstractRpcException::PARSE => Response::HTTP_INTERNAL_SERVER_ERROR,
-        AbstractRpcException::INVALID_PARAMS => Response::HTTP_INTERNAL_SERVER_ERROR,
-        AbstractRpcException::INTERNAL => Response::HTTP_INTERNAL_SERVER_ERROR,
-    ];
+    /**
+     * @var AbstractRpcException
+     */
+    private $rpcException;
 
     /**
-     * @param AbstractRpcException $e
-     * @param string[]             $headers
+     * @var mixed|null
      */
-    public function __construct(AbstractRpcException $e, array $headers = [])
+    private $id;
+
+    /**
+     * RpcResponseError constructor.
+     *
+     * @param AbstractRpcException $rpcException
+     * @param mixed|null           $id
+     */
+    public function __construct(AbstractRpcException $rpcException, $id = null)
     {
-        $return = [
-            'jsonrpc' => RequestPayload::JSON_RPC_VERSION,
-            'error' => [
-                'code' => $e->getCode(),
-                'message' => $e->getMessage(),
-                'data' => $e->getData(),
-            ],
-        ];
-        $payload = $e->getPayload();
-
-        if ($payload) {
-            $return['id'] = $payload->getId();
-        }
-
-        parent::__construct($return, $this->getHttpStatus($e), $headers);
+        $this->rpcException = $rpcException;
+        $this->id = $id;
     }
 
-    private function getHttpStatus(AbstractRpcException $e): int
+    public function getContent(): array
     {
-        return self::HTTP_ERROR_MAPPING[$e->getCode()] ?? Response::HTTP_INTERNAL_SERVER_ERROR;
+        return [
+            'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
+            'error'   => [
+                'code'    => $this->rpcException->getCode(),
+                'message' => $this->rpcException->getMessage(),
+                'data'    => $this->rpcException->getData(),
+                'id'      => $this->id
+            ],
+        ];
     }
 }

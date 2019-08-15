@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/nanofelis/NanofelisJsonRpcBundle.svg?branch=master)](https://travis-ci.com/nanofelis/NanofelisJsonRpcBundle)
+[![SymfonyInsight](https://insight.symfony.com/projects/993c360e-d436-4902-a253-9864451ee006/mini.svg)](https://insight.symfony.com/projects/993c360e-d436-4902-a253-9864451ee006)
 Installation
 ============
 
@@ -43,7 +44,7 @@ class AppKernel extends Kernel
     {
         $bundles = [
             // ...
-            new Nanofelis\JsonRpcBundle\NanofelisJsonRpcBundle(),
+            new Nanofelis\Bundle\JsonRpcBundle\NanofelisJsonRpcBundle(),
         ];
 
         // ...

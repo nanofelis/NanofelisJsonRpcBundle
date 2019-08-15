@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Request\Tests;
+namespace Nanofelis\Bundle\JsonRpcBundle\Request\Tests;
 
-use Nanofelis\JsonRpcBundle\Request\RpcRequestParser;
-use Nanofelis\JsonRpcBundle\Request\RpcRequestPayload;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestParser;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -27,6 +27,6 @@ class RpcRequestParserTest extends TestCase
 
         $payload = $parser->parse($request);
 
-        $this->assertInstanceOf(RpcRequestPayload::class, $payload);
+        $this->assertInstanceOf(RpcRpcRequest::class, $payload);
     }
 }

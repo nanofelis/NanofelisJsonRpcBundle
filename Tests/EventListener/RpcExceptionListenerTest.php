@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Tests\EventListener;
+namespace Nanofelis\Bundle\JsonRpcBundle\Tests\EventListener;
 
-use Nanofelis\JsonRpcBundle\EventListener\RpcExceptionListener;
-use Nanofelis\JsonRpcBundle\Exception\RpcParseException;
+use Nanofelis\Bundle\JsonRpcBundle\EventListener\RpcExceptionListener;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcParseException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 

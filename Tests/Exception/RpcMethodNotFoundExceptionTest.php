@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\Tests\Exception;
+namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Exception;
 
-use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
-use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use PHPUnit\Framework\TestCase;
 
 class RpcMethodNotFoundExceptionTest extends TestCase
