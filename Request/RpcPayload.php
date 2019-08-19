@@ -1,9 +1,8 @@
 <?php
 
-
 namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
-class RpcRequestPayload implements \Countable
+class RpcPayload
 {
     /**
      * @var RpcRequest[]
@@ -24,6 +23,14 @@ class RpcRequestPayload implements \Countable
     }
 
     /**
+     * @param RpcRequest $rpcRequest
+     */
+    public function addRpcRequest(RpcRequest $rpcRequest): void
+    {
+        $this->rpcRequests[] = $rpcRequest;
+    }
+
+    /**
      * @return bool
      */
     public function isBatch(): bool
@@ -37,28 +44,5 @@ class RpcRequestPayload implements \Countable
     public function setIsBatch(bool $isBatch): void
     {
         $this->isBatch = $isBatch;
-    }
-
-    /**
-     * @return RpcRequest[]
-     */
-    public function getValidRpcRequests(): array
-    {
-        return array_filter($this->rpcRequests, function(RpcRequest $rpcRequest) {
-            return !$rpcRequest->getResponseError();
-        });
-    }
-
-    /**
-     * @param RpcRequest $rpcRequest
-     */
-    public function addRpcRequest(RpcRequest $rpcRequest): void
-    {
-        $this->rpcRequests[] = $rpcRequest;
-    }
-
-    public function count()
-    {
-        return count($this->rpcRequests);
     }
 }

@@ -6,7 +6,7 @@
         http://symfony.com/schema/routing/routing-1.0.xsd">
 
     <route id="nanofelis_json_rpc.endpoint" path="/" methods="POST,GET">
-        <default key="_controller">nanofelis_json_rpc.controller.rpc</default>
+        <default key="_controller">nanofelis_json_rpc.action.rpc</default>
     </route>
 
 </routes>

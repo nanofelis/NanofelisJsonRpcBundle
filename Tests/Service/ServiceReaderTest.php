@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Tests\RpcService;
+namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
 use App\Rpc\Annotation\RpcNormalizationContext;
 use App\Rpc\Exception\RpcMethodNotFoundException;

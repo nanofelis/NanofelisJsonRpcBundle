@@ -6,7 +6,6 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Response;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequest;
-use Symfony\Component\HttpFoundation\Response;
 
 class RpcResponseError implements RpcResponseInterface
 {
@@ -36,11 +35,11 @@ class RpcResponseError implements RpcResponseInterface
     {
         return [
             'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
-            'error'   => [
-                'code'    => $this->rpcException->getCode(),
+            'error' => [
+                'code' => $this->rpcException->getCode(),
                 'message' => $this->rpcException->getMessage(),
-                'data'    => $this->rpcException->getData(),
-                'id'      => $this->id
+                'data' => $this->rpcException->getData(),
+                'id' => $this->id,
             ],
         ];
     }

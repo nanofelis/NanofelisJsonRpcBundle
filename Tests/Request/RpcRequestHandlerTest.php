@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\Bundle\JsonRpcBundle\Request\Tests;
+namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Request;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInternalException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestHandler;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
-use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceReader;
+use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -34,7 +34,7 @@ class RpcRequestHandlerTest extends TestCase
             new MockService(),
         ]);
         $serviceLocator = new ServiceFinder($services);
-        $annotationReader = $this->createMock(ServiceReader::class);
+        $annotationReader = $this->createMock(ServiceConfigLoader::class);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
 

@@ -6,14 +6,13 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Validator\Constraints;
 
 use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequestValidator;
-use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequest;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
 class RpcRequestValidatorTest extends ConstraintValidatorTestCase
 {
     protected function createValidator()
     {
-        return  new RpcRequestValidator();
+        return new RpcRequestValidator();
     }
 
     /**

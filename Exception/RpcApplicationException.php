@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Nanofelis\Bundle\JsonRpcBundle\Exception;
 
 use Throwable;
@@ -20,9 +19,8 @@ class RpcApplicationException extends AbstractRpcException
     {
         parent::__construct($message, $code, $previous);
 
-        if ($code >= self::CODE_RANGE[0] || $code <= self::CODE_RANGE[1]) {
-            throw new \RuntimeException(sprintf("application exception code should be outside range %d to %d, given: %d", self::CODE_RANGE[0], self::CODE_RANGE[1], $code));
+        if ($code >= self::CODE_RANGE[0] && $code <= self::CODE_RANGE[1]) {
+            throw new \RuntimeException(sprintf('application exception code should be outside range %d to %d, given: %d', self::CODE_RANGE[0], self::CODE_RANGE[1], $code));
         }
     }
-
 }

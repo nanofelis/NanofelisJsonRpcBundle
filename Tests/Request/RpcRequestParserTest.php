@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\Bundle\JsonRpcBundle\Request\Tests;
+namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Request;
 
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestParser;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
@@ -22,7 +22,7 @@ class RpcRequestParserTest extends TestCase
         $request = Request::create('/', 'GET', [], [], [], [], json_encode([
             'jsonrpc' => '2.0',
             'method' => 'mock.add',
-            'params' => [1, 2]
+            'params' => [1, 2],
         ]));
 
         $payload = $parser->parse($request);

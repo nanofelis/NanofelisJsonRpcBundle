@@ -5,7 +5,7 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Service;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
-class MethodDescriptor
+class ServiceDescriptor
 {
     /**
      * @var object
@@ -15,7 +15,7 @@ class MethodDescriptor
     /**
      * @var \ReflectionMethod[]
      */
-    private $reflection = [];
+    private $methodReflection = [];
 
     /**
      * @var array
@@ -28,7 +28,7 @@ class MethodDescriptor
     private $cacheConfiguration;
 
     /**
-     * MethodDescriptor constructor.
+     * ServiceDescriptor constructor.
      *
      * @param object $service
      * @param string $method
@@ -40,20 +40,20 @@ class MethodDescriptor
         $this->service = $service;
 
         try {
-            $this->reflection = new \ReflectionMethod(get_class($service), $method);
+            $this->methodReflection = new \ReflectionMethod(get_class($service), $method);
         } catch (\ReflectionException $e) {
             throw new RpcMethodNotFoundException();
         }
     }
 
-    public function getReflection()
+    public function getMethodReflection()
     {
-        return $this->reflection;
+        return $this->methodReflection;
     }
 
-    public function getName(): string
+    public function getMethodName(): string
     {
-        return $this->reflection->getName();
+        return $this->methodReflection->getName();
     }
 
     /**
@@ -65,11 +65,19 @@ class MethodDescriptor
     }
 
     /**
+     * @return string
+     */
+    public function getServiceClass(): string
+    {
+        return get_class($this->service);
+    }
+
+    /**
      * @return \ReflectionParameter[]
      */
-    public function getParameters(): array
+    public function getMethodParameters(): array
     {
-        return $this->reflection->getParameters();
+        return $this->methodReflection->getParameters();
     }
 
     /**

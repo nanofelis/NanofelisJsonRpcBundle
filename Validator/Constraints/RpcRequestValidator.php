@@ -8,25 +8,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class RpcMethodValidator extends ConstraintValidator
+class RpcRequestValidator extends ConstraintValidator
 {
     /**
-     * Checks if the passed value is valid.
-     *
-     * @param mixed                     $value      The value that should be validated
-     * @param Constraint|RpcRequest $constraint The constraint for the validation
+     * @param mixed      $request
+     * @param Constraint $constraint
      */
-    public function validate(RpcRequest $request, Constraint $constraint)
+    public function validate($request, Constraint $constraint)
     {
         try {
-            $this->getResolver()->resolve($value);
+            $this->getResolver()->resolve($request);
         } catch (\Exception $e) {
             $this->context->addViolation($e->getMessage());
 
             return;
         }
 
-        if (!preg_match('/^\w+\.\w+$/', $value['method'])) {
+        if (!preg_match('/^\w+\.\w+$/', $request['method'])) {
             $this->context->addViolation('Invalid RPC method format %method%, needs "serviceKey.method"', ['%method%' => $value['method']]);
         }
     }

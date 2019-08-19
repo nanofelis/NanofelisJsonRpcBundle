@@ -21,7 +21,7 @@ class RpcResponse implements RpcResponseInterface
     /**
      * RpcResponse constructor.
      *
-     * @param mixed $data
+     * @param mixed      $data
      * @param mixed|null $id
      */
     public function __construct($data, $id = null)
@@ -34,8 +34,8 @@ class RpcResponse implements RpcResponseInterface
     {
         return [
             'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
-            'result'  => $this->data,
-            'id'      => $this->id
+            'result' => $this->data,
+            'id' => $this->id,
         ];
     }
 }

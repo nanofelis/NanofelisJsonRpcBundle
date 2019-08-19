@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Rpc\Exception;
+namespace Nanofelis\Bundle\JsonRpcBundle\Exception;
 
 interface RpcDataExceptionInterface
 {

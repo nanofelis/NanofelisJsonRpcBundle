@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
-use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 class RpcRequest
 {
@@ -20,14 +20,19 @@ class RpcRequest
     private $id;
 
     /**
-     * @var string|null
+     * @var string|null Format serviceKey.methodKey
      */
-    private $serviceId;
+    private $method;
 
     /**
      * @var string|null
      */
-    private $method;
+    private $serviceKey;
+
+    /**
+     * @var string|null
+     */
+    private $methodKey;
 
     /**
      * @var array|null
@@ -77,11 +82,51 @@ class RpcRequest
     }
 
     /**
+     * @return string|null
+     */
+    public function getServiceKey(): ?string
+    {
+        return $this->serviceKey;
+    }
+
+    /**
+     * @param string|null $serviceKey
+     */
+    public function setServiceKey(?string $serviceKey): void
+    {
+        $this->serviceKey = $serviceKey;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMethodKey(): ?string
+    {
+        return $this->methodKey;
+    }
+
+    /**
+     * @param string|null $methodKey
+     */
+    public function setMethodKey(?string $methodKey): void
+    {
+        $this->methodKey = $methodKey;
+    }
+
+    /**
      * @return array|null
      */
     public function getParams(): ?array
     {
         return $this->params;
+    }
+
+    /**
+     * @param array|null $params
+     */
+    public function setParams(?array $params): void
+    {
+        $this->params = $params;
     }
 
     /**
@@ -91,6 +136,7 @@ class RpcRequest
     {
         return $this->response;
     }
+
     /**
      * @param RpcResponse|null $response
      */

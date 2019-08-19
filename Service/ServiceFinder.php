@@ -15,11 +15,37 @@ class ServiceFinder
     private $rpcServices;
 
     /**
-     * RPCServiceManager constructor.
+     * @var ServiceConfigLoader
      */
-    public function __construct(\Traversable $rpcServices)
+    private $serviceConfigLoader;
+
+    /**
+     * ServiceFinder constructor.
+     *
+     * @param \Traversable        $rpcServices
+     * @param ServiceConfigLoader $serviceConfigLoader
+     */
+    public function __construct(\Traversable $rpcServices, ServiceConfigLoader $serviceConfigLoader)
     {
         $this->rpcServices = $rpcServices;
+        $this->serviceConfigLoader = $serviceConfigLoader;
+    }
+
+    /**
+     * @param RpcRequest $rpcRequest
+     *
+     * @return ServiceDescriptor
+     *
+     * @throws RpcMethodNotFoundException
+     */
+    public function find(RpcRequest $rpcRequest): ServiceDescriptor
+    {
+        $service = $this->search($rpcRequest->getServiceKey());
+        $descriptor = new ServiceDescriptor($service, $rpcRequest->getMethodKey());
+
+        $this->serviceConfigLoader->loadConfig($descriptor);
+
+        return $descriptor;
     }
 
     /**
@@ -29,7 +55,7 @@ class ServiceFinder
      *
      * @throws RpcMethodNotFoundException
      */
-    public function find(string $serviceKey): object
+    private function search(string $serviceKey): object
     {
         foreach ($this->rpcServices as $service) {
             $class = explode('\\', \get_class($service));

@@ -16,7 +16,6 @@ class MethodReader
      */
     private $reader;
 
-
     public function __construct(Reader $reader)
     {
         $this->reader = $reader;
@@ -58,8 +57,6 @@ class MethodReader
 
     /**
      * @param MethodDescriptor $methodDescriptor
-     *
-     * @return Cache|null
      */
     private function setCacheConfig(MethodDescriptor $methodDescriptor): void
     {

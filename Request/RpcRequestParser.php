@@ -6,8 +6,6 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcParseException;
-use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInternalException;
-use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -42,16 +40,17 @@ class RpcRequestParser
     /**
      * @param Request $request
      *
-     * @return RpcRequestPayload
-     *
-     * @throws RpcInvalidRequestException
-     * @throws RpcParseException
+     * @return RpcPayload
      */
-    public function parse(Request $request): RpcRequestPayload
+    public function parse(Request $request): RpcPayload
     {
-        $data = $this->_parse($request);
+        try {
+            $data = $this->getContent($request);
+        } catch (RpcParseException $e) {
+            return $this->getRpcPayloadParseError($e);
+        }
 
-        return $this->getRpcPayload($data, $request);
+        return $this->getRpcPayload($data);
     }
 
     /**
@@ -61,9 +60,9 @@ class RpcRequestParser
      *
      * @throws RpcParseException
      */
-    private function _parse(Request $request)
+    private function getContent(Request $request)
     {
-        return Request::METHOD_GET === $request->getMethod() ? $this->parseGetRequest($request) : $this->parsePostRequest($request);
+        return Request::METHOD_GET === $request->getMethod() ? $this->getQueryData($request) : $this->getPostData($request);
     }
 
     /**
@@ -73,9 +72,9 @@ class RpcRequestParser
      *
      * @throws RpcParseException
      */
-    private function parsePostRequest(Request $request)
+    private function getPostData(Request $request)
     {
-        $data = json_decode($request->getContent(),true);
+        $data = json_decode($request->getContent(), true);
 
         if (is_null($data)) {
             throw new RpcParseException();
@@ -89,35 +88,22 @@ class RpcRequestParser
      *
      * @return array
      */
-    private function parseGetRequest(Request $request): array
+    private function getQueryData(Request $request): array
     {
         return $request->query->all();
     }
 
     /**
-     * @param array   $data
+     * @param RpcParseException $e
      *
-     * @return RpcRequest|RpcRequest[]
-     *
-     * @throws ExceptionInterface
+     * @return RpcPayload
      */
-    private function getRpcPayload(array $data)
+    private function getRpcPayloadParseError(RpcParseException $e): RpcPayload
     {
-        $payload = new RpcRequestPayload();
-        $keys = array_keys($data);
-
-        if (empty($keys)) {
-            return $payload;
-        }
-
-        if (is_int($keys[0])) {
-            $payload->setIsBatch(true);
-            foreach ($data as $subData) {
-                $payload->addRpcRequest($this->getRpcRequest((array) $subData));
-            }
-        } else {
-            $payload->addRpcRequest($this->getRpcRequest((array) $data));
-        }
+        $payload = new RpcPayload();
+        $rpcRequest = new RpcRequest();
+        $rpcRequest->setResponseError(new RpcResponseError($e));
+        $payload->addRpcRequest($rpcRequest);
 
         return $payload;
     }
@@ -125,24 +111,55 @@ class RpcRequestParser
     /**
      * @param array $data
      *
-     * @return RpcRequest
+     * @return RpcPayload
+     */
+    private function getRpcPayload(array $data): RpcPayload
+    {
+        $payload = new RpcPayload();
+
+        if ($this->isBatch($data)) {
+            $payload->setIsBatch(true);
+
+            foreach ($data as $subData) {
+                $payload->addRpcRequest($this->getRpcRequest((array) $subData));
+            }
+        } else {
+            $payload->addRpcRequest($this->getRpcRequest($data));
+        }
+
+        return $payload;
+    }
+
+    private function isBatch(array $data): bool
+    {
+        $keys = array_keys($data);
+
+        return !empty($keys) && is_int($keys[0]);
+    }
+
+    /**
+     * @param array $data
      *
-     * @throws RpcInternalException
+     * @return RpcRequest
      */
     private function getRpcRequest(array $data): RpcRequest
     {
         try {
-            /** @var RpcRpcRequest $rpcRequest */
+            /** @var RpcRequest $rpcRequest */
             $rpcRequest = $this->serializer->denormalize($data, RpcRequest::class);
         } catch (ExceptionInterface $e) {
-            throw new RpcInternalException($e->getMessage());
+            throw new \LogicException($e->getMessage());
         }
 
-        if (count($violations = $this->validator->validate($rpcRequest)) > 0) {
-            $rpcRequest->setResponseError(new RpcResponseError(new RpcInvalidRequestException()));
+        if (count($this->validator->validate($rpcRequest)) > 0) {
+            $rpcRequest->setResponseError(new RpcResponseError(new RpcInvalidRequestException(), $rpcRequest->getId()));
 
             return $rpcRequest;
         }
+
+        [$serviceKey, $methodKey] = explode('.', $rpcRequest->getMethod());
+        $rpcRequest->setServiceKey($serviceKey);
+        $rpcRequest->setMethodKey($methodKey);
 
         return $rpcRequest;
     }
