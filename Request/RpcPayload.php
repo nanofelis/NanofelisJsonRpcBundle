@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
 class RpcPayload

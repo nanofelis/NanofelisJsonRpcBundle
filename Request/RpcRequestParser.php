@@ -76,7 +76,7 @@ class RpcRequestParser
     {
         $data = json_decode($request->getContent(), true);
 
-        if (is_null($data)) {
+        if (null === $data) {
             throw new RpcParseException();
         }
 
@@ -134,7 +134,7 @@ class RpcRequestParser
     {
         $keys = array_keys($data);
 
-        return !empty($keys) && is_int($keys[0]);
+        return !empty($keys) && \is_int($keys[0]);
     }
 
     /**
@@ -151,7 +151,7 @@ class RpcRequestParser
             throw new \LogicException($e->getMessage());
         }
 
-        if (count($this->validator->validate($rpcRequest)) > 0) {
+        if (\count($this->validator->validate($rpcRequest)) > 0) {
             $rpcRequest->setResponseError(new RpcResponseError(new RpcInvalidRequestException(), $rpcRequest->getId()));
 
             return $rpcRequest;

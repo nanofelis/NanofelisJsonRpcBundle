@@ -20,6 +20,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class RpcRequestListenerTest extends TestCase
 {
     /**
+     * @var Request
+     */
+    private $request;
+
+    /**
      * @var RpcRequestListener
      */
     private $subscriber;
@@ -29,16 +34,11 @@ class RpcRequestListenerTest extends TestCase
         $converterManager = new ParamConverterManager();
         $converterManager->add(new DateTimeParamConverter());
         $requestStack = $this->createMock(RequestStack::class);
-        $requestStack->method('getCurrentRequest')->willReturn(Request::create('/fake'));
+        $request = Request::create('/fake');
+        $requestStack->method('getCurrentRequest')->willReturn($request);
 
+        $this->request = $request;
         $this->subscriber = new RpcRequestListener($requestStack, $converterManager);
-    }
-
-    public function testGetSubscribedEvents()
-    {
-        $this->assertSame([
-            RpcBeforeMethodEvent::NAME => 'onRPCBeforeMethodEvent',
-        ], $this->subscriber->getSubscribedEvents());
     }
 
     /**
@@ -47,23 +47,37 @@ class RpcRequestListenerTest extends TestCase
      */
     public function testParamConversionWithDate()
     {
-        $payload = new RpcRequest();
-        $payload->setMethodKey('getDateIso');
-        $payload->setParams(['date' => '1970-01-01']);
+        $rpcRequest = new RpcRequest();
+        $rpcRequest->setMethodKey('getDateIso');
+        $rpcRequest->setParams(['date' => '1970-01-01']);
         $serviceDescriptor = new ServiceDescriptor(new MockService(), 'getDateIso');
 
-        $event = new RpcBeforeMethodEvent($payload, $serviceDescriptor);
+        $event = new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor);
 
         $this->subscriber->convertParams($event);
 
-        $this->assertInstanceOf(\DateTime::class, $payload->getParams()['date']);
+        $this->assertInstanceOf(\DateTime::class, $this->request->attributes->get('date'));
+        $this->assertInstanceOf(\DateTime::class, $rpcRequest->getParams()['date']);
     }
 
+    /**
+     * Test Array params are excluded from the param conversion.
+     *
+     * @throws RpcInvalidRequestException
+     * @throws RpcMethodNotFoundException
+     */
     public function testParamConversionWithArrayArg()
     {
-    }
+        $rpcRequest = new RpcRequest();
+        $rpcRequest->setMethodKey('testArrayParam');
+        $rpcRequest->setParams([1, [2, 3, 4]]);
+        $serviceDescriptor = new ServiceDescriptor(new MockService(), 'testArrayParam');
 
-    public function testParamConversionWithDoctrineEntity()
-    {
+        $event = new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor);
+
+        $this->subscriber->convertParams($event);
+
+        $this->assertSame([1, [2, 3, 4]], $rpcRequest->getParams());
+        $this->assertSame([1], $this->request->attributes->all());
     }
 }

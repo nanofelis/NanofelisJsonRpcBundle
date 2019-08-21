@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nanofelis\Bundle\JsonRpcBundle\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
@@ -40,7 +42,7 @@ class MethodDescriptor
         $this->service = $service;
 
         try {
-            $this->reflection = new \ReflectionMethod(get_class($service), $method);
+            $this->reflection = new \ReflectionMethod(\get_class($service), $method);
         } catch (\ReflectionException $e) {
             throw new RpcMethodNotFoundException();
         }

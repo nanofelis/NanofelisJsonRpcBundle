@@ -120,7 +120,7 @@ class RpcRequestHandler
         $reflectionParams = $serviceDescriptor->getMethodParameters();
 
         foreach ($reflectionParams as $reflectionParam) {
-            if (array_key_exists($reflectionParam->getName(), $params)) {
+            if (\array_key_exists($reflectionParam->getName(), $params)) {
                 $orderedParams[] = $params[$reflectionParam->getName()];
             }
         }

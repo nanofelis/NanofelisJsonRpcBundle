@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Request;
 
-use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInternalException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcApplicationException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestHandler;
-use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
+use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RpcRequestHandlerTest extends TestCase
@@ -30,64 +32,57 @@ class RpcRequestHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $services = new \ArrayIterator([
-            new MockService(),
-        ]);
-        $serviceLocator = new ServiceFinder($services);
-        $annotationReader = $this->createMock(ServiceConfigLoader::class);
+        $services = new \ArrayIterator([new MockService()]);
+        $serviceConfigLoader = $this->createMock(ServiceConfigLoader::class);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $requestStack = $this->createMock(RequestStack::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
 
-        $this->requestHandler = new RpcRequestHandler($serviceLocator, $annotationReader, $eventDispatcher, $this->normalizer);
+        $serviceFinder = new ServiceFinder($services, $serviceConfigLoader);
+        $this->requestHandler = new RpcRequestHandler($serviceFinder, $this->normalizer, $eventDispatcher, $requestStack);
     }
 
     /**
-     * @dataProvider providePayload
+     * @dataProvider provideRpcRequest
      */
-    public function testHandle(RpcRpcRequest $payload, $expectedResult = null, ?string $expectedException = null, ?string $exceptionMessage = null)
+    public function testHandle(RpcRequest $rpcRequest, $expectedResult = null, RpcResponseError $expectedError = null)
     {
-        if ($expectedException) {
-            $this->expectException($expectedException);
-            $this->expectExceptionMessageRegExp("/$exceptionMessage/");
+        if ($expectedError) {
+            $this->assertSame($expectedResult, $rpcRequest->getResponseError());
         } else {
-            $this->normalizer->expects($this->once())->method('normalize')->with($expectedResult);
+            $this->normalizer->expects($this->once())->method('normalize')->with($expectedResult, null, []);
         }
 
-        $this->requestHandler->handle($payload);
+        $this->requestHandler->handle($rpcRequest);
     }
 
-    public function providePayload(): \Generator
+    public function provideRpcRequest(): \Generator
     {
-        $badTypePayload = new RpcRpcRequest();
-        $badTypePayload->setMethod('add');
-        $badTypePayload->setServiceId('mock');
-        $badTypePayload->setParams(['arg1' => '5', 'arg2' => 5]);
+        $badTypeRpcRequest = new RpcRequest();
+        $badTypeRpcRequest->setMethodKey('add');
+        $badTypeRpcRequest->setServiceKey('mockService');
+        $badTypeRpcRequest->setParams(['arg1' => '5', 'arg2' => 5]);
 
-        yield [$badTypePayload, null, RpcInvalidRequestException::class, 'bad types'];
+        yield [$badTypeRpcRequest, null, new RpcResponseError(new RpcInvalidRequestException())];
 
-        $badArgumentsPayload = new RpcRpcRequest();
-        $badArgumentsPayload->setMethod('willThrowBadArguments');
-        $badArgumentsPayload->setServiceId('mock');
+        $badArgCountRpcRequest = new RpcRequest();
+        $badArgCountRpcRequest->setMethodKey('add');
+        $badArgCountRpcRequest->setServiceKey('mockService');
+        $badArgCountRpcRequest->setParams(['arg1' => 5]);
 
-        yield [$badArgumentsPayload, null, RpcInvalidRequestException::class, 'bad arguments'];
+        yield [$badArgCountRpcRequest, null, new RpcResponseError(new RpcInvalidRequestException())];
 
-        $exceptionPayload = new RpcRpcRequest();
-        $exceptionPayload->setMethod('willThrowException');
-        $exceptionPayload->setServiceId('mock');
+        $exceptionRpcRequest = new RpcRequest();
+        $exceptionRpcRequest->setMethodKey('willThrowException');
+        $exceptionRpcRequest->setServiceKey('mockService');
 
-        yield [$exceptionPayload, null, RpcInternalException::class, 'it went wrong'];
+        yield [$exceptionRpcRequest, null, new RpcResponseError(new RpcApplicationException())];
 
-        $exceptionPayload = new RpcRpcRequest();
-        $exceptionPayload->setMethod('willThrowPhpError');
-        $exceptionPayload->setServiceId('mock');
+        $successRpcRequest = new RpcRequest();
+        $successRpcRequest->setMethodKey('add');
+        $successRpcRequest->setServiceKey('mockService');
+        $successRpcRequest->setParams(['arg1' => 5, 'arg2' => 5]);
 
-        yield [$exceptionPayload, null, RpcInternalException::class, 'internal server error'];
-
-        $successPayload = new RpcRpcRequest();
-        $successPayload->setMethod('add');
-        $successPayload->setServiceId('mock');
-        $successPayload->setParams(['arg1' => 5, 'arg2' => 5]);
-
-        yield [$successPayload, 10];
+        yield [$successRpcRequest, 10, null];
     }
 }

@@ -11,6 +11,13 @@ class MockService
         return $arg1 + $arg2;
     }
 
+    public function testArrayParam(array $b, int $a): array
+    {
+        $b[] = $a;
+
+        return $b;
+    }
+
     public function getDateIso(\DateTime $date): string
     {
         return $date->format(\DateTime::ISO8601);
@@ -19,24 +26,8 @@ class MockService
     /**
      * @throws \Exception
      */
-    public function willThrowBadArguments()
-    {
-        throw new \InvalidArgumentException('bad arguments');
-    }
-
-    /**
-     * @throws \Exception
-     */
     public function willThrowException()
     {
         throw new \Exception('it went wrong');
-    }
-
-    /**
-     * @throws \Error
-     */
-    public function willThrowPhpError()
-    {
-        throw new \Error();
     }
 }

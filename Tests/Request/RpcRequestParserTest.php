@@ -4,29 +4,64 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Request;
 
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcPayload;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestParser;
-use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Validation;
 
 class RpcRequestParserTest extends TestCase
 {
-    public function testParse()
-    {
-        $validator = $this->createMock(ValidatorInterface::class);
-        $validator->method('validate')->willReturn(new ConstraintViolationList());
-        $parser = new RpcRequestParser($validator);
+    /**
+     * @var RpcRequestParser
+     */
+    private $parser;
 
-        $request = Request::create('/', 'GET', [], [], [], [], json_encode([
+    protected function setUp()
+    {
+        $validatorBuilder = Validation::createValidatorBuilder();
+        $validatorBuilder->addXmlMapping(__DIR__.'/../../Resources/config/validator/rpc_request.xml');
+
+        $this->parser = new RpcRequestParser($validatorBuilder->getValidator());
+    }
+
+    public function testParsePostRequest()
+    {
+        $request = Request::create('/', 'POST', [], [], [], [], json_encode([
             'jsonrpc' => '2.0',
-            'method' => 'mock.add',
+            'method' => 'mockService.add',
             'params' => [1, 2],
+            'id' => 'test',
         ]));
 
-        $payload = $parser->parse($request);
+        $payload = $this->parser->parse($request);
 
-        $this->assertInstanceOf(RpcRpcRequest::class, $payload);
+        $this->assertInstanceOf(RpcPayload::class, $payload);
+        $rpcRequest = $payload->getRpcRequests()[0];
+
+        $this->assertSame('add', $rpcRequest->getMethodKey());
+        $this->assertSame('mockService', $rpcRequest->getServiceKey());
+        $this->assertSame([1, 2], $rpcRequest->getParams());
+        $this->assertSame('test', $rpcRequest->getId());
+    }
+
+    public function testParseGetRequest()
+    {
+        $request = Request::create(sprintf('/?%s', http_build_query([
+            'jsonrpc' => '2.0',
+            'method' => 'mockService.add',
+            'params' => [1, 2],
+            'id' => 'test',
+        ])));
+
+        $payload = $this->parser->parse($request);
+
+        $this->assertInstanceOf(RpcPayload::class, $payload);
+        $rpcRequest = $payload->getRpcRequests()[0];
+
+        $this->assertSame('add', $rpcRequest->getMethodKey());
+        $this->assertSame('mockService', $rpcRequest->getServiceKey());
+        $this->assertSame(['1', '2'], $rpcRequest->getParams());
+        $this->assertSame('test', $rpcRequest->getId());
     }
 }

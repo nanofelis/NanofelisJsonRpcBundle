@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Exception;
 
-use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Throwable;
 
 abstract class AbstractRpcException extends \Exception
@@ -24,18 +23,13 @@ abstract class AbstractRpcException extends \Exception
     ];
 
     /**
-     * @var RpcRpcRequest|null
-     */
-    private $payload;
-
-    /**
      * @var array
      */
     private $data;
 
     public function __construct(string $message = '', int $code = 0, Throwable $previous = null)
     {
-        if (empty($message)) {
+        if (empty($message) && isset(self::MESSAGES[$code])) {
             $message = self::MESSAGES[$code];
         }
 
@@ -56,18 +50,5 @@ abstract class AbstractRpcException extends \Exception
     public function setData(?array $data): void
     {
         $this->data = $data;
-    }
-
-    public function getPayload(): ?RpcRequest
-    {
-        return $this->payload;
-    }
-
-    /**
-     * @param RpcRpcRequest|null $payload
-     */
-    public function setPayload(?RpcRequest $payload): void
-    {
-        $this->payload = $payload;
     }
 }
