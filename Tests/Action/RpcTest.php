@@ -4,30 +4,113 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Action;
 
-use Nanofelis\Bundle\JsonRpcBundle\NanofelisJsonRpcBundle;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
+use Nanofelis\Bundle\JsonRpcBundle\Tests\TestKernel;
+use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\RouterInterface;
 
-// todo
 class RpcTest extends WebTestCase
 {
-//    public function testRpc()
-//    {
-//        $client = static::createClient();
-//        /** @var RouterInterface $router */
-//        $router = $client->getContainer()->get('router');
-////        $client->getContainer()->get('nanofelis_json_rpc.service.finder');
-//
-//        $client->request('POST', $router->generate('nanofelis_json_rpc.endpoint'));
-//    }
-//
-//    protected static function getKernelClass()
-//    {
-//        return NanofelisJsonRpcBundle::class;
-//    }
-//
-//    public function provideRpcRequest()
-//    {
-//        yield
-//    }
+    /**
+     * @var Client
+     */
+    public static $client;
+
+    /**
+     * @var RouterInterface
+     */
+    private $router;
+
+    protected function setUp()
+    {
+        self::$client = static::createClient();
+        $this->router = self::$client->getContainer()->get('router');
+    }
+
+    public function testInvalidJson()
+    {
+        self::$client->request('POST', $this->router->generate('nanofelis_json_rpc.endpoint'), [], [], [], '@');
+        $expected = [
+            'jsonrpc' => '2.0',
+            'error' => [
+                'code' => AbstractRpcException::PARSE,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::PARSE],
+                'data' => null,
+            ],
+            'id' => null,
+        ];
+        $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
+    }
+
+    /**
+     * @dataProvider provideRpcRequest
+     */
+    public function testRpc(array $requestData, array $expected)
+    {
+        self::$client->request('POST', $this->router->generate('nanofelis_json_rpc.endpoint'), [], [], [], json_encode($requestData));
+
+        $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
+    }
+
+    protected static function getKernelClass()
+    {
+        return TestKernel::class;
+    }
+
+    public function provideRpcRequest()
+    {
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => [1, 2], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test'],
+        ];
+
+        yield [
+            [
+                ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => [1, 2], 'id' => 'test_0'],
+                ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => [3, 4], 'id' => 'test_1'],
+            ],
+            [
+                ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test_0'],
+                ['jsonrpc' => '2.0', 'result' => 7, 'id' => 'test_1'],
+            ],
+        ];
+
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.testArrayParam', 'params' => [[1, 2], 3]],
+            ['jsonrpc' => '2.0', 'result' => [1, 2, 3], 'id' => null],
+        ];
+
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.returnObject'],
+            ['jsonrpc' => '2.0', 'result' => ['prop' => 'test'], 'id' => null],
+        ];
+
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.unknownMethod', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => [
+                'code' => AbstractRpcException::METHOD_NOT_FOUND,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::METHOD_NOT_FOUND],
+                'data' => null,
+            ], 'id' => 'test'],
+        ];
+
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['', 2], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => [
+                'code' => AbstractRpcException::INVALID_PARAMS,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_PARAMS],
+                'data' => null,
+            ], 'id' => 'test'],
+        ];
+
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.willThrowException'],
+            ['jsonrpc' => '2.0', 'error' => [
+                'code' => 99,
+                'message' => 'it went wrong',
+                'data' => null,
+            ], 'id' => null],
+        ];
+    }
 }

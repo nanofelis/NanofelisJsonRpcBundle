@@ -17,7 +17,8 @@
         "sensio/framework-extra-bundle": "^4.0|^5.0",
         "symfony/options-resolver": "^3.4|^4.0",
         "symfony/serializer": "^3.4|^4.0",
-        "symfony/validator": "^3.4|^4.0"
+        "symfony/validator": "^3.4|^4.0",
+        "symfony/property-access": "^4.3"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^3.4|^4.0",

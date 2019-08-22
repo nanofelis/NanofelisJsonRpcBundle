@@ -12,7 +12,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterMana
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class RpcRequestListener
+class RpcBeforeMethodListener
 {
     /**
      * @var ParamConverterManager
@@ -59,16 +59,16 @@ class RpcRequestListener
     }
 
     /**
-     * @param \ReflectionFunctionAbstract $r
+     * @param \ReflectionFunctionAbstract $reflection
      * @param Request                     $request
      *
      * @return array
      */
-    private function getParamsConfigurations(\ReflectionFunctionAbstract $r, Request $request): array
+    private function getParamsConfigurations(\ReflectionFunctionAbstract $reflection, Request $request): array
     {
         $configurations = [];
 
-        foreach ($r->getParameters() as $param) {
+        foreach ($reflection->getParameters() as $param) {
             if ($param->getClass() && $param->getClass()->isInstance($request)) {
                 continue;
             }

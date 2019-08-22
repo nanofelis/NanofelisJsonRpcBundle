@@ -18,11 +18,11 @@ class RpcRequestValidatorTest extends ConstraintValidatorTestCase
     /**
      * @dataProvider provideRawPayload
      */
-    public function testValidate(array $payload, $expectedViolation = false)
+    public function testValidate(array $payload, bool $expectViolation)
     {
         $this->validator->validate($payload, new RpcRequest());
 
-        $this->assertSame($expectedViolation, $this->context->getViolations()->count() > 0);
+        $this->assertSame($expectViolation, $this->context->getViolations()->count() > 0);
     }
 
     public function provideRawPayload(): \Generator
@@ -34,7 +34,7 @@ class RpcRequestValidatorTest extends ConstraintValidatorTestCase
             'params' => [1, 2],
         ];
 
-        yield [$validPayload];
+        yield [$validPayload, false];
 
         $missingJsonRpcVersion = [
             'method' => 'mock.add',

@@ -32,8 +32,18 @@ class MockService
      */
     public function annotatedMethod()
     {
-        $object = new \stdClass();
-        $object->param = 'test';
+        return 'it has annotations';
+    }
+
+    /**
+     * @Cache(public=true, smaxage=3600)
+     * @RpcNormalizationContext("test")
+     */
+    public function returnObject()
+    {
+        $object = new class() {
+            public $prop = 'test';
+        };
 
         return $object;
     }
@@ -43,6 +53,6 @@ class MockService
      */
     public function willThrowException()
     {
-        throw new \Exception('it went wrong');
+        throw new \Exception('it went wrong', 99);
     }
 }

@@ -100,8 +100,8 @@ class RpcRequestHandler
             }
         }
 
-        if ($cache = $serviceDescriptor->getCacheConfiguration()) {
-            $this->requestStack->getCurrentRequest() ?: $this->requestStack->getCurrentRequest()->attributes->set('_cache', $cache);
+        if (($cache = $serviceDescriptor->getCacheConfiguration()) && ($request = $this->requestStack->getCurrentRequest())) {
+            $request->attributes->set('_cache', $cache);
         }
 
         return $this->normalizer->normalize($result, null, $serviceDescriptor->getNormalizationContexts());

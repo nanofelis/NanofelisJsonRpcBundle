@@ -71,8 +71,8 @@ class RpcResponderTest extends TestCase
                         'code' => 99,
                         'message' => 'error',
                         'data' => ['details'],
-                        'id' => 2,
                     ],
+                    'id' => 2,
                 ],
             ],
         ];

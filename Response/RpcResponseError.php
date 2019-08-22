@@ -39,8 +39,8 @@ class RpcResponseError implements RpcResponseInterface
                 'code' => $this->rpcException->getCode(),
                 'message' => $this->rpcException->getMessage(),
                 'data' => $this->rpcException->getData(),
-                'id' => $this->id,
             ],
+            'id' => $this->id,
         ];
     }
 }

@@ -54,21 +54,21 @@ class RpcRequest
      *
      * @param string|null $jsonrpc
      * @param string|null $method
-     * @param string|null $id
      * @param array|null  $params
+     * @param mixed       $id
      */
-    public function __construct(?string $jsonrpc = null, ?string $method = null, ?string $id = null, ?array $params = null)
+    public function __construct(?string $jsonrpc = null, ?string $method = null, ?array $params = null, $id = null)
     {
         $this->jsonrpc = $jsonrpc;
-        $this->id = $id;
         $this->method = $method;
         $this->params = $params;
+        $this->id = $id;
     }
 
     /**
-     * @return string|null
+     * @return mixed
      */
-    public function getId(): ?string
+    public function getId()
     {
         return $this->id;
     }

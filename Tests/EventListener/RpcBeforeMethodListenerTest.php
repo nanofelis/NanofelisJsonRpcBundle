@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\EventListener;
 
 use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeMethodEvent;
-use Nanofelis\Bundle\JsonRpcBundle\EventListener\RpcRequestListener;
+use Nanofelis\Bundle\JsonRpcBundle\EventListener\RpcBeforeMethodListener;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
@@ -17,7 +17,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterMana
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class RpcRequestListenerTest extends TestCase
+class RpcBeforeMethodListenerTest extends TestCase
 {
     /**
      * @var Request
@@ -25,7 +25,7 @@ class RpcRequestListenerTest extends TestCase
     private $request;
 
     /**
-     * @var RpcRequestListener
+     * @var RpcBeforeMethodListener
      */
     private $subscriber;
 
@@ -38,7 +38,7 @@ class RpcRequestListenerTest extends TestCase
         $requestStack->method('getCurrentRequest')->willReturn($request);
 
         $this->request = $request;
-        $this->subscriber = new RpcRequestListener($requestStack, $converterManager);
+        $this->subscriber = new RpcBeforeMethodListener($requestStack, $converterManager);
     }
 
     /**

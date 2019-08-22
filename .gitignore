@@ -5,3 +5,4 @@ phpunit.xml
 composer.lock
 /.phpunit
 /.php_cs.cache
+/var

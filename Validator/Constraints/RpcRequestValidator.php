@@ -23,10 +23,6 @@ class RpcRequestValidator extends ConstraintValidator
 
             return;
         }
-
-        if (!preg_match('/^\w+\.\w+$/', $request['method'])) {
-            $this->context->addViolation('Invalid RPC method format %method%, needs "serviceKey.method"', ['%method%' => $value['method']]);
-        }
     }
 
     private function getResolver(): OptionsResolver
@@ -42,8 +38,10 @@ class RpcRequestValidator extends ConstraintValidator
             ->setDefined(['params'])
             ->setAllowedValues('jsonrpc', RpcRequest::JSON_RPC_VERSION)
             ->setAllowedTypes('method', 'string')
+            ->setAllowedValues('method', function ($value) {
+                return 1 === preg_match('/^\w+\.\w+$/', $value);
+            })
             ->setAllowedTypes('id', ['string', 'int'])
-            ->setAllowedTypes('params', ['array'])
-        ;
+            ->setAllowedTypes('params', ['array']);
     }
 }
