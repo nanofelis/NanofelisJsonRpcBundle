@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Service;
 
+use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Reader;
 use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
@@ -25,35 +26,27 @@ class ServiceConfigLoader
      */
     public function loadConfig(ServiceDescriptor $descriptor): void
     {
-        $this->setNormalizationContexts($descriptor);
-        $this->setCacheConfig($descriptor);
+        $annotations = $this->reader->getMethodAnnotations($descriptor->getMethodReflection());
+
+        $this->load($descriptor, $annotations);
     }
 
     /**
-     * @param ServiceDescriptor $methodDescriptor
+     * @param ServiceDescriptor $serviceDescriptor
+     * @param Annotation[]      $annotations
      */
-    private function setNormalizationContexts(ServiceDescriptor $methodDescriptor): void
+    private function load(ServiceDescriptor $serviceDescriptor, array $annotations): void
     {
-        $annotation = $this->reader->getMethodAnnotation($methodDescriptor->getMethodReflection(), RpcNormalizationContext::class);
-
-        if (!$annotation instanceof RpcNormalizationContext) {
-            return;
+        foreach ($annotations as $annotation) {
+            switch (true) {
+                case $annotation instanceof RpcNormalizationContext:
+                    $serviceDescriptor->setNormalizationContexts($annotation->getContexts());
+                    break;
+                case $annotation instanceof Cache:
+                    $serviceDescriptor->setCacheConfiguration($annotation);
+                    break;
+                default:
+            }
         }
-
-        $methodDescriptor->setNormalizationContexts($annotation->getcontexts());
-    }
-
-    /**
-     * @param ServiceDescriptor $methodDescriptor
-     */
-    private function setCacheConfig(ServiceDescriptor $methodDescriptor): void
-    {
-        $annotation = $this->reader->getMethodAnnotation($methodDescriptor->getMethodReflection(), Cache::class);
-
-        if (!$annotation instanceof Cache) {
-            return;
-        }
-
-        $methodDescriptor->setCacheConfiguration($annotation);
     }
 }

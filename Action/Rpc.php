@@ -35,8 +35,6 @@ class Rpc
     {
         $rpcPayload = $this->rpcHandler->createRpcPayload($request);
 
-        $responder = $this->responder;
-
-        return $responder($rpcPayload);
+        return ($this->responder)($rpcPayload);
     }
 }

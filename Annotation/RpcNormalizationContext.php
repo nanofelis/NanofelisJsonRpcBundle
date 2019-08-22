@@ -19,7 +19,7 @@ class RpcNormalizationContext
 
     public function __construct(array $values)
     {
-        $this->contexts = $values['value'] ?? [];
+        $this->contexts = (array) $values['value'] ?? [];
     }
 
     public function getContexts(): array

@@ -6,7 +6,7 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Exception;
 
 use Throwable;
 
-abstract class AbstractRpcException extends \Exception
+abstract class AbstractRpcException extends \Exception implements RpcDataExceptionInterface
 {
     const PARSE = -32700;
     const INVALID_REQUEST = -32600;

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
-use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRpcRequest;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
+use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader;
+use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -13,12 +15,18 @@ use PHPUnit\Framework\TestCase;
 class ServiceFinderTest extends TestCase
 {
     /**
-     * @var object[]|MockObject[]
+     * @var MockObject
+     */
+    private $configLoader;
+
+    /**
+     * @var \ArrayIterator
      */
     private $services;
 
     protected function setUp(): void
     {
+        $this->configLoader = $this->createMock(ServiceConfigLoader::class);
         $this->services = new \ArrayIterator([
             new MockService(),
         ]);
@@ -27,49 +35,37 @@ class ServiceFinderTest extends TestCase
     /**
      * @dataProvider providePayload
      */
-    public function testFind(RpcRpcRequest $payload, ?string $expectedResult, ?string $expectedException = null)
+    public function testFind(RpcRequest $payload, ?string $expectedResult, ?string $expectedException = null)
     {
-        $serviceLocator = new ServiceFinder($this->services);
-
         if ($expectedException) {
             $this->expectException($expectedException);
+        } else {
+            $this->configLoader->expects($this->once())->method('loadConfig');
         }
+
+        $serviceLocator = new ServiceFinder($this->services, $this->configLoader);
 
         $this->assertInstanceOf($expectedResult, $serviceLocator->find($payload));
     }
 
-    /**
-     * @expectedException \Nanofelis\Bundle\JsonRpcBundle\Exception\RPCMethodNotFoundException
-     */
-    public function testMethodNotExist()
-    {
-        $payload = new RpcRpcRequest();
-        $payload->setServiceId('mock');
-        $payload->setMethod('unknownMethod');
-
-        $serviceLocator = new ServiceFinder($this->services);
-
-        $this->assertInstanceOf(MockService::class, $serviceLocator->find($payload));
-    }
-
     public function providePayload(): \Generator
     {
-        $payload = new RpcRpcRequest();
-        $payload->setMethod('add');
-        $payload->setServiceId('mock');
+        $rpcRequest = new RpcRequest();
+        $rpcRequest->setMethodKey('add');
+        $rpcRequest->setServiceKey('mockService');
 
-        yield [$payload, MockService::class];
+        yield [$rpcRequest, ServiceDescriptor::class];
 
-        $payloadUnknownService = new RpcRpcRequest();
-        $payloadUnknownService->setMethod('add');
-        $payloadUnknownService->setServiceId('unknown');
+        $rpcRequestUnknownService = new RpcRequest();
+        $rpcRequestUnknownService->setMethodKey('add');
+        $rpcRequestUnknownService->setServiceKey('unknown');
 
-        yield [$payloadUnknownService, null, RpcMethodNotFoundException::class];
+        yield [$rpcRequestUnknownService, null, RpcMethodNotFoundException::class];
 
-        $payloadMethodNotExist = new RpcRpcRequest();
-        $payloadMethodNotExist->setMethod('unknown');
-        $payloadMethodNotExist->setServiceId('mock');
+        $rpcRequestUnknownMethod = new RpcRequest();
+        $rpcRequestUnknownMethod->setMethodKey('unknown');
+        $rpcRequestUnknownMethod->setServiceKey('mockService');
 
-        yield [$payloadMethodNotExist, null, RpcMethodNotFoundException::class];
+        yield [$rpcRequestUnknownMethod, null, RpcMethodNotFoundException::class];
     }
 }
