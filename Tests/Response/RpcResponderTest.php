@@ -35,6 +35,9 @@ class RpcResponderTest extends TestCase
 
     /**
      * @dataProvider provideRpcPayload
+     *
+     * @param RpcPayload $payload
+     * @param array      $expected
      */
     public function testResponderBatch(RpcPayload $payload, array $expected)
     {
@@ -43,7 +46,10 @@ class RpcResponderTest extends TestCase
         $this->assertSame($expected, json_decode($jsonResponse->getContent(), true));
     }
 
-    public function provideRpcPayload()
+    /**
+     * @return \Generator
+     */
+    public function provideRpcPayload(): \Generator
     {
         $successRequest = new RpcRequest();
         $successRequest->setResponse(new RpcResponse('success', 1));

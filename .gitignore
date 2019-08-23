@@ -1,8 +1,7 @@
-coverage
-/vendor
-coverage
-phpunit.xml
+.php_cs.cache
 composer.lock
+phpunit.xml
 /.phpunit
-/.php_cs.cache
+/coverage
 /var
+/vendor

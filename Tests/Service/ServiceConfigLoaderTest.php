@@ -10,6 +10,8 @@ use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class ServiceConfigLoaderTest extends TestCase
 {
@@ -29,12 +31,12 @@ class ServiceConfigLoaderTest extends TestCase
         $this->configLoader = new ServiceConfigLoader($this->annotationReader);
     }
 
-    public function testRead()
+    public function testLoadConfig()
     {
-        $serviceDescriptor = new ServiceDescriptor(new MockService(), 'annotatedMethod');
+        $serviceDescriptor = new ServiceDescriptor(new MockService(), 'dateParamConverter');
         $this->configLoader->loadConfig($serviceDescriptor);
 
-        $this->assertSame(['test'], $serviceDescriptor->getNormalizationContexts());
-        $this->assertSame(3600, $serviceDescriptor->getCacheConfiguration()->getMaxAge());
+        $this->assertInstanceOf(ParamConverter::class, $serviceDescriptor->getMethodConfigurations()['_converters'][0]);
+        $this->assertInstanceOf(Cache::class, $serviceDescriptor->getMethodConfigurations()['_cache']);
     }
 }

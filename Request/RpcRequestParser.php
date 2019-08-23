@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
+use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcParseException;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
@@ -46,8 +47,8 @@ class RpcRequestParser
     {
         try {
             $data = $this->getContent($request);
-        } catch (RpcParseException $e) {
-            return $this->getRpcPayloadParseError($e);
+        } catch (AbstractRpcException $e) {
+            return $this->getRpcPayloadError($e);
         }
 
         return $this->getRpcPayload($data);
@@ -59,10 +60,18 @@ class RpcRequestParser
      * @return mixed
      *
      * @throws RpcParseException
+     * @throws RpcInvalidRequestException
      */
     private function getContent(Request $request)
     {
-        return Request::METHOD_GET === $request->getMethod() ? $this->getQueryData($request) : $this->getPostData($request);
+        switch ($request->getMethod()) {
+            case Request::METHOD_POST:
+                return $this->getPostData($request);
+            case Request::METHOD_GET:
+                return $this->getQueryData($request);
+        }
+
+        throw new RpcInvalidRequestException();
     }
 
     /**
@@ -94,11 +103,11 @@ class RpcRequestParser
     }
 
     /**
-     * @param RpcParseException $e
+     * @param AbstractRpcException $e
      *
      * @return RpcPayload
      */
-    private function getRpcPayloadParseError(RpcParseException $e): RpcPayload
+    private function getRpcPayloadError(AbstractRpcException $e): RpcPayload
     {
         $payload = new RpcPayload();
         $rpcRequest = new RpcRequest();

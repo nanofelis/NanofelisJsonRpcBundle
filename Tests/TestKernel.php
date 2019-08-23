@@ -61,11 +61,11 @@ class TestKernel extends Kernel implements CompilerPassInterface
     }
 
     /**
-     * @param ContainerBuilder $container
+     * @param ContainerBuilder $c
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $c)
     {
-        $container->register(MockService::class, MockService::class)
+        $c->register(MockService::class, MockService::class)
             ->addTag('nanofelis_json_rpc')
             ->setPublic(true);
     }

@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Nanofelis\Bundle\JsonRpcBundle\EventListener;
 
 use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeMethodEvent;
-use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidParamsException;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
+use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class RpcBeforeMethodListener
+class RpcParamConverterListener
 {
     /**
      * @var ParamConverterManager
@@ -39,9 +40,9 @@ class RpcBeforeMethodListener
     /**
      * @param RpcBeforeMethodEvent $event
      *
-     * @throws RpcInvalidRequestException
+     * @throws RpcInvalidParamsException
      */
-    public function convertParams(RpcBeforeMethodEvent $event): void
+    public function __invoke(RpcBeforeMethodEvent $event): void
     {
         $rpcRequest = $event->getRpcRequest();
         $request = $this->requestStack->getCurrentRequest();
@@ -50,8 +51,8 @@ class RpcBeforeMethodListener
             return;
         }
 
-        $service = $event->getServiceDescriptor();
-        $configurations = $this->getParamsConfigurations($service->getMethodReflection(), $request);
+        $serviceDescriptor = $event->getServiceDescriptor();
+        $configurations = $this->getParamsAutoConfigurations($serviceDescriptor, $request);
 
         $this->prepareRequestForParamConversion($rpcRequest, $request);
         $this->applyConfigurations($request, $configurations);
@@ -59,14 +60,19 @@ class RpcBeforeMethodListener
     }
 
     /**
-     * @param \ReflectionFunctionAbstract $reflection
-     * @param Request                     $request
+     * @param ServiceDescriptor $serviceDescriptor
+     * @param Request           $request
      *
      * @return array
      */
-    private function getParamsConfigurations(\ReflectionFunctionAbstract $reflection, Request $request): array
+    private function getParamsAutoConfigurations(ServiceDescriptor $serviceDescriptor, Request $request): array
     {
+        $reflection = $serviceDescriptor->getMethodReflection();
         $configurations = [];
+
+        foreach ($serviceDescriptor->getMethodConfigurations()['_converters'] ?? [] as $configuration) {
+            $configurations[$configuration->getName()] = $configuration;
+        }
 
         foreach ($reflection->getParameters() as $param) {
             if ($param->getClass() && $param->getClass()->isInstance($request)) {
@@ -75,15 +81,17 @@ class RpcBeforeMethodListener
 
             $name = $param->getName();
             $class = $param->getClass();
-            $hasType = $param->hasType();
+            $hasType = method_exists('ReflectionParameter', 'getType') && $param->hasType();
 
             if ($class || $hasType) {
-                $configuration = new ParamConverter([]);
-                $configuration->setName($name);
+                if (!isset($configurations[$name])) {
+                    $configuration = new ParamConverter([]);
+                    $configuration->setName($name);
 
-                $configurations[$name] = $configuration;
+                    $configurations[$name] = $configuration;
+                }
 
-                if ($class) {
+                if ($class && null === $configurations[$name]->getClass()) {
                     $configurations[$name]->setClass($class->getName());
                 }
             }
@@ -117,20 +125,25 @@ class RpcBeforeMethodListener
      * @param Request $request
      * @param array   $configurations
      *
-     * @throws RpcInvalidRequestException
+     * @throws RpcInvalidParamsException
      */
     private function applyConfigurations(Request $request, array $configurations)
     {
         try {
             $this->converterManager->apply($request, $configurations);
         } catch (\Exception $e) {
-            throw new RPCInvalidRequestException(sprintf('Param conversion error: %s', $e->getMessage()));
+            throw new RpcInvalidParamsException(sprintf('Param conversion error: %s', $e->getMessage()));
         }
     }
 
     private function mergeParams(RpcRequest $rpcRequest, Request $request): void
     {
         $params = $rpcRequest->getParams();
-        $rpcRequest->setParams(array_replace_recursive($params, $request->attributes->all()));
+
+        foreach ($params as $key => $val) {
+            $params[$key] = $request->attributes->get($key, $params[$key]);
+        }
+
+        $rpcRequest->setParams($params);
     }
 }

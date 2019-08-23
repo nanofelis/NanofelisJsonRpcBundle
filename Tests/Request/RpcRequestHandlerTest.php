@@ -15,7 +15,6 @@ use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RpcRequestHandlerTest extends TestCase
@@ -35,15 +34,18 @@ class RpcRequestHandlerTest extends TestCase
         $services = new \ArrayIterator([new MockService()]);
         $serviceConfigLoader = $this->createMock(ServiceConfigLoader::class);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $requestStack = $this->createMock(RequestStack::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
 
         $serviceFinder = new ServiceFinder($services, $serviceConfigLoader);
-        $this->requestHandler = new RpcRequestHandler($serviceFinder, $this->normalizer, $eventDispatcher, $requestStack);
+        $this->requestHandler = new RpcRequestHandler($serviceFinder, $this->normalizer, $eventDispatcher);
     }
 
     /**
      * @dataProvider provideRpcRequest
+     *
+     * @param RpcRequest            $rpcRequest
+     * @param null                  $expectedResult
+     * @param RpcResponseError|null $expectedError
      */
     public function testHandle(RpcRequest $rpcRequest, $expectedResult = null, RpcResponseError $expectedError = null)
     {
@@ -56,6 +58,9 @@ class RpcRequestHandlerTest extends TestCase
         $this->requestHandler->handle($rpcRequest);
     }
 
+    /**
+     * @return \Generator
+     */
     public function provideRpcRequest(): \Generator
     {
         $badTypeRpcRequest = new RpcRequest();

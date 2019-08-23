@@ -6,8 +6,7 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Service;
 
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Reader;
-use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ConfigurationAnnotation;
 
 class ServiceConfigLoader
 {
@@ -37,16 +36,10 @@ class ServiceConfigLoader
      */
     private function load(ServiceDescriptor $serviceDescriptor, array $annotations): void
     {
-        foreach ($annotations as $annotation) {
-            switch (true) {
-                case $annotation instanceof RpcNormalizationContext:
-                    $serviceDescriptor->setNormalizationContexts($annotation->getContexts());
-                    break;
-                case $annotation instanceof Cache:
-                    $serviceDescriptor->setCacheConfiguration($annotation);
-                    break;
-                default:
+        array_walk($annotations, function ($annotation) use ($serviceDescriptor) {
+            if ($annotation instanceof ConfigurationAnnotation) {
+                $serviceDescriptor->addMethodConfiguration($annotation);
             }
-        }
+        });
     }
 }

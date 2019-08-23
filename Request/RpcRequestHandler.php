@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
+use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeMethodEvent;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcDataExceptionInterface;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
@@ -15,7 +16,6 @@ use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -36,21 +36,14 @@ class RpcRequestHandler
      */
     private $eventDispatcher;
 
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
     public function __construct(
         ServiceFinder $serviceFinder,
         NormalizerInterface $normalizer,
-        EventDispatcherInterface $eventDispatcher,
-        RequestStack $requestStack
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->serviceFinder = $serviceFinder;
         $this->normalizer = $normalizer;
         $this->eventDispatcher = $eventDispatcher;
-        $this->requestStack = $requestStack;
     }
 
     /**
@@ -84,11 +77,11 @@ class RpcRequestHandler
     {
         $serviceDescriptor = $this->serviceFinder->find($rpcRequest);
 
+        $this->eventDispatcher->dispatch(RpcBeforeMethodEvent::NAME, new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor));
+
         $service = $serviceDescriptor->getService();
         $method = $serviceDescriptor->getMethodName();
         $params = $this->getOrderedParams($serviceDescriptor, $rpcRequest);
-
-        $this->eventDispatcher->dispatch(RpcBeforeMethodEvent::NAME, new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor));
 
         try {
             $result = $service->$method(...$params);
@@ -100,11 +93,7 @@ class RpcRequestHandler
             }
         }
 
-        if (($cache = $serviceDescriptor->getCacheConfiguration()) && ($request = $this->requestStack->getCurrentRequest())) {
-            $request->attributes->set('_cache', $cache);
-        }
-
-        return $this->normalizer->normalize($result, null, $serviceDescriptor->getNormalizationContexts());
+        return $this->normalizeResult($result, $serviceDescriptor);
     }
 
     /**
@@ -161,5 +150,21 @@ class RpcRequestHandler
         }
 
         return $rpcError;
+    }
+
+    /**
+     * @param mixed             $result
+     * @param ServiceDescriptor $serviceDescriptor
+     *
+     * @return mixed
+     *
+     * @throws ExceptionInterface
+     */
+    private function normalizeResult($result, ServiceDescriptor $serviceDescriptor)
+    {
+        /** @var RpcNormalizationContext|null $normalizationContext */
+        $normalizationConfig = $serviceDescriptor->getMethodConfigurations()['_rpc_normalization_context'] ?? null;
+
+        return $this->normalizer->normalize($result, null, $normalizationConfig ? $normalizationConfig->getContexts() : []);
     }
 }

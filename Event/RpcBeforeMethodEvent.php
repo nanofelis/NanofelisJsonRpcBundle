@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\Event;
 
 class RpcBeforeMethodEvent extends Event
 {
-    const NAME = '';
+    const NAME = 'nanofelis_json_rpc.before_method';
 
     /**
      * @var RpcRequest

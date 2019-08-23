@@ -34,6 +34,12 @@ class ServiceFinderTest extends TestCase
 
     /**
      * @dataProvider providePayload
+     *
+     * @param RpcRequest  $payload
+     * @param string|null $expectedResult
+     * @param string|null $expectedException
+     *
+     * @throws RpcMethodNotFoundException
      */
     public function testFind(RpcRequest $payload, ?string $expectedResult, ?string $expectedException = null)
     {
@@ -48,6 +54,9 @@ class ServiceFinderTest extends TestCase
         $this->assertInstanceOf($expectedResult, $serviceLocator->find($payload));
     }
 
+    /**
+     * @return \Generator
+     */
     public function providePayload(): \Generator
     {
         $rpcRequest = new RpcRequest();

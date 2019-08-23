@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Nanofelis\Bundle\JsonRpcBundle\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ConfigurationAnnotation;
 
 class ServiceDescriptor
 {
@@ -20,14 +20,9 @@ class ServiceDescriptor
     private $methodReflection = [];
 
     /**
-     * @var array
+     * @var ConfigurationAnnotation[]
      */
-    private $normalizationContexts = [];
-
-    /**
-     * @var Cache|null
-     */
-    private $cacheConfiguration;
+    private $methodConfigurations = [];
 
     /**
      * ServiceDescriptor constructor.
@@ -83,34 +78,22 @@ class ServiceDescriptor
     }
 
     /**
-     * @return array
+     * @return ConfigurationAnnotation[]
      */
-    public function getNormalizationContexts(): array
+    public function getMethodConfigurations(): array
     {
-        return $this->normalizationContexts;
+        return $this->methodConfigurations;
     }
 
     /**
-     * @param array $normalizationContexts
+     * @param ConfigurationAnnotation $configuration
      */
-    public function setNormalizationContexts(array $normalizationContexts): void
+    public function addMethodConfiguration(ConfigurationAnnotation $configuration): void
     {
-        $this->normalizationContexts = $normalizationContexts;
-    }
-
-    /**
-     * @return Cache|null
-     */
-    public function getCacheConfiguration(): ?Cache
-    {
-        return $this->cacheConfiguration;
-    }
-
-    /**
-     * @param Cache|null $cacheConfiguration
-     */
-    public function setCacheConfiguration(?Cache $cacheConfiguration): void
-    {
-        $this->cacheConfiguration = $cacheConfiguration;
+        if ($configuration->allowArray()) {
+            $this->methodConfigurations['_'.$configuration->getAliasName()][] = $configuration;
+        } else {
+            $this->methodConfigurations['_'.$configuration->getAliasName()] = $configuration;
+        }
     }
 }

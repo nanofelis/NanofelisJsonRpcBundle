@@ -6,6 +6,7 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class MockService
 {
@@ -21,23 +22,17 @@ class MockService
         return $b;
     }
 
-    public function getDateIso(\DateTime $date): string
-    {
-        return $date->format(\DateTime::ISO8601);
-    }
-
     /**
      * @Cache(public=true, maxage=3600)
-     * @RpcNormalizationContext("test")
+     * @ParamConverter("date", options={"format": "Y-m-d"})
      */
-    public function annotatedMethod()
+    public function dateParamConverter(\DateTime $date): string
     {
-        return 'it has annotations';
+        return $date->format('d-m-Y');
     }
 
     /**
-     * @Cache(public=true, smaxage=3600)
-     * @RpcNormalizationContext("test")
+     * @RpcNormalizationContext(contexts={"test"})
      */
     public function returnObject()
     {
