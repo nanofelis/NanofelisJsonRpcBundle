@@ -47,11 +47,11 @@ class RpcRequestParser
     {
         try {
             $data = $this->getContent($request);
+
+            return $this->getRpcPayload($data);
         } catch (AbstractRpcException $e) {
             return $this->getRpcPayloadError($e);
         }
-
-        return $this->getRpcPayload($data);
     }
 
     /**
@@ -121,6 +121,8 @@ class RpcRequestParser
      * @param array $data
      *
      * @return RpcPayload
+     *
+     * @throws RpcInvalidRequestException
      */
     private function getRpcPayload(array $data): RpcPayload
     {
@@ -150,14 +152,16 @@ class RpcRequestParser
      * @param array $data
      *
      * @return RpcRequest
+     *
+     * @throws RpcInvalidRequestException
      */
     private function getRpcRequest(array $data): RpcRequest
     {
         try {
             /** @var RpcRequest $rpcRequest */
             $rpcRequest = $this->serializer->denormalize($data, RpcRequest::class);
-        } catch (ExceptionInterface $e) {
-            throw new \LogicException($e->getMessage());
+        } catch (ExceptionInterface | \TypeError $e) {
+            throw new RpcInvalidRequestException();
         }
 
         if (\count($this->validator->validate($rpcRequest)) > 0) {

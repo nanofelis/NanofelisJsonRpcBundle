@@ -8,5 +8,4 @@ use Symfony\Component\Validator\Constraint;
 
 class RpcRequest extends Constraint
 {
-    const JSON_RPC_VERSION = '2.0';
 }

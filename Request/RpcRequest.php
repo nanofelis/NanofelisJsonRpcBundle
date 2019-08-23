@@ -9,6 +9,8 @@ use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 
 class RpcRequest
 {
+    const JSON_RPC_VERSION = '2.0';
+
     /**
      * @var string|null
      */
@@ -57,7 +59,7 @@ class RpcRequest
      * @param array|null  $params
      * @param mixed       $id
      */
-    public function __construct(?string $jsonrpc = null, ?string $method = null, ?array $params = null, $id = null)
+    public function __construct(string $jsonrpc = null, string $method = null, ?array $params = null, $id = null)
     {
         $this->jsonrpc = $jsonrpc;
         $this->method = $method;

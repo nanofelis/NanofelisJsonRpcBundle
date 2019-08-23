@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Response;
 
-use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequest;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 
 class RpcResponse implements RpcResponseInterface
 {
@@ -37,5 +37,21 @@ class RpcResponse implements RpcResponseInterface
             'result' => $this->data,
             'id' => $this->id,
         ];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param mixed $data
+     */
+    public function setData($data): void
+    {
+        $this->data = $data;
     }
 }

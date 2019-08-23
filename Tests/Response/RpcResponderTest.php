@@ -10,7 +10,6 @@ use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponder;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
-use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequest as RpcRequestConstraint;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -67,12 +66,12 @@ class RpcResponderTest extends TestCase
         yield [$payload,
             [
                 [
-                    'jsonrpc' => RpcRequestConstraint::JSON_RPC_VERSION,
+                    'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
                     'result' => 'success',
                     'id' => 1,
                 ],
                 [
-                    'jsonrpc' => RpcRequestConstraint::JSON_RPC_VERSION,
+                    'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
                     'error' => [
                         'code' => 99,
                         'message' => 'error',
@@ -87,7 +86,7 @@ class RpcResponderTest extends TestCase
         $payload->addRpcRequest($successRequest);
 
         yield [$payload, [
-            'jsonrpc' => RpcRequestConstraint::JSON_RPC_VERSION,
+            'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
             'result' => 'success',
             'id' => 1,
         ]];
