@@ -15,12 +15,12 @@ class ServiceDescriptor
     private $service;
 
     /**
-     * @var \ReflectionMethod[]
+     * @var \ReflectionMethod
      */
-    private $methodReflection = [];
+    private $methodReflection;
 
     /**
-     * @var ConfigurationAnnotation[]
+     * @var ConfigurationAnnotation[]|ConfigurationAnnotation[][]
      */
     private $methodConfigurations = [];
 
@@ -78,7 +78,7 @@ class ServiceDescriptor
     }
 
     /**
-     * @return ConfigurationAnnotation[]
+     * @return ConfigurationAnnotation[]|ConfigurationAnnotation[][]
      */
     public function getMethodConfigurations(): array
     {

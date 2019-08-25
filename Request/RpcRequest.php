@@ -165,6 +165,9 @@ class RpcRequest
 
     public function getResponseContent(): ?array
     {
-        return $this->getResponse() ? $this->getResponse()->getContent() : $this->getResponseError()->getContent();
+        $response = $this->getResponse();
+        $error = $this->getResponseError();
+
+        return $response ? $response->getContent() : ($error ? $error->getContent() : null);
     }
 }

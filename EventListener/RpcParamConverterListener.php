@@ -67,10 +67,12 @@ class RpcParamConverterListener
      */
     private function getParamsAutoConfigurations(ServiceDescriptor $serviceDescriptor, Request $request): array
     {
-        $reflection = $serviceDescriptor->getMethodReflection();
         $configurations = [];
+        $reflection = $serviceDescriptor->getMethodReflection();
+        /** @var ParamConverter[] $currentConfigurations */
+        $currentConfigurations = $serviceDescriptor->getMethodConfigurations()['_converters'] ?? [];
 
-        foreach ($serviceDescriptor->getMethodConfigurations()['_converters'] ?? [] as $configuration) {
+        foreach ($currentConfigurations as $configuration) {
             $configurations[$configuration->getName()] = $configuration;
         }
 

@@ -109,7 +109,7 @@ class RpcRequestHandler
         $reflectionParams = $serviceDescriptor->getMethodParameters();
 
         foreach ($reflectionParams as $reflectionParam) {
-            if (\array_key_exists($reflectionParam->getName(), $params)) {
+            if (array_key_exists($reflectionParam->getName(), $params)) {
                 $orderedParams[] = $params[$reflectionParam->getName()];
             }
         }
@@ -162,7 +162,7 @@ class RpcRequestHandler
      */
     private function normalizeResult($result, ServiceDescriptor $serviceDescriptor)
     {
-        /** @var RpcNormalizationContext|null $normalizationContext */
+        /** @var RpcNormalizationContext|null $normalizationConfig */
         $normalizationConfig = $serviceDescriptor->getMethodConfigurations()['_rpc_normalization_context'] ?? null;
 
         return $this->normalizer->normalize($result, null, $normalizationConfig ? $normalizationConfig->getContexts() : []);

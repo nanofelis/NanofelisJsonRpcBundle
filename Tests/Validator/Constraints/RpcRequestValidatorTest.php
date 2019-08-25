@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Validator\Constraints;
 
-use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest as RpcRequestEntity;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest as RpcRequestObject;
 use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Validator\Constraints\RpcRequestValidator;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
@@ -29,7 +29,7 @@ class RpcRequestValidatorTest extends ConstraintValidatorTestCase
     public function provideRawPayload(): \Generator
     {
         $validPayload = [
-            'jsonrpc' => RpcRequestEntity::JSON_RPC_VERSION,
+            'jsonrpc' => RpcRequestObject::JSON_RPC_VERSION,
             'id' => 'adding',
             'method' => 'mock.add',
             'params' => [1, 2],

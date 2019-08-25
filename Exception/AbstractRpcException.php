@@ -23,7 +23,7 @@ abstract class AbstractRpcException extends \Exception implements RpcDataExcepti
     ];
 
     /**
-     * @var array
+     * @var array|null
      */
     private $data;
 

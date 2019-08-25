@@ -12,7 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RpcRequestParser
@@ -23,7 +22,7 @@ class RpcRequestParser
     private $validator;
 
     /**
-     * @var SerializerInterface
+     * @var Serializer
      */
     private $serializer;
 
@@ -83,7 +82,7 @@ class RpcRequestParser
      */
     private function getPostData(Request $request)
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode((string) $request->getContent(), true);
 
         if (null === $data) {
             throw new RpcParseException();
