@@ -54,7 +54,7 @@ class RpcParamConverterListenerTest extends TestCase
 
         $event = new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor);
 
-        ($this->subscriber)($event);
+        $this->subscriber->convertParams($event);
 
         $this->assertInstanceOf(\DateTime::class, $this->request->attributes->get('date'));
         $this->assertInstanceOf(\DateTime::class, $rpcRequest->getParams()['date']);
@@ -72,7 +72,7 @@ class RpcParamConverterListenerTest extends TestCase
 
         $event = new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor);
 
-        ($this->subscriber)($event);
+        $this->subscriber->convertParams($event);
 
         $this->assertSame([1, [2, 3, 4]], $rpcRequest->getParams());
         $this->assertSame([1], $this->request->attributes->all());
