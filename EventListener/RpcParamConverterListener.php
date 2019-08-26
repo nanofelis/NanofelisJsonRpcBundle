@@ -42,7 +42,7 @@ class RpcParamConverterListener
      *
      * @throws RpcInvalidParamsException
      */
-    public function __invoke(RpcBeforeMethodEvent $event): void
+    public function convertParams(RpcBeforeMethodEvent $event): void
     {
         $rpcRequest = $event->getRpcRequest();
         $request = $this->requestStack->getCurrentRequest();
