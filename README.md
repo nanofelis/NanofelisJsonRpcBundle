@@ -70,14 +70,14 @@ or
 # config/routes.yaml
 rpc:
     path: /
-    controller: Nanofelis\Bundle\JsonRpcBundle\Action
+    controller: Nanofelis\Bundle\JsonRpcBundle\Action\Rpc
     methods: GET|POST
 ```  
 
 Usage
 =====
 
-Simply Tag the services you want to expose and send a json-rpc payload to the rpc endpoint.
+Simply Tag the services you want to expose and send a json-rpc payload to the RPC endpoint.
 
 The method key must follow the convention  `{className with first letter lower cased}.{method}`
  
@@ -103,32 +103,58 @@ class MyService
 
 ```shell script
 # Example call with success response
-curl -d '{'jsonrpc': "2.0", "method": "myService.add", "params": [1, 2], "id": "test-call"}'  http://localhost
+curl -d '{"jsonrpc": "2.0", "method": "myService.add", "params": [1, 2], "id": "test-call"}'  http://localhost | fx this
 
-{"jsonrpc": "2.0", "result": 3, "id": 'test-call'}
+{
+  "jsonrpc": "2.0",
+  "result": 3,
+  "id": "test-call"
+}
 
-# Example call with wrong method param
-curl -d '{"jsonrpc": 2.0, "method": "myService.add", "params": [1], "id": "test-call"}'  http://localhost
 
-{"jsonrpc":"2.0", "error": {"code": -32602, "message": "invalid params", "data": null}, "id": 'test-call'}
+# Example call with wrong method parameters
+curl -d '{"jsonrpc": 2.0, "method": "myService.add", "params": [1], "id": "test-call"}'  http://localhost | fx this
+
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "message": "invalid params",
+    "data": null
+  },
+  "id": "test-call"
+}
+
 ```
 
 Batch Requests
 --------------
-As described by the RFC requests multiple requests can be send in a single call.
+As described by the RFC, multiple requests can be sent in a single call.
 
  ```shell script
 # Example batch call
-curl -d '[{'jsonrpc': "2.0", "method": "myService.add", "params": [1, 2], "id": "test-call-0"}, {'jsonrpc': "2.0", "method": "myService.add", "params": [3, 4], "id": "test-call-0"}]'  http://localhost
+curl -d '[{"jsonrpc": "2.0", "method": "myService.add", "params": [1, 2], "id": "test-call-0"}, {"jsonrpc": "2.0", "method": "myService.add", "params": [3, 4], "id": "test-call-0"}]'  http://localhost | fx this
 
-[{"jsonrpc":"2.0", "result":3, "id": 'test-call-0'}, {"jsonrpc":"2.0", "result":3, "id": 'test-call-1'}]
+[
+  {
+    "jsonrpc": "2.0",
+    "result": 3,
+    "id": "test-call-0"
+  },
+  {
+    "jsonrpc": "2.0",
+    "result": 7,
+    "id": "test-call-1"
+  }
+]
+
 ```
 
 Param Conversion
 ----------------
 The bundle supports the [Param Converter](https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/annotations/converters.html) from the [SensioFrameworkExtraBundle](https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html#annotations-for-controllers)
 
-As for a regular controller method, dates and Doctrine entities are automatically converted if a param's name matches a method argument with the correct type hinting. 
+As for a regular controller method, dates and Doctrine entities are automatically converted if a parameter's name matches a method argument with the correct type hinting. 
 
 ```php
 namespace App\RpcServices;
@@ -209,9 +235,9 @@ public function onRpcBeforeMethod(RpcBeforeMethodEvent $event)
 ```
 
 __nanofelis_json_rpc.before_response__  
-__Event Class__: RpcBeforeMethodEvent
+__Event Class__: RpcBeforeResponseEvent
 
-This event is dispatched just before the response execution. You can use it to alter the rpc response data.
+This event is dispatched just before the error or success response is sent. You can use it to alter the RPC response data.
 
 ```php
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -230,8 +256,13 @@ It also supports the [cache annotation](https://symfony.com/doc/current/bundles/
 
 ```shell script
 # Example GET call
-curl http://localhost?jsonrpc=2.0&method=myService.add&params=[1,2]&id=test-call
-{"jsonrpc":"2.0", "result":3, "id": 'test-call'}
+curl http://localhost?jsonrpc=2.0&method=myService.add&params[0]=1&params[1]=2&id=test-call | fx this
+
+{
+  "jsonrpc": "2.0",
+  "result": 3,
+  "id": "test-call"
+}
 ```
 ![warning](https://img.icons8.com/color/48/000000/warning-shield.png) GET requests are not recommended for RPC payloads.
 Unlike a json payload, all query params are sent as string, so for instance the `add(int $a, int $b)` method would fail as 
