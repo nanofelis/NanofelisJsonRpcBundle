@@ -137,19 +137,17 @@ class RpcRequestHandler
      */
     private function castToRpcException(\Throwable $e): AbstractRpcException
     {
-        switch ($e) {
-            case $e instanceof AbstractRpcException:
-                return $e;
-                break;
-            default:
-                $rpcError = new RpcApplicationException($e->getMessage(), $e->getCode());
+        if ($e instanceof AbstractRpcException) {
+            return $e;
         }
+
+        $rpcException = new RpcApplicationException($e->getMessage(), $e->getCode());
 
         if ($e instanceof RpcDataExceptionInterface) {
-            $rpcError->setData($e->getData());
+            $rpcException->setData($e->getData());
         }
 
-        return $rpcError;
+        return $rpcException;
     }
 
     /**

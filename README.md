@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.com/nanofelis/NanofelisJsonRpcBundle.svg?branch=master)](https://travis-ci.com/nanofelis/NanofelisJsonRpcBundle)
-[![SymfonyInsight](https://insight.symfony.com/projects/993c360e-d436-4902-a253-9864451ee006/mini.svg)](https://insight.symfony.com/projects/993c360e-d436-4902-a253-9864451ee006)
 
 The NanofelisJsonRpcBundle is a symfony friendly implementation of the  [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification.
 
