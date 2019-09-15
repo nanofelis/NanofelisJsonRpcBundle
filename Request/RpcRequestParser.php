@@ -63,11 +63,12 @@ class RpcRequestParser
      */
     private function getContent(Request $request)
     {
-        switch ($request->getMethod()) {
-            case Request::METHOD_POST:
-                return $this->getPostData($request);
-            case Request::METHOD_GET:
-                return $this->getQueryData($request);
+        if (Request::METHOD_POST === $request->getMethod()) {
+            return $this->getPostData($request);
+        }
+
+        if (Request::METHOD_GET === $request->getMethod()) {
+            return $this->getQueryData($request);
         }
 
         throw new RpcInvalidRequestException();

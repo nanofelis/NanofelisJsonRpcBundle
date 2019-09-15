@@ -11,7 +11,7 @@ class RpcApplicationExceptionTest extends TestCase
 {
     public function testConstructInvalidCode()
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('application exception code should be outside range -32099 to -32000, given: -32098');
 
         new RpcApplicationException('app error', RpcApplicationException::CODE_RANGE[0] + 1);
