@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.com/nanofelis/NanofelisJsonRpcBundle.svg?branch=master)](https://travis-ci.com/nanofelis/NanofelisJsonRpcBundle)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=nanofelis_NanofelisJsonRpcBundle&metric=alert_status)](https://sonarcloud.io/dashboard?id=nanofelis_NanofelisJsonRpcBundle)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=nanofelis_NanofelisJsonRpcBundle&metric=coverage)](https://sonarcloud.io/dashboard?id=nanofelis_NanofelisJsonRpcBundle)
 
 The NanofelisJsonRpcBundle is a symfony friendly implementation of the  [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification.
 
