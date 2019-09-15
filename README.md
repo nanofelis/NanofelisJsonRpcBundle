@@ -185,7 +185,7 @@ use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
 class MyService 
 {
     /**
-     * RpcNormalizationContext(context={'custom'})
+     * RpcNormalizationContext(contexts={'custom'})
      */
     function doSomething($data): Article
     {
