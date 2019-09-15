@@ -71,7 +71,7 @@ or
 # config/routes.yaml
 rpc:
     path: /
-    controller: Nanofelis\Bundle\JsonRpcBundle\Action\Rpc
+    controller: nanofelis_json_rpc.action.rpc
     methods: GET|POST
 ```  
 
