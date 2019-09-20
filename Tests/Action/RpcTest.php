@@ -138,6 +138,16 @@ class RpcTest extends WebTestCase
             ], 'id' => 'test'],
         ];
 
+        // Test wrong params names
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['wrongParam' => 1]],
+            ['jsonrpc' => '2.0', 'error' => [
+                'code'    => AbstractRpcException::INVALID_PARAMS,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_PARAMS],
+                'data'    => null,
+            ], 'id'    => null],
+        ];
+
         // Test application exception handling
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.willThrowException'],

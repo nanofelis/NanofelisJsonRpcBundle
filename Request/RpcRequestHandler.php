@@ -114,7 +114,7 @@ class RpcRequestHandler
             }
         }
 
-        return empty($orderedParams) ? $params : $orderedParams;
+        return empty($orderedParams) ? array_values($params) : $orderedParams;
     }
 
     /**
