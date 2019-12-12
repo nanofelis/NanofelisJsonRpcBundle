@@ -26,7 +26,7 @@ class RpcResponderTest extends TestCase
      */
     private $responder;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->responder = new RpcResponder($this->eventDispatcher);

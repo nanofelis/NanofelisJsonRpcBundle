@@ -22,7 +22,7 @@ class RpcTest extends WebTestCase
      */
     private $router;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         self::$client = static::createClient();
         $this->router = self::$client->getContainer()->get('router');

@@ -119,7 +119,7 @@ class RpcParamConverterListener
             if (\is_array($val)) {
                 continue;
             }
-            $request->attributes->set($key, $val);
+            $request->attributes->set((string)$key, $val);
         }
     }
 
@@ -143,7 +143,7 @@ class RpcParamConverterListener
         $params = $rpcRequest->getParams();
 
         foreach ($params as $key => $val) {
-            $params[$key] = $request->attributes->get($key, $params[$key]);
+            $params[$key] = $request->attributes->get((string)$key, $params[$key]);
         }
 
         $rpcRequest->setParams($params);

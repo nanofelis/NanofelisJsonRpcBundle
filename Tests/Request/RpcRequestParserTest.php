@@ -18,7 +18,7 @@ class RpcRequestParserTest extends TestCase
      */
     private $parser;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $validatorBuilder = Validation::createValidatorBuilder();
         $validatorBuilder->addXmlMapping(__DIR__.'/../../Resources/config/validator/rpc_request.xml');
