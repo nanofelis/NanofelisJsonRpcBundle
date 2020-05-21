@@ -57,6 +57,11 @@ class TestKernel extends Kernel implements CompilerPassInterface
                 'enabled' => true,
             ],
         ]);
+        $c->loadFromExtension('sensio_framework_extra', [
+            'router' => [
+                'annotations' => false,
+            ],
+        ]);
         $c->setParameter('kernel.secret', 'fake');
     }
 
