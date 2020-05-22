@@ -6,8 +6,8 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Response;
 
 use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeResponseEvent;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcPayload;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RpcResponder
 {
@@ -37,12 +37,12 @@ class RpcResponder
 
         if ($payload->isBatch()) {
             foreach ($payload->getRpcRequests() as $rpcRequest) {
-                $this->eventDispatcher->dispatch(RpcBeforeResponseEvent::NAME, new RpcBeforeResponseEvent($rpcRequest));
+                $this->eventDispatcher->dispatch(new RpcBeforeResponseEvent($rpcRequest), RpcBeforeResponseEvent::NAME);
                 $responseContent[] = $rpcRequest->getResponseContent();
             }
         } else {
             $rpcRequest = $payload->getRpcRequests()[0];
-            $this->eventDispatcher->dispatch(RpcBeforeResponseEvent::NAME, new RpcBeforeResponseEvent($rpcRequest));
+            $this->eventDispatcher->dispatch(new RpcBeforeResponseEvent($rpcRequest), RpcBeforeResponseEvent::NAME);
             $responseContent = $rpcRequest->getResponseContent();
         }
 

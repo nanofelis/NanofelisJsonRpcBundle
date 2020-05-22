@@ -6,7 +6,7 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Event;
 
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class RpcBeforeMethodEvent extends Event
 {

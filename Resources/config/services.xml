@@ -48,7 +48,7 @@
                  class="Nanofelis\Bundle\JsonRpcBundle\EventListener\RpcParamConverterListener" public="false">
             <argument type="service" id="request_stack"/>
             <argument type="service" id="sensio_framework_extra.converter.manager"/>
-            <tag name="kernel.event_listener"  event="nanofelis_json_rpc.before_method" method="convertParams" priority="1" />
+            <tag name="kernel.event_listener" event="nanofelis_json_rpc.before_method" method="convertParams" priority="1" />
         </service>
     </services>
 </container>

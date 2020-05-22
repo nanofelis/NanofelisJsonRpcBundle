@@ -15,9 +15,9 @@ use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RpcRequestHandler
 {
@@ -77,7 +77,7 @@ class RpcRequestHandler
     {
         $serviceDescriptor = $this->serviceFinder->find($rpcRequest);
 
-        $this->eventDispatcher->dispatch(RpcBeforeMethodEvent::NAME, new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor));
+        $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 
         $service = $serviceDescriptor->getService();
         $method = $serviceDescriptor->getMethodName();
