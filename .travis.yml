@@ -1,6 +1,6 @@
 language: php
 sudo: false
-dist: trusty
+dist: xenial
 
 addons:
     sonarcloud:
@@ -28,9 +28,8 @@ matrix:
 
         # Test the latest stable release
         - php: 7.3
-          env: COVERAGE=true PHPUNIT_FLAGS="-v --log-junit phpunit.report.xml --coverage-clover=phpunit.coverage.xml"
         - php: 7.2
-          env: COVERAGE=true PHPUNIT_FLAGS="-v --log-junit phpunit.report.xml --coverage-clover=phpunit.coverage.xml"
+          env: COVERAGE=true XDEBUG_MODE=coverage PHPUNIT_FLAGS="-v --log-junit phpunit.report.xml --coverage-clover=phpunit.coverage.xml"
 
         # Latest commit to master
         - php: 7.3
@@ -38,7 +37,7 @@ matrix:
 
     allow_failures:
         # Dev-master is allowed to fail.
-        - env: STABILITY="dev"
+        -   env: STABILITY="dev"
 
 before_install:
     - if [[ $COVERAGE != true ]]; then phpenv config-rm xdebug.ini || true; fi
