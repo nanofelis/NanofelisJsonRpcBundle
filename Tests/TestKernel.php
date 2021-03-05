@@ -47,9 +47,8 @@ class TestKernel extends Kernel implements CompilerPassInterface
 
     /**
      * @param ContainerBuilder $c
-     * @param LoaderInterface  $loader
      */
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $c)
     {
         $c->loadFromExtension('framework', [
             'test' => true,

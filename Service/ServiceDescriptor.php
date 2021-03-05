@@ -43,7 +43,7 @@ class ServiceDescriptor
         }
     }
 
-    public function getMethodReflection()
+    public function getMethodReflection(): \ReflectionMethod
     {
         return $this->methodReflection;
     }
