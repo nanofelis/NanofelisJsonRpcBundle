@@ -16,15 +16,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class RpcResponderTest extends TestCase
 {
-    /**
-     * @var MockObject
-     */
-    private $eventDispatcher;
+    private MockObject $eventDispatcher;
 
-    /**
-     * @var RpcResponder
-     */
-    private $responder;
+    private RpcResponder $responder;
 
     protected function setUp(): void
     {
@@ -50,7 +44,7 @@ class RpcResponderTest extends TestCase
         $errorRequest = new RpcRequest();
         $errorException = new RpcApplicationException('error', 99);
         $errorException->setData(['details']);
-        $errorRequest->setResponseError(new RpcResponseError($errorException, 2));
+        $errorRequest->setResponse(new RpcResponseError($errorException, 2));
 
         $payload = new RpcPayload();
         $payload->setIsBatch(true);

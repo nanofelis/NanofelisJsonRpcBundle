@@ -13,22 +13,10 @@ class RpcBeforeMethodEvent extends Event
     public const NAME = 'nanofelis_json_rpc.before_method';
 
     /**
-     * @var RpcRequest
-     */
-    private $rpcRequest;
-
-    /**
-     * @var ServiceDescriptor
-     */
-    private $serviceDescriptor;
-
-    /**
      * RpcBeforeMethodEvent constructor.
      */
-    public function __construct(RpcRequest $rpcRequest, ServiceDescriptor $serviceDescriptor)
+    public function __construct(private RpcRequest $rpcRequest, private ServiceDescriptor $serviceDescriptor)
     {
-        $this->rpcRequest = $rpcRequest;
-        $this->serviceDescriptor = $serviceDescriptor;
     }
 
     public function getRpcRequest(): RpcRequest

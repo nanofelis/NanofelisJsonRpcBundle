@@ -5,11 +5,17 @@ declare(strict_types=1);
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
+use Nanofelis\Bundle\JsonRpcBundle\Service\AbstractRpcService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
-class MockService
+class MockService extends AbstractRpcService
 {
+    public static function getServiceKey(): string
+    {
+        return 'mockService';
+    }
+
     public function add(int $arg1, int $arg2): int
     {
         return $arg1 + $arg2;

@@ -9,21 +9,14 @@ use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestParser;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Validator\Validation;
 
 class RpcRequestParserTest extends TestCase
 {
-    /**
-     * @var RpcRequestParser
-     */
-    private $parser;
+    private RpcRequestParser $parser;
 
     protected function setUp(): void
     {
-        $validatorBuilder = Validation::createValidatorBuilder();
-        $validatorBuilder->addXmlMapping(__DIR__.'/../../Resources/config/validator/rpc_request.xml');
-
-        $this->parser = new RpcRequestParser($validatorBuilder->getValidator());
+        $this->parser = new RpcRequestParser();
     }
 
     public function testParsePostRequest()
@@ -40,7 +33,7 @@ class RpcRequestParserTest extends TestCase
         $this->assertInstanceOf(RpcPayload::class, $payload);
         $rpcRequest = $payload->getRpcRequests()[0];
 
-        $this->assertNull($rpcRequest->getResponseError());
+        $this->assertNull($rpcRequest->getResponse());
         $this->assertSame('add', $rpcRequest->getMethodKey());
         $this->assertSame('mockService', $rpcRequest->getServiceKey());
         $this->assertSame([1, 2], $rpcRequest->getParams());
@@ -61,7 +54,7 @@ class RpcRequestParserTest extends TestCase
         $this->assertInstanceOf(RpcPayload::class, $payload);
         $rpcRequest = $payload->getRpcRequests()[0];
 
-        $this->assertNull($rpcRequest->getResponseError());
+        $this->assertNull($rpcRequest->getResponse());
         $this->assertSame('add', $rpcRequest->getMethodKey());
         $this->assertSame('mockService', $rpcRequest->getServiceKey());
         $this->assertSame(['1', '2'], $rpcRequest->getParams());
@@ -74,7 +67,7 @@ class RpcRequestParserTest extends TestCase
         $payload = $this->parser->parse($request);
         $rpcRequest = $payload->getRpcRequests()[0];
 
-        $this->assertInstanceOf(RpcResponseError::class, $rpcRequest->getResponseError());
+        $this->assertInstanceOf(RpcResponseError::class, $rpcRequest->getResponse());
     }
 
     public function testParseBadInvalidRpcFormat()
@@ -86,6 +79,6 @@ class RpcRequestParserTest extends TestCase
         $payload = $this->parser->parse($request);
         $rpcRequest = $payload->getRpcRequests()[0];
 
-        $this->assertInstanceOf(RpcResponseError::class, $rpcRequest->getResponseError());
+        $this->assertInstanceOf(RpcResponseError::class, $rpcRequest->getResponse());
     }
 }

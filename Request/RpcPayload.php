@@ -9,12 +9,9 @@ class RpcPayload
     /**
      * @var RpcRequest[]
      */
-    private $rpcRequests = [];
+    private array $rpcRequests = [];
 
-    /**
-     * @var bool
-     */
-    private $isBatch = false;
+    private bool $isBatch = false;
 
     /**
      * @return RpcRequest[]

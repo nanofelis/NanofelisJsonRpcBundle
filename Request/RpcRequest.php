@@ -11,63 +11,20 @@ class RpcRequest
 {
     public const JSON_RPC_VERSION = '2.0';
 
-    /**
-     * @var string|null
-     */
-    private $jsonrpc;
-
-    /**
-     * @var string|null
-     */
-    private $id;
-
-    /**
-     * @var string|null Format serviceKey.methodKey
-     */
-    private $method;
-
-    /**
-     * @var string|null
-     */
-    private $serviceKey;
-
-    /**
-     * @var string|null
-     */
-    private $methodKey;
-
-    /**
-     * @var array|null
-     */
-    private $params;
-
-    /**
-     * @var RpcResponse|null
-     */
-    private $response;
-
-    /**
-     * @var RpcResponseError|null
-     */
-    private $responseError;
-
-    /**
-     * RpcRequest constructor.
-     *
-     * @param mixed $id
-     */
-    public function __construct(string $jsonrpc = null, string $method = null, ?array $params = null, $id = null)
-    {
-        $this->jsonrpc = $jsonrpc;
-        $this->method = $method;
-        $this->params = $params;
-        $this->id = $id;
+    public function __construct(
+        private mixed $id = null,
+        private ?string $method = null,
+        private ?string $serviceKey = null,
+        private ?string $methodKey = null,
+        /**
+         * @var array<string,mixed>|null
+         */
+        private ?array $params = null,
+        private RpcResponse|RpcResponseError|null $response = null,
+    ) {
     }
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function getId(): mixed
     {
         return $this->id;
     }
@@ -97,42 +54,37 @@ class RpcRequest
         $this->methodKey = $methodKey;
     }
 
+    /**
+     * @return array<string,mixed>|null $params
+     */
     public function getParams(): ?array
     {
         return $this->params;
     }
 
+    /**
+     * @param array<string,mixed>|null $params
+     */
     public function setParams(?array $params): void
     {
         $this->params = $params;
     }
 
-    public function getResponse(): ?RpcResponse
+    public function getResponse(): RpcResponse|RpcResponseError|null
     {
         return $this->response;
     }
 
-    public function setResponse(?RpcResponse $response): void
+    public function setResponse(RpcResponse|RpcResponseError|null $response): void
     {
         $this->response = $response;
     }
 
-    public function getResponseError(): ?RpcResponseError
-    {
-        return $this->responseError;
-    }
-
-    public function setResponseError(?RpcResponseError $responseError): void
-    {
-        $this->responseError = $responseError;
-    }
-
+    /**
+     * @return array<string,mixed>
+     */
     public function getResponseContent(): ?array
     {
-        if ($this->getResponse()) {
-            return $this->getResponse()->getContent();
-        } else {
-            return $this->getResponseError() ? $this->getResponseError()->getContent() : null;
-        }
+        return $this->response?->getContent();
     }
 }

@@ -23,9 +23,9 @@ abstract class AbstractRpcException extends \Exception implements RpcDataExcepti
     ];
 
     /**
-     * @var array|null
+     * @var array<string,mixed>|null
      */
-    private $data;
+    private ?array $data = null;
 
     public function __construct(string $message = '', int $code = 0, Throwable $previous = null)
     {
@@ -36,11 +36,17 @@ abstract class AbstractRpcException extends \Exception implements RpcDataExcepti
         parent::__construct($message, $code, $previous);
     }
 
+    /**
+     * @return array<string,mixed>|null
+     */
     public function getData(): ?array
     {
         return $this->data;
     }
 
+    /**
+     * @param array<string,mixed>|null $data
+     */
     public function setData(?array $data): void
     {
         $this->data = $data;

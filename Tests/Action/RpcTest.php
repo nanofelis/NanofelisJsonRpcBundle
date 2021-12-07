@@ -6,21 +6,15 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Action;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\Bundle\JsonRpcBundle\Tests\TestKernel;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\RouterInterface;
 
 class RpcTest extends WebTestCase
 {
-    /**
-     * @var Client
-     */
-    public static $client;
+    public static KernelBrowser $client;
 
-    /**
-     * @var RouterInterface
-     */
-    private $router;
+    private RouterInterface $router;
 
     protected function setUp(): void
     {

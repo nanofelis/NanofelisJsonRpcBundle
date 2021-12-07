@@ -14,21 +14,15 @@ use PHPUnit\Framework\TestCase;
 
 class ServiceFinderTest extends TestCase
 {
-    /**
-     * @var MockObject
-     */
-    private $configLoader;
+    private MockObject $configLoader;
 
-    /**
-     * @var \ArrayIterator
-     */
-    private $services;
+    private \ArrayIterator $services;
 
     protected function setUp(): void
     {
         $this->configLoader = $this->createMock(ServiceConfigLoader::class);
         $this->services = new \ArrayIterator([
-            new MockService(),
+            'mockService' => new MockService(),
         ]);
     }
 

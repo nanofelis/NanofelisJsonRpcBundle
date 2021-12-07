@@ -13,16 +13,17 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 class NanofelisJsonRpcExtension extends Extension implements CompilerPassInterface
 {
     /**
-     * {@inheritdoc}
+     * @param array<int|string,mixed> $configs
+     *
+     * @throws \Exception
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__).'/Resources/config'));
         $loader->load('services.xml');
     }
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
-        $container->getDefinition('validator.builder')->addMethodCall('addXmlMapping', [__DIR__.'/../Resources/config/validator/rpc_request.xml']);
     }
 }

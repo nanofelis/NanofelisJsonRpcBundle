@@ -14,15 +14,21 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ConfigurationAnnotation;
 class RpcNormalizationContext extends ConfigurationAnnotation
 {
     /**
-     * @var array
+     * @var array<string,mixed>
      */
-    private $contexts;
+    private array $contexts;
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getContexts(): array
     {
         return $this->contexts;
     }
 
+    /**
+     * @param array<string,mixed> $context
+     */
     public function setContexts(array $context): void
     {
         $this->contexts = $context;
