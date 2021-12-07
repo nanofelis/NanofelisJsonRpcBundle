@@ -6,9 +6,9 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
 use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeMethodEvent;
-use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcDataExceptionInterface;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcApplicationException;
+use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcDataExceptionInterface;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidParamsException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
@@ -46,9 +46,6 @@ class RpcRequestHandler
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    /**
-     * @param RpcRequest $rpcRequest
-     */
     public function handle(RpcRequest $rpcRequest): void
     {
         if ($rpcRequest->getResponseError()) {
@@ -65,8 +62,6 @@ class RpcRequestHandler
     }
 
     /**
-     * @param RpcRequest $rpcRequest
-     *
      * @return array|bool|float|int|string
      *
      * @throws RpcMethodNotFoundException
@@ -96,12 +91,6 @@ class RpcRequestHandler
         return $this->normalizeResult($result, $serviceDescriptor);
     }
 
-    /**
-     * @param ServiceDescriptor $serviceDescriptor
-     * @param RpcRequest        $rpcRequest
-     *
-     * @return array
-     */
     private function getOrderedParams(ServiceDescriptor $serviceDescriptor, RpcRequest $rpcRequest): array
     {
         $params = $rpcRequest->getParams() ?: [];
@@ -109,7 +98,7 @@ class RpcRequestHandler
         $reflectionParams = $serviceDescriptor->getMethodParameters();
 
         foreach ($reflectionParams as $reflectionParam) {
-            if (array_key_exists($reflectionParam->getName(), $params)) {
+            if (\array_key_exists($reflectionParam->getName(), $params)) {
                 $orderedParams[] = $params[$reflectionParam->getName()];
             }
         }
@@ -117,12 +106,6 @@ class RpcRequestHandler
         return empty($orderedParams) ? array_values($params) : $orderedParams;
     }
 
-    /**
-     * @param \TypeError        $e
-     * @param ServiceDescriptor $serviceDescriptor
-     *
-     * @return bool
-     */
     private function isInvalidParamsException(\TypeError $e, ServiceDescriptor $serviceDescriptor): bool
     {
         $trace = $e->getTrace();
@@ -130,11 +113,6 @@ class RpcRequestHandler
         return $trace[0]['class'] === $serviceDescriptor->getServiceClass() && $trace[0]['function'] === $serviceDescriptor->getMethodName();
     }
 
-    /**
-     * @param \Throwable $e
-     *
-     * @return AbstractRpcException
-     */
     private function castToRpcException(\Throwable $e): AbstractRpcException
     {
         if ($e instanceof AbstractRpcException) {
@@ -151,8 +129,7 @@ class RpcRequestHandler
     }
 
     /**
-     * @param mixed             $result
-     * @param ServiceDescriptor $serviceDescriptor
+     * @param mixed $result
      *
      * @return mixed
      *

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Nanofelis\Bundle\JsonRpcBundle\Action;
 
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponder;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class Rpc
 {
@@ -26,11 +26,6 @@ class Rpc
         $this->responder = $responder;
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function __invoke(Request $request): JsonResponse
     {
         $rpcPayload = $this->rpcHandler->createRpcPayload($request);

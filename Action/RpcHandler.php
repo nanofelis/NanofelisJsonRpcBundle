@@ -23,9 +23,6 @@ class RpcHandler
 
     /**
      * RpcHandler constructor.
-     *
-     * @param RpcRequestParser  $parser
-     * @param RpcRequestHandler $rpcRequestHandler
      */
     public function __construct(
         RpcRequestParser $parser,
@@ -35,11 +32,6 @@ class RpcHandler
         $this->rpcRequestHandler = $rpcRequestHandler;
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return RpcPayload
-     */
     public function createRpcPayload(Request $request): RpcPayload
     {
         $payload = $this->parser->parse($request);

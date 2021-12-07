@@ -21,9 +21,6 @@ class ServiceFinder
 
     /**
      * ServiceFinder constructor.
-     *
-     * @param \Traversable        $rpcServices
-     * @param ServiceConfigLoader $serviceConfigLoader
      */
     public function __construct(\Traversable $rpcServices, ServiceConfigLoader $serviceConfigLoader)
     {
@@ -32,10 +29,6 @@ class ServiceFinder
     }
 
     /**
-     * @param RpcRequest $rpcRequest
-     *
-     * @return ServiceDescriptor
-     *
      * @throws RpcMethodNotFoundException
      */
     public function find(RpcRequest $rpcRequest): ServiceDescriptor
@@ -49,10 +42,6 @@ class ServiceFinder
     }
 
     /**
-     * @param string $serviceKey
-     *
-     * @return object
-     *
      * @throws RpcMethodNotFoundException
      */
     private function search(string $serviceKey): object

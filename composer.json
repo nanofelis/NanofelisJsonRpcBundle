@@ -11,21 +11,22 @@
         }
     ],
     "require": {
-        "php": "^7.2",
+        "php": "^7.4",
         "ext-json": "*",
-        "symfony/event-dispatcher": "^4.0|^5.0",
-        "symfony/options-resolver": "^4.0|^5.0",
-        "symfony/property-access": "^4.0|^5.0",
-        "symfony/serializer": "^4.0|^5.0",
-        "symfony/validator": "^4.0|^5.0"
+        "symfony/event-dispatcher": "^4.4|^5.0",
+        "symfony/options-resolver": "^4.4|^5.0",
+        "symfony/property-access": "^4.4|^5.0",
+        "symfony/serializer": "^4.4|^5.0",
+        "symfony/validator": "^4.4|^5.0"
     },
     "require-dev": {
         "ext-intl": "*",
-        "symfony/phpunit-bridge": "^4.0|^5.0",
-        "symfony/var-dumper": "^4.0|^5.0",
-        "phpstan/phpstan-symfony": "^0.11.6",
-        "symfony/browser-kit": "^4.0|^5.0",
-        "sensio/framework-extra-bundle": "^4.0|^5.0"
+        "symfony/phpunit-bridge": "^4.4|^5.0",
+        "symfony/var-dumper": "^4.4|^5.0",
+        "phpstan/phpstan-symfony": "^0.12",
+        "symfony/browser-kit": "^4.4|^5.0",
+        "sensio/framework-extra-bundle": "^6.0",
+        "friendsofphp/php-cs-fixer": "^3.3"
     },
     "autoload": {
         "psr-4": {
@@ -40,7 +41,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "master-dev"
+            "dev-master": "2.0-dev"
         }
     }
 }

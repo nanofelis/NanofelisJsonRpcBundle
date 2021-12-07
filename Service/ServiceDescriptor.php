@@ -27,9 +27,6 @@ class ServiceDescriptor
     /**
      * ServiceDescriptor constructor.
      *
-     * @param object $service
-     * @param string $method
-     *
      * @throws RpcMethodNotFoundException
      */
     public function __construct(object $service, string $method)
@@ -53,17 +50,11 @@ class ServiceDescriptor
         return $this->methodReflection->getName();
     }
 
-    /**
-     * @return object
-     */
     public function getService(): object
     {
         return $this->service;
     }
 
-    /**
-     * @return string
-     */
     public function getServiceClass(): string
     {
         return \get_class($this->service);
@@ -85,9 +76,6 @@ class ServiceDescriptor
         return $this->methodConfigurations;
     }
 
-    /**
-     * @param ConfigurationAnnotation $configuration
-     */
     public function addMethodConfiguration(ConfigurationAnnotation $configuration): void
     {
         if ($configuration->allowArray()) {

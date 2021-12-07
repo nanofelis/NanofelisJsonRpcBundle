@@ -28,7 +28,7 @@ class RpcTest extends WebTestCase
         $this->router = self::$client->getContainer()->get('router');
     }
 
-    protected static function getKernelClass()
+    protected static function getKernelClass(): string
     {
         return TestKernel::class;
     }
@@ -50,9 +50,6 @@ class RpcTest extends WebTestCase
 
     /**
      * @dataProvider provideRpcRequest
-     *
-     * @param array $requestData
-     * @param array $expected
      */
     public function testRpc(array $requestData, array $expected)
     {
@@ -61,9 +58,6 @@ class RpcTest extends WebTestCase
         $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
     }
 
-    /**
-     * @return \Generator
-     */
     public function provideRpcRequest(): \Generator
     {
         // Test regular rpc request
@@ -142,10 +136,10 @@ class RpcTest extends WebTestCase
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['wrongParam' => 1]],
             ['jsonrpc' => '2.0', 'error' => [
-                'code'    => AbstractRpcException::INVALID_PARAMS,
+                'code' => AbstractRpcException::INVALID_PARAMS,
                 'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_PARAMS],
-                'data'    => null,
-            ], 'id'    => null],
+                'data' => null,
+            ], 'id' => null],
         ];
 
         // Test application exception handling

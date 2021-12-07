@@ -20,9 +20,6 @@ class ServiceConfigLoader
         $this->reader = $reader;
     }
 
-    /**
-     * @param ServiceDescriptor $descriptor
-     */
     public function loadConfig(ServiceDescriptor $descriptor): void
     {
         $annotations = $this->reader->getMethodAnnotations($descriptor->getMethodReflection());
@@ -31,8 +28,7 @@ class ServiceConfigLoader
     }
 
     /**
-     * @param ServiceDescriptor $serviceDescriptor
-     * @param Annotation[]      $annotations
+     * @param Annotation[] $annotations
      */
     private function load(ServiceDescriptor $serviceDescriptor, array $annotations): void
     {

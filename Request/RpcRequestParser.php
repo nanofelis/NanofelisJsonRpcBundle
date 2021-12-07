@@ -28,8 +28,6 @@ class RpcRequestParser
 
     /**
      * RpcRequestParser constructor.
-     *
-     * @param ValidatorInterface $validator
      */
     public function __construct(ValidatorInterface $validator)
     {
@@ -37,11 +35,6 @@ class RpcRequestParser
         $this->serializer = new Serializer([new GetSetMethodNormalizer()]);
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return RpcPayload
-     */
     public function parse(Request $request): RpcPayload
     {
         try {
@@ -54,8 +47,6 @@ class RpcRequestParser
     }
 
     /**
-     * @param Request $request
-     *
      * @return mixed
      *
      * @throws RpcParseException
@@ -75,8 +66,6 @@ class RpcRequestParser
     }
 
     /**
-     * @param Request $request
-     *
      * @return mixed
      *
      * @throws RpcParseException
@@ -92,21 +81,11 @@ class RpcRequestParser
         return $data;
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return array
-     */
     private function getQueryData(Request $request): array
     {
         return $request->query->all();
     }
 
-    /**
-     * @param AbstractRpcException $e
-     *
-     * @return RpcPayload
-     */
     private function getRpcPayloadError(AbstractRpcException $e): RpcPayload
     {
         $payload = new RpcPayload();
@@ -118,10 +97,6 @@ class RpcRequestParser
     }
 
     /**
-     * @param array $data
-     *
-     * @return RpcPayload
-     *
      * @throws RpcInvalidRequestException
      */
     private function getRpcPayload(array $data): RpcPayload
@@ -149,10 +124,6 @@ class RpcRequestParser
     }
 
     /**
-     * @param array $data
-     *
-     * @return RpcRequest
-     *
      * @throws RpcInvalidRequestException
      */
     private function getRpcRequest(array $data): RpcRequest
@@ -160,7 +131,7 @@ class RpcRequestParser
         try {
             /** @var RpcRequest $rpcRequest */
             $rpcRequest = $this->serializer->denormalize($data, RpcRequest::class);
-        } catch (ExceptionInterface | \TypeError $e) {
+        } catch (ExceptionInterface|\TypeError $e) {
             throw new RpcInvalidRequestException();
         }
 

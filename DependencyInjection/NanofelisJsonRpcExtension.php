@@ -21,9 +21,6 @@ class NanofelisJsonRpcExtension extends Extension implements CompilerPassInterfa
         $loader->load('services.xml');
     }
 
-    /**
-     * @param ContainerBuilder $container
-     */
     public function process(ContainerBuilder $container)
     {
         $container->getDefinition('validator.builder')->addMethodCall('addXmlMapping', [__DIR__.'/../Resources/config/validator/rpc_request.xml']);

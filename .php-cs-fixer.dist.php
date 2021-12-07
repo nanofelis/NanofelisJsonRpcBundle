@@ -1,10 +1,11 @@
 <?php
 
-$finder = PhpCsFixer\Finder::create()
-    ->exclude('vendor')
-    ->in(__DIR__);
+$finder = (new PhpCsFixer\Finder())
+    ->in(__DIR__)
+    ->exclude('var')
+;
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRules(array(
         '@Symfony'             => true,
         '@Symfony:risky'       => true,

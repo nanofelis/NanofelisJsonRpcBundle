@@ -18,19 +18,12 @@ class RpcResponder
 
     /**
      * RpcResponder constructor.
-     *
-     * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(EventDispatcherInterface $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    /**
-     * @param RpcPayload $payload
-     *
-     * @return JsonResponse
-     */
     public function __invoke(RpcPayload $payload): JsonResponse
     {
         $responseContent = null;

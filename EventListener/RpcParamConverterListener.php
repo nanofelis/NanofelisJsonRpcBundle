@@ -27,9 +27,6 @@ class RpcParamConverterListener
 
     /**
      * RpcRequestListener constructor.
-     *
-     * @param RequestStack          $requestStack
-     * @param ParamConverterManager $converterManager
      */
     public function __construct(RequestStack $requestStack, ParamConverterManager $converterManager)
     {
@@ -38,8 +35,6 @@ class RpcParamConverterListener
     }
 
     /**
-     * @param RpcBeforeMethodEvent $event
-     *
      * @throws RpcInvalidParamsException
      */
     public function convertParams(RpcBeforeMethodEvent $event): void
@@ -59,12 +54,6 @@ class RpcParamConverterListener
         $this->mergeParams($rpcRequest, $request);
     }
 
-    /**
-     * @param ServiceDescriptor $serviceDescriptor
-     * @param Request           $request
-     *
-     * @return array
-     */
     private function getParamsAutoConfigurations(ServiceDescriptor $serviceDescriptor, Request $request): array
     {
         $configurations = [];
@@ -109,9 +98,6 @@ class RpcParamConverterListener
     /**
      * Hydrate request attributes bag with parameters from the rpc request. Array are excluded as attributes must be
      * scalars.
-     *
-     * @param Request    $request
-     * @param RpcRequest $rpcRequest
      */
     private function prepareRequestForParamConversion(RpcRequest $rpcRequest, Request $request): void
     {
@@ -119,14 +105,11 @@ class RpcParamConverterListener
             if (\is_array($val)) {
                 continue;
             }
-            $request->attributes->set((string)$key, $val);
+            $request->attributes->set((string) $key, $val);
         }
     }
 
     /**
-     * @param Request $request
-     * @param array   $configurations
-     *
      * @throws RpcInvalidParamsException
      */
     private function applyConfigurations(Request $request, array $configurations)
@@ -143,7 +126,7 @@ class RpcParamConverterListener
         $params = $rpcRequest->getParams();
 
         foreach ($params as $key => $val) {
-            $params[$key] = $request->attributes->get((string)$key, $params[$key]);
+            $params[$key] = $request->attributes->get((string) $key, $params[$key]);
         }
 
         $rpcRequest->setParams($params);
