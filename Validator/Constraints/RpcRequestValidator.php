@@ -12,8 +12,7 @@ use Symfony\Component\Validator\ConstraintValidator;
 class RpcRequestValidator extends ConstraintValidator
 {
     /**
-     * @param mixed      $request
-     * @param Constraint $constraint
+     * @param mixed $request
      */
     public function validate($request, Constraint $constraint)
     {

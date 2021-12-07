@@ -10,7 +10,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class RpcBeforeMethodEvent extends Event
 {
-    const NAME = 'nanofelis_json_rpc.before_method';
+    public const NAME = 'nanofelis_json_rpc.before_method';
 
     /**
      * @var RpcRequest
@@ -24,9 +24,6 @@ class RpcBeforeMethodEvent extends Event
 
     /**
      * RpcBeforeMethodEvent constructor.
-     *
-     * @param RpcRequest        $rpcRequest
-     * @param ServiceDescriptor $serviceDescriptor
      */
     public function __construct(RpcRequest $rpcRequest, ServiceDescriptor $serviceDescriptor)
     {
@@ -34,17 +31,11 @@ class RpcBeforeMethodEvent extends Event
         $this->serviceDescriptor = $serviceDescriptor;
     }
 
-    /**
-     * @return RpcRequest
-     */
     public function getRpcRequest(): RpcRequest
     {
         return $this->rpcRequest;
     }
 
-    /**
-     * @return ServiceDescriptor
-     */
     public function getServiceDescriptor(): ServiceDescriptor
     {
         return $this->serviceDescriptor;

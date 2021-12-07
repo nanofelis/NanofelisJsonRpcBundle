@@ -43,9 +43,7 @@ class RpcRequestHandlerTest extends TestCase
     /**
      * @dataProvider provideRpcRequest
      *
-     * @param RpcRequest            $rpcRequest
-     * @param null                  $expectedResult
-     * @param RpcResponseError|null $expectedError
+     * @param null $expectedResult
      */
     public function testHandle(RpcRequest $rpcRequest, $expectedResult = null, RpcResponseError $expectedError = null)
     {
@@ -58,9 +56,6 @@ class RpcRequestHandlerTest extends TestCase
         $this->requestHandler->handle($rpcRequest);
     }
 
-    /**
-     * @return \Generator
-     */
     public function provideRpcRequest(): \Generator
     {
         $badTypeRpcRequest = new RpcRequest();

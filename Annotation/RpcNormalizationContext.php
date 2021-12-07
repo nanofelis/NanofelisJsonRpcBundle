@@ -18,17 +18,11 @@ class RpcNormalizationContext extends ConfigurationAnnotation
      */
     private $contexts;
 
-    /**
-     * @return array
-     */
     public function getContexts(): array
     {
         return $this->contexts;
     }
 
-    /**
-     * @param array $context
-     */
     public function setContexts(array $context): void
     {
         $this->contexts = $context;
@@ -36,8 +30,6 @@ class RpcNormalizationContext extends ConfigurationAnnotation
 
     /**
      * Returns the alias name for an annotated configuration.
-     *
-     * @return string
      */
     public function getAliasName(): string
     {
@@ -46,8 +38,6 @@ class RpcNormalizationContext extends ConfigurationAnnotation
 
     /**
      * Returns whether multiple annotations of this type are allowed.
-     *
-     * @return bool
      */
     public function allowArray(): bool
     {

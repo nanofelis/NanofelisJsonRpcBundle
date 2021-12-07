@@ -9,7 +9,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class RpcBeforeResponseEvent extends Event
 {
-    const NAME = 'nanofelis_json_rpc.before_response';
+    public const NAME = 'nanofelis_json_rpc.before_response';
 
     /**
      * @var RpcRequest
@@ -18,17 +18,12 @@ class RpcBeforeResponseEvent extends Event
 
     /**
      * RpcBeforeResponseEvent constructor.
-     *
-     * @param RpcRequest $rpcRequest
      */
     public function __construct(RpcRequest $rpcRequest)
     {
         $this->rpcRequest = $rpcRequest;
     }
 
-    /**
-     * @return RpcRequest
-     */
     public function getRpcRequest(): RpcRequest
     {
         return $this->rpcRequest;

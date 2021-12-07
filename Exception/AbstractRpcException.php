@@ -8,13 +8,13 @@ use Throwable;
 
 abstract class AbstractRpcException extends \Exception implements RpcDataExceptionInterface
 {
-    const PARSE = -32700;
-    const INVALID_REQUEST = -32600;
-    const METHOD_NOT_FOUND = -32601;
-    const INVALID_PARAMS = -32602;
-    const INTERNAL = -32603;
+    public const PARSE = -32700;
+    public const INVALID_REQUEST = -32600;
+    public const METHOD_NOT_FOUND = -32601;
+    public const INVALID_PARAMS = -32602;
+    public const INTERNAL = -32603;
 
-    const MESSAGES = [
+    public const MESSAGES = [
         self::PARSE => 'invalid json',
         self::INVALID_REQUEST => 'invalid json-rpc payload',
         self::METHOD_NOT_FOUND => 'method not found',
@@ -36,17 +36,11 @@ abstract class AbstractRpcException extends \Exception implements RpcDataExcepti
         parent::__construct($message, $code, $previous);
     }
 
-    /**
-     * @return array|null
-     */
     public function getData(): ?array
     {
         return $this->data;
     }
 
-    /**
-     * @param array|null $data
-     */
     public function setData(?array $data): void
     {
         $this->data = $data;

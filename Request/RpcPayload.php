@@ -24,25 +24,16 @@ class RpcPayload
         return $this->rpcRequests;
     }
 
-    /**
-     * @param RpcRequest $rpcRequest
-     */
     public function addRpcRequest(RpcRequest $rpcRequest): void
     {
         $this->rpcRequests[] = $rpcRequest;
     }
 
-    /**
-     * @return bool
-     */
     public function isBatch(): bool
     {
         return $this->isBatch;
     }
 
-    /**
-     * @param bool $isBatch
-     */
     public function setIsBatch(bool $isBatch): void
     {
         $this->isBatch = $isBatch;
