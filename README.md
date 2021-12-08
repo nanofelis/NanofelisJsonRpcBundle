@@ -80,7 +80,7 @@ Usage
 
 Simply Tag the services you want to expose and send a json-rpc payload to the RPC endpoint.
 
-The method key must follow the convention  `{className with first letter lower cased}.{method}`
+The method parameter must follow the convention `{serviceKey}.{method}`
  
 ```yaml
 # config/services.yaml
@@ -93,8 +93,15 @@ App\RpcServices:
 ```php
 namespace App\RpcServices;
 
-class MyService 
+use Nanofelis\Bundle\JsonRpcBundle\Service\AbstractRpcService;
+
+class MyService extends AbstractRpcService
 {
+    public static function getServiceKey(): string
+    {
+        return 'myService';
+    }
+    
     function add(int $a, int $b): int
     {
         return $a + $b;
