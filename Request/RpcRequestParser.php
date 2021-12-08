@@ -7,32 +7,33 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcParseException;
+use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest as RpcRequestObject;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\OptionsResolver\Exception\ExceptionInterface as OptionResolverException;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RpcRequestParser
 {
-    /**
-     * @var ValidatorInterface
-     */
-    private $validator;
+    private Serializer $serializer;
 
-    /**
-     * @var Serializer
-     */
-    private $serializer;
+    private OptionsResolver $rpcResolver;
 
-    /**
-     * RpcRequestParser constructor.
-     */
-    public function __construct(ValidatorInterface $validator)
+    public function __construct()
     {
-        $this->validator = $validator;
         $this->serializer = new Serializer([new GetSetMethodNormalizer()]);
+        $this->rpcResolver = (new OptionsResolver())
+            ->setRequired(['jsonrpc', 'method'])
+            ->setDefined(['id'])
+            ->setDefined(['params'])
+            ->setAllowedValues('jsonrpc', RpcRequestObject::JSON_RPC_VERSION)
+            ->setAllowedTypes('method', 'string')
+            ->setAllowedValues('method', fn ($value) => 1 === preg_match('/^\w+\.\w+$/', $value))
+            ->setAllowedTypes('id', ['string', 'int'])
+            ->setAllowedTypes('params', ['array']);
     }
 
     public function parse(Request $request): RpcPayload
@@ -47,30 +48,22 @@ class RpcRequestParser
     }
 
     /**
-     * @return mixed
-     *
      * @throws RpcParseException
      * @throws RpcInvalidRequestException
      */
-    private function getContent(Request $request)
+    private function getContent(Request $request): mixed
     {
-        if (Request::METHOD_POST === $request->getMethod()) {
-            return $this->getPostData($request);
-        }
-
-        if (Request::METHOD_GET === $request->getMethod()) {
-            return $this->getQueryData($request);
-        }
-
-        throw new RpcInvalidRequestException();
+        return match ($request->getMethod()) {
+            Request::METHOD_POST => $this->getPostData($request),
+            Request::METHOD_GET => $this->getQueryData($request),
+            default => throw new RpcInvalidRequestException()
+        };
     }
 
     /**
-     * @return mixed
-     *
      * @throws RpcParseException
      */
-    private function getPostData(Request $request)
+    private function getPostData(Request $request): mixed
     {
         $data = json_decode((string) $request->getContent(), true);
 
@@ -81,6 +74,9 @@ class RpcRequestParser
         return $data;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     private function getQueryData(Request $request): array
     {
         return $request->query->all();
@@ -90,13 +86,15 @@ class RpcRequestParser
     {
         $payload = new RpcPayload();
         $rpcRequest = new RpcRequest();
-        $rpcRequest->setResponseError(new RpcResponseError($e));
+        $rpcRequest->setResponse(new RpcResponseError($e));
         $payload->addRpcRequest($rpcRequest);
 
         return $payload;
     }
 
     /**
+     * @param array<string|int,mixed> $data
+     *
      * @throws RpcInvalidRequestException
      */
     private function getRpcPayload(array $data): RpcPayload
@@ -116,6 +114,9 @@ class RpcRequestParser
         return $payload;
     }
 
+    /**
+     * @param array<string|int,mixed> $data
+     */
     private function isBatch(array $data): bool
     {
         $keys = array_keys($data);
@@ -124,6 +125,8 @@ class RpcRequestParser
     }
 
     /**
+     * @param array<string|int,mixed> $data
+     *
      * @throws RpcInvalidRequestException
      */
     private function getRpcRequest(array $data): RpcRequest
@@ -131,12 +134,14 @@ class RpcRequestParser
         try {
             /** @var RpcRequest $rpcRequest */
             $rpcRequest = $this->serializer->denormalize($data, RpcRequest::class);
-        } catch (ExceptionInterface|\TypeError $e) {
+        } catch (ExceptionInterface) {
             throw new RpcInvalidRequestException();
         }
 
-        if (\count($this->validator->validate($rpcRequest)) > 0) {
-            $rpcRequest->setResponseError(new RpcResponseError(new RpcInvalidRequestException(), $rpcRequest->getId()));
+        try {
+            $this->rpcResolver->resolve($data);
+        } catch (OptionResolverException $e) {
+            $rpcRequest->setResponse(new RpcResponseError(new RpcInvalidRequestException(), $rpcRequest->getId()));
 
             return $rpcRequest;
         }

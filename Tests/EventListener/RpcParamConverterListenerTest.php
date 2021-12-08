@@ -19,15 +19,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class RpcParamConverterListenerTest extends TestCase
 {
-    /**
-     * @var Request
-     */
-    private $request;
+    private Request $request;
 
-    /**
-     * @var RpcParamConverterListener
-     */
-    private $subscriber;
+    private RpcParamConverterListener $subscriber;
 
     protected function setUp(): void
     {

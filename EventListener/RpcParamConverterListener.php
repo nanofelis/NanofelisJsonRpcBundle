@@ -15,23 +15,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class RpcParamConverterListener
 {
-    /**
-     * @var ParamConverterManager
-     */
-    private $converterManager;
-
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
-     * RpcRequestListener constructor.
-     */
-    public function __construct(RequestStack $requestStack, ParamConverterManager $converterManager)
+    public function __construct(private RequestStack $requestStack, private ParamConverterManager $converterManager)
     {
-        $this->converterManager = $converterManager;
-        $this->requestStack = $requestStack;
     }
 
     /**
@@ -54,6 +39,9 @@ class RpcParamConverterListener
         $this->mergeParams($rpcRequest, $request);
     }
 
+    /**
+     * @return array<string,ParamConverter|null>
+     */
     private function getParamsAutoConfigurations(ServiceDescriptor $serviceDescriptor, Request $request): array
     {
         $configurations = [];
@@ -66,15 +54,15 @@ class RpcParamConverterListener
         }
 
         foreach ($reflection->getParameters() as $param) {
-            if ($param->getClass() && $param->getClass()->isInstance($request)) {
+            $type = $param->getType();
+            $class = $this->getParamClassByType($type);
+            if (null !== $class && $request instanceof $class) {
                 continue;
             }
 
             $name = $param->getName();
-            $class = $param->getClass();
-            $hasType = method_exists('ReflectionParameter', 'getType') && $param->hasType();
 
-            if ($class || $hasType) {
+            if ($type) {
                 if (!isset($configurations[$name])) {
                     $configuration = new ParamConverter([]);
                     $configuration->setName($name);
@@ -82,17 +70,33 @@ class RpcParamConverterListener
                     $configurations[$name] = $configuration;
                 }
 
-                if ($class && null === $configurations[$name]->getClass()) {
-                    $configurations[$name]->setClass($class->getName());
+                /* @phpstan-ignore-next-line */
+                if (null !== $class && null === $configurations[$name]->getClass()) {
+                    $configurations[$name]->setClass($class);
                 }
             }
 
             if (isset($configurations[$name])) {
-                $configurations[$name]->setIsOptional($param->isOptional() || $param->isDefaultValueAvailable() || $hasType && $param->getType()->allowsNull());
+                $configurations[$name]->setIsOptional($param->isOptional() || $param->isDefaultValueAvailable() || ($type && $type->allowsNull()));
             }
         }
 
         return $configurations;
+    }
+
+    private function getParamClassByType(?\ReflectionType $type): ?string
+    {
+        if (null === $type) {
+            return null;
+        }
+
+        foreach ($type instanceof \ReflectionUnionType ? $type->getTypes() : [$type] as $type) {
+            if (!$type->isBuiltin()) {
+                return $type->getName();
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -110,9 +114,11 @@ class RpcParamConverterListener
     }
 
     /**
+     * @param array<string,ParamConverter|null> $configurations
+     *
      * @throws RpcInvalidParamsException
      */
-    private function applyConfigurations(Request $request, array $configurations)
+    private function applyConfigurations(Request $request, array $configurations): void
     {
         try {
             $this->converterManager->apply($request, $configurations);
@@ -126,7 +132,7 @@ class RpcParamConverterListener
         $params = $rpcRequest->getParams();
 
         foreach ($params as $key => $val) {
-            $params[$key] = $request->attributes->get((string) $key, $params[$key]);
+            $params[$key] = $request->attributes->get((string) $key, $val);
         }
 
         $rpcRequest->setParams($params);

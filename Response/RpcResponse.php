@@ -9,27 +9,15 @@ use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 class RpcResponse implements RpcResponseInterface
 {
     /**
-     * @var mixed
-     */
-    private $data;
-
-    /**
-     * @var mixed|null
-     */
-    private $id;
-
-    /**
      * RpcResponse constructor.
-     *
-     * @param mixed      $data
-     * @param mixed|null $id
      */
-    public function __construct($data, $id = null)
+    public function __construct(private mixed $data, private mixed $id = null)
     {
-        $this->data = $data;
-        $this->id = $id;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getContent(): array
     {
         return [
@@ -39,18 +27,12 @@ class RpcResponse implements RpcResponseInterface
         ];
     }
 
-    /**
-     * @return mixed
-     */
-    public function getData()
+    public function getData(): mixed
     {
         return $this->data;
     }
 
-    /**
-     * @param mixed $data
-     */
-    public function setData($data): void
+    public function setData(mixed $data): void
     {
         $this->data = $data;
     }

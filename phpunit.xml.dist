@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit bootstrap="./vendor/autoload.php" colors="true">
-    <php>
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[direct]=0"/>
-        <env name="SYMFONY_PHPUNIT_VERSION" value="8.0" />
-    </php>
-    <testsuites>
-        <testsuite name="NanofelisJsonRpcBundle">
-            <directory suffix="Test.php">./Tests</directory>
-        </testsuite>
-    </testsuites>
-    <filter>
-        <whitelist>
-            <directory>./</directory>
-            <exclude>
-                <directory>./Resources</directory>
-                <directory>./Tests</directory>
-                <directory>./vendor</directory>
-                <directory>./var</directory>
-            </exclude>
-        </whitelist>
-    </filter>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="./vendor/autoload.php" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage>
+    <include>
+      <directory>./</directory>
+    </include>
+    <exclude>
+      <directory>./Resources</directory>
+      <directory>./Tests</directory>
+      <directory>./vendor</directory>
+      <directory>./var</directory>
+    </exclude>
+  </coverage>
+  <php>
+    <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[direct]=0"/>
+  </php>
+  <testsuites>
+    <testsuite name="NanofelisJsonRpcBundle">
+      <directory suffix="Test.php">./Tests</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>

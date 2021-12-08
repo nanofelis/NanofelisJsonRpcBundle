@@ -10,26 +10,15 @@ use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 class RpcResponseError implements RpcResponseInterface
 {
     /**
-     * @var AbstractRpcException
-     */
-    private $rpcException;
-
-    /**
-     * @var mixed|null
-     */
-    private $id;
-
-    /**
      * RpcResponseError constructor.
-     *
-     * @param mixed|null $id
      */
-    public function __construct(AbstractRpcException $rpcException, $id = null)
+    public function __construct(private AbstractRpcException $rpcException, private mixed $id = null)
     {
-        $this->rpcException = $rpcException;
-        $this->id = $id;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getContent(): array
     {
         return [

@@ -10,14 +10,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ConfigurationAnnotation;
 
 class ServiceConfigLoader
 {
-    /**
-     * @var Reader
-     */
-    private $reader;
-
-    public function __construct(Reader $reader)
+    public function __construct(private Reader $reader)
     {
-        $this->reader = $reader;
     }
 
     public function loadConfig(ServiceDescriptor $descriptor): void
@@ -28,7 +22,7 @@ class ServiceConfigLoader
     }
 
     /**
-     * @param Annotation[] $annotations
+     * @param array<int,Annotation|ConfigurationAnnotation> $annotations
      */
     private function load(ServiceDescriptor $serviceDescriptor, array $annotations): void
     {

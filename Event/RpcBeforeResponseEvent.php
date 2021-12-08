@@ -12,16 +12,10 @@ class RpcBeforeResponseEvent extends Event
     public const NAME = 'nanofelis_json_rpc.before_response';
 
     /**
-     * @var RpcRequest
-     */
-    private $rpcRequest;
-
-    /**
      * RpcBeforeResponseEvent constructor.
      */
-    public function __construct(RpcRequest $rpcRequest)
+    public function __construct(private RpcRequest $rpcRequest)
     {
-        $this->rpcRequest = $rpcRequest;
     }
 
     public function getRpcRequest(): RpcRequest

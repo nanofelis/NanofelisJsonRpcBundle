@@ -15,8 +15,8 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                php: [7.4]
-                symfony: [^4.0, ^5.0]
+                php: [8.0]
+                symfony: [^5.4, 6.0]
 
         steps:
             - name: Checkout code
@@ -51,7 +51,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: 7.4
+                  php-version: 8.0
                   coverage: none
 
             - name: Install dependencies
@@ -73,13 +73,13 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: 7.4
+                  php-version: 8.0
                   coverage: none
 
             - name: Validate composer.json
               run: composer validate --strict --no-check-lock
 
-    cs-check:
+    code-check:
         name: PHP Coding Standards
         runs-on: ubuntu-latest
         steps:
@@ -89,7 +89,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: 7.4
+                  php-version: 8.0
                   coverage: none
 
             - name: Install dependencies
@@ -99,3 +99,6 @@ jobs:
 
             - name: Check CS
               run: vendor/bin/php-cs-fixer fix -v --dry-run --diff
+
+            - name: Check PHPStan
+              run: vendor/bin/phpstan -n

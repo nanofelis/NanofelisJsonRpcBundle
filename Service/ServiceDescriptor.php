@@ -9,38 +9,28 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ConfigurationAnnotation;
 
 class ServiceDescriptor
 {
-    /**
-     * @var object
-     */
-    private $service;
-
-    /**
-     * @var \ReflectionMethod
-     */
-    private $methodReflection;
+    private \ReflectionMethod $methodReflection;
 
     /**
      * @var ConfigurationAnnotation[]|ConfigurationAnnotation[][]
      */
-    private $methodConfigurations = [];
+    private array $methodConfigurations = [];
 
     /**
      * ServiceDescriptor constructor.
      *
      * @throws RpcMethodNotFoundException
      */
-    public function __construct(object $service, string $method)
+    public function __construct(private object $service, string $method)
     {
-        $this->service = $service;
-
         try {
-            $this->methodReflection = new \ReflectionMethod(\get_class($service), $method);
-        } catch (\ReflectionException $e) {
+            $this->methodReflection = new \ReflectionMethod($service::class, $method);
+        } catch (\ReflectionException) {
             throw new RpcMethodNotFoundException();
         }
     }
 
-    public function getMethodReflection()
+    public function getMethodReflection(): \ReflectionMethod
     {
         return $this->methodReflection;
     }
@@ -57,7 +47,7 @@ class ServiceDescriptor
 
     public function getServiceClass(): string
     {
-        return \get_class($this->service);
+        return $this->service::class;
     }
 
     /**

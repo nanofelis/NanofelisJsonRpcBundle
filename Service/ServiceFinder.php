@@ -10,22 +10,10 @@ use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 class ServiceFinder
 {
     /**
-     * @var \Traversable
+     * @param \Traversable<string,AbstractRpcService> $rpcServices
      */
-    private $rpcServices;
-
-    /**
-     * @var ServiceConfigLoader
-     */
-    private $serviceConfigLoader;
-
-    /**
-     * ServiceFinder constructor.
-     */
-    public function __construct(\Traversable $rpcServices, ServiceConfigLoader $serviceConfigLoader)
+    public function __construct(private \Traversable $rpcServices, private ServiceConfigLoader $serviceConfigLoader)
     {
-        $this->rpcServices = $rpcServices;
-        $this->serviceConfigLoader = $serviceConfigLoader;
     }
 
     /**
@@ -33,27 +21,15 @@ class ServiceFinder
      */
     public function find(RpcRequest $rpcRequest): ServiceDescriptor
     {
-        $service = $this->search($rpcRequest->getServiceKey());
-        $descriptor = new ServiceDescriptor($service, $rpcRequest->getMethodKey());
+        $rpcServices = iterator_to_array($this->rpcServices);
 
+        if (!$service = ($rpcServices[$rpcRequest->getServiceKey()] ?? null)) {
+            throw new RpcMethodNotFoundException();
+        }
+
+        $descriptor = new ServiceDescriptor($service, $rpcRequest->getMethodKey());
         $this->serviceConfigLoader->loadConfig($descriptor);
 
         return $descriptor;
-    }
-
-    /**
-     * @throws RpcMethodNotFoundException
-     */
-    private function search(string $serviceKey): object
-    {
-        foreach ($this->rpcServices as $service) {
-            $class = explode('\\', \get_class($service));
-
-            if (end($class) === ucfirst($serviceKey)) {
-                return $service;
-            }
-        }
-
-        throw new RpcMethodNotFoundException();
     }
 }

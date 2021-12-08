@@ -27,7 +27,7 @@ class TestKernel extends Kernel implements CompilerPassInterface
      *
      * @return iterable|BundleInterface[] An iterable of bundle instances
      */
-    public function registerBundles()
+    public function registerBundles(): iterable
     {
         return [
             new FrameworkBundle(),
@@ -47,9 +47,6 @@ class TestKernel extends Kernel implements CompilerPassInterface
             'test' => true,
             'serializer' => [
                 'enabled' => true,
-            ],
-            'validation' => [
-                'enable_annotations' => false,
             ],
         ]);
         $c->loadFromExtension('sensio_framework_extra', [

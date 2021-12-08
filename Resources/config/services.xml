@@ -18,7 +18,6 @@
 
         <service id="nanofelis_json_rpc.request.parser" class="Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestParser"
                  public="false">
-            <argument type="service" id="validator"/>
         </service>
 
         <service id="nanofelis_json_rpc.request.handler"
@@ -30,7 +29,7 @@
 
         <service id="nanofelis_json_rpc.service.finder" class="Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder"
                  public="false">
-            <argument type="tagged" tag="nanofelis_json_rpc"/>
+            <argument type="tagged" tag="nanofelis_json_rpc" default-index-method="getServiceKey"/>
             <argument type="service" id="nanofelis_bundle_json_rpc.service.config_loader" />
         </service>
 

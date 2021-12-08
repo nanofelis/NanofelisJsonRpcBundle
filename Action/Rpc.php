@@ -10,20 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class Rpc
 {
-    /**
-     * @var RpcHandler
-     */
-    private $rpcHandler;
-
-    /**
-     * @var RpcResponder
-     */
-    private $responder;
-
-    public function __construct(RpcHandler $rpcHandler, RpcResponder $responder)
+    public function __construct(private RpcHandler $rpcHandler, private RpcResponder $responder)
     {
-        $this->rpcHandler = $rpcHandler;
-        $this->responder = $responder;
     }
 
     public function __invoke(Request $request): JsonResponse

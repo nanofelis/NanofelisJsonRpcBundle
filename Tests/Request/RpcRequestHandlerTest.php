@@ -19,19 +19,13 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RpcRequestHandlerTest extends TestCase
 {
-    /**
-     * @var RpcRequestHandler
-     */
-    private $requestHandler;
+    private RpcRequestHandler $requestHandler;
 
-    /**
-     * @var NormalizerInterface|MockObject
-     */
-    private $normalizer;
+    private NormalizerInterface|MockObject $normalizer;
 
     protected function setUp(): void
     {
-        $services = new \ArrayIterator([new MockService()]);
+        $services = new \ArrayIterator(['mockService' => new MockService()]);
         $serviceConfigLoader = $this->createMock(ServiceConfigLoader::class);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
@@ -48,7 +42,7 @@ class RpcRequestHandlerTest extends TestCase
     public function testHandle(RpcRequest $rpcRequest, $expectedResult = null, RpcResponseError $expectedError = null)
     {
         if ($expectedError) {
-            $this->assertSame($expectedResult, $rpcRequest->getResponseError());
+            $this->assertSame($expectedResult, $rpcRequest->getResponse());
         } else {
             $this->normalizer->expects($this->once())->method('normalize')->with($expectedResult, null, []);
         }

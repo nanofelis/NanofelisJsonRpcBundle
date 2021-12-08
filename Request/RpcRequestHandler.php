@@ -21,34 +21,13 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RpcRequestHandler
 {
-    /**
-     * @var ServiceFinder
-     */
-    private $serviceFinder;
-
-    /**
-     * @var NormalizerInterface
-     */
-    private $normalizer;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    public function __construct(
-        ServiceFinder $serviceFinder,
-        NormalizerInterface $normalizer,
-        EventDispatcherInterface $eventDispatcher
-    ) {
-        $this->serviceFinder = $serviceFinder;
-        $this->normalizer = $normalizer;
-        $this->eventDispatcher = $eventDispatcher;
+    public function __construct(private ServiceFinder $serviceFinder, private NormalizerInterface $normalizer, private EventDispatcherInterface $eventDispatcher)
+    {
     }
 
     public function handle(RpcRequest $rpcRequest): void
     {
-        if ($rpcRequest->getResponseError()) {
+        if ($rpcRequest->getResponse()) {
             return;
         }
 
@@ -57,40 +36,39 @@ class RpcRequestHandler
             $rpcRequest->setResponse(new RpcResponse($result, $rpcRequest->getId()));
         } catch (\Throwable $e) {
             $e = $this->castToRpcException($e);
-            $rpcRequest->setResponseError(new RpcResponseError($e, $rpcRequest->getId()));
+            $rpcRequest->setResponse(new RpcResponseError($e, $rpcRequest->getId()));
         }
     }
 
     /**
-     * @return array|bool|float|int|string
-     *
      * @throws RpcMethodNotFoundException
      * @throws RpcInvalidParamsException
      * @throws ExceptionInterface
      */
-    private function execute(RpcRequest $rpcRequest)
+    private function execute(RpcRequest $rpcRequest): mixed
     {
         $serviceDescriptor = $this->serviceFinder->find($rpcRequest);
 
         $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 
-        $service = $serviceDescriptor->getService();
         $method = $serviceDescriptor->getMethodName();
         $params = $this->getOrderedParams($serviceDescriptor, $rpcRequest);
 
         try {
-            $result = $service->$method(...$params);
+            $result = $serviceDescriptor->getService()->$method(...$params);
         } catch (\TypeError $e) {
             if ($this->isInvalidParamsException($e, $serviceDescriptor)) {
                 throw new RpcInvalidParamsException();
-            } else {
-                throw $e;
             }
+            throw $e;
         }
 
         return $this->normalizeResult($result, $serviceDescriptor);
     }
 
+    /**
+     * @return array<int,mixed>
+     */
     private function getOrderedParams(ServiceDescriptor $serviceDescriptor, RpcRequest $rpcRequest): array
     {
         $params = $rpcRequest->getParams() ?: [];
@@ -129,13 +107,9 @@ class RpcRequestHandler
     }
 
     /**
-     * @param mixed $result
-     *
-     * @return mixed
-     *
      * @throws ExceptionInterface
      */
-    private function normalizeResult($result, ServiceDescriptor $serviceDescriptor)
+    private function normalizeResult(mixed $result, ServiceDescriptor $serviceDescriptor): mixed
     {
         /** @var RpcNormalizationContext|null $normalizationConfig */
         $normalizationConfig = $serviceDescriptor->getMethodConfigurations()['_rpc_normalization_context'] ?? null;

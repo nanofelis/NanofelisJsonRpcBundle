@@ -12,24 +12,10 @@ use Symfony\Component\HttpFoundation\Request;
 class RpcHandler
 {
     /**
-     * @var RpcRequestParser
-     */
-    private $parser;
-
-    /**
-     * @var RpcRequestHandler
-     */
-    private $rpcRequestHandler;
-
-    /**
      * RpcHandler constructor.
      */
-    public function __construct(
-        RpcRequestParser $parser,
-        RpcRequestHandler $rpcRequestHandler
-    ) {
-        $this->parser = $parser;
-        $this->rpcRequestHandler = $rpcRequestHandler;
+    public function __construct(private RpcRequestParser $parser, private RpcRequestHandler $rpcRequestHandler)
+    {
     }
 
     public function createRpcPayload(Request $request): RpcPayload

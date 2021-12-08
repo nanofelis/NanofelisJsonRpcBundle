@@ -15,15 +15,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class ServiceConfigLoaderTest extends TestCase
 {
-    /**
-     * @var AnnotationReader|MockObject
-     */
-    private $annotationReader;
+    private AnnotationReader|MockObject $annotationReader;
 
-    /**
-     * @var ServiceConfigLoader
-     */
-    private $configLoader;
+    private ServiceConfigLoader $configLoader;
 
     protected function setUp(): void
     {
