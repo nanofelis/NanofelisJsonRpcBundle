@@ -40,7 +40,7 @@ class MockService extends AbstractRpcService
     /**
      * @RpcNormalizationContext(contexts={"test"})
      */
-    public function returnObject()
+    public function returnObject(): object
     {
         $object = new class() {
             public $prop = 'test';

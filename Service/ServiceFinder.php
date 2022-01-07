@@ -32,4 +32,12 @@ class ServiceFinder
 
         return $descriptor;
     }
+
+    /**
+     * @return \Traversable<string,AbstractRpcService>
+     */
+    public function getRpcServices(): \Traversable
+    {
+        return $this->rpcServices;
+    }
 }

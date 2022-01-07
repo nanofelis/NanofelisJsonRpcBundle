@@ -16,7 +16,8 @@
         "symfony/event-dispatcher": "^5.4|^6.0",
         "symfony/options-resolver": "^5.4|^6.0",
         "symfony/property-access": "^5.4|^6.0",
-        "symfony/serializer": "^5.4|^6.0"
+        "symfony/serializer": "^5.4|^6.0",
+        "symfony/twig-bundle": "^5.4|^6.0"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^6.0",

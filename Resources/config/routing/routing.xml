@@ -9,4 +9,7 @@
         <default key="_controller">nanofelis_json_rpc.action.rpc</default>
     </route>
 
+    <route id="nanofelis_json_rpc.doc" path="/doc" methods="GET">
+        <default key="_controller">nanofelis_json_rpc.action.doc</default>
+    </route>
 </routes>
