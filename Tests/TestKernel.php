@@ -9,6 +9,7 @@ use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -32,6 +33,7 @@ class TestKernel extends Kernel implements CompilerPassInterface
         return [
             new FrameworkBundle(),
             new SensioFrameworkExtraBundle(),
+            new TwigBundle(),
             new NanofelisJsonRpcBundle(),
         ];
     }

@@ -16,20 +16,15 @@ class ServiceConfigLoader
 
     public function loadConfig(ServiceDescriptor $descriptor): void
     {
+        /**
+         * @param array<int,Annotation|ConfigurationAnnotation> $annotations
+         */
         $annotations = $this->reader->getMethodAnnotations($descriptor->getMethodReflection());
 
-        $this->load($descriptor, $annotations);
-    }
-
-    /**
-     * @param array<int,Annotation|ConfigurationAnnotation> $annotations
-     */
-    private function load(ServiceDescriptor $serviceDescriptor, array $annotations): void
-    {
-        array_walk($annotations, function ($annotation) use ($serviceDescriptor) {
+        foreach ($annotations as $annotation) {
             if ($annotation instanceof ConfigurationAnnotation) {
-                $serviceDescriptor->addMethodConfiguration($annotation);
+                $descriptor->addMethodConfiguration($annotation);
             }
-        });
+        }
     }
 }
