@@ -73,6 +73,11 @@ rpc:
     path: /
     controller: nanofelis_json_rpc.action.rpc
     methods: GET|POST
+
+rpc_doc:
+    path: /doc
+    controller: nanofelis_json_rpc.action.doc
+    methods: GET
 ```  
 
 Usage
@@ -256,6 +261,12 @@ public function onRpcBeforeResponse(RpcBeforeResponseEvent $event)
     $rpcResponse = $rpcRequest->getReponse() ?: $rpcRequest->getReponseError() 
 }
 ```
+
+
+Documentation
+-----------
+The bundle generates a documentation page of all registered RPC services on the route `rpc_doc` 
+
 
 GET Support
 -----------

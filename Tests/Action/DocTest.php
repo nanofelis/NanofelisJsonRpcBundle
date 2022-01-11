@@ -23,7 +23,7 @@ class DocTest extends WebTestCase
 
     public function testDoc()
     {
-        $crawler = self::$client->request('GET', $this->router->generate('nanofelis_json_rpc.doc'), [], [], [], '@');
+        $crawler = self::$client->request('GET', $this->router->generate('nanofelis_json_rpc.doc'));
 
         $this->assertTrue(self::$client->getResponse()->isSuccessful());
         $this->assertSame(MockService::getServiceKey(), $crawler->filterXPath('//a')->text());
