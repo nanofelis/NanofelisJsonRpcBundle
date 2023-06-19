@@ -58,9 +58,9 @@ class TestKernel extends Kernel implements CompilerPassInterface
         $container->register(MockService::class, MockService::class)
             ->addTag('nanofelis_json_rpc')
             ->setPublic(true);
-        $container->register('argument_resolver.date', DateTimeValueResolver::class)
-            ->addTag('controller.argument_value_resolver', ['name' => 'argument_resolver.date'])
-            ->setPublic(true);
+//        $container->register('argument_resolver.date', DateTimeValueResolver::class)
+//            ->addTag('controller.argument_value_resolver', ['name' => 'argument_resolver.date'])
+//            ->setPublic(true);
     }
 
     /**
