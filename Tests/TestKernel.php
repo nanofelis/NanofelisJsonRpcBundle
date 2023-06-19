@@ -13,6 +13,7 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver\DateTimeValueResolver;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\Loader\PhpFileLoader as RoutingPhpFileLoader;
@@ -36,26 +37,29 @@ class TestKernel extends Kernel implements CompilerPassInterface
         ];
     }
 
-    protected function configureRoutes(RoutingConfigurator $routes)
+    protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import(__DIR__.'/../Resources/config/routing/routing.xml');
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
-        $c->loadFromExtension('framework', [
+        $container->loadFromExtension('framework', [
             'test' => true,
             'serializer' => [
                 'enabled' => true,
             ],
         ]);
-        $c->setParameter('kernel.secret', 'fake');
+        $container->setParameter('kernel.secret', 'fake');
     }
 
-    public function process(ContainerBuilder $c)
+    public function process(ContainerBuilder $container): void
     {
-        $c->register(MockService::class, MockService::class)
+        $container->register(MockService::class, MockService::class)
             ->addTag('nanofelis_json_rpc')
+            ->setPublic(true);
+        $container->register('argument_resolver.date', DateTimeValueResolver::class)
+            ->addTag('controller.argument_value_resolver', ['name' => 'argument_resolver.date'])
             ->setPublic(true);
     }
 

@@ -15,14 +15,26 @@ use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RpcRequestHandler
 {
-    public function __construct(private ServiceFinder $serviceFinder, private NormalizerInterface $normalizer, private EventDispatcherInterface $eventDispatcher)
+    public function __construct(
+        private ArgumentResolverInterface $argumentResolver,
+        private ServiceFinder $serviceFinder,
+        private NormalizerInterface $normalizer,
+        private EventDispatcherInterface $eventDispatcher
+    )
     {
     }
 
@@ -52,13 +64,13 @@ class RpcRequestHandler
 
         $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 
-        $method = $serviceDescriptor->getMethodName();
-        $params = $this->getOrderedParams($serviceDescriptor, $rpcRequest);
-
-//        $this->eventDispatcher->dispatch(new ControllerArgumentsEvent($rpcRequest, $serviceDescriptor), ControllerArgumentsEvent::NAME);
+        [$service, $method] = [$serviceDescriptor->getService(), $serviceDescriptor->getMethodName()];
+        $request = Request::create('/');
+        $request->attributes->replace($rpcRequest->getParams());
+        $arguments = $this->argumentResolver->getArguments($request, [$service, $method]);
 
         try {
-            $result = $serviceDescriptor->getService()->$method(...$params);
+            $result = $serviceDescriptor->getService()->$method(...$arguments);
         } catch (\TypeError $e) {
             if ($this->isInvalidParamsException($e, $serviceDescriptor)) {
                 throw new RpcInvalidParamsException();
