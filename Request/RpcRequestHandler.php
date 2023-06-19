@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
-use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
+use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Event\RpcBeforeMethodEvent;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcApplicationException;
@@ -15,6 +15,7 @@ use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -53,6 +54,8 @@ class RpcRequestHandler
 
         $method = $serviceDescriptor->getMethodName();
         $params = $this->getOrderedParams($serviceDescriptor, $rpcRequest);
+
+//        $this->eventDispatcher->dispatch(new ControllerArgumentsEvent($rpcRequest, $serviceDescriptor), ControllerArgumentsEvent::NAME);
 
         try {
             $result = $serviceDescriptor->getService()->$method(...$params);
@@ -112,8 +115,8 @@ class RpcRequestHandler
     private function normalizeResult(mixed $result, ServiceDescriptor $serviceDescriptor): mixed
     {
         /** @var RpcNormalizationContext|null $normalizationConfig */
-        $normalizationConfig = $serviceDescriptor->getMethodConfigurations()['_rpc_normalization_context'] ?? null;
+        $normalizationConfig = $serviceDescriptor->getMethodAttribute(RpcNormalizationContext::class);
 
-        return $this->normalizer->normalize($result, null, $normalizationConfig ? $normalizationConfig->getContexts() : []);
+        return $this->normalizer->normalize($result, null, $normalizationConfig ? $normalizationConfig->contexts : []);
     }
 }

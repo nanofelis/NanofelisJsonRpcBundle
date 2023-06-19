@@ -12,11 +12,6 @@ class ServiceDescriptor
     private \ReflectionMethod $methodReflection;
 
     /**
-     * @var ConfigurationAnnotation[]|ConfigurationAnnotation[][]
-     */
-    private array $methodConfigurations = [];
-
-    /**
      * ServiceDescriptor constructor.
      *
      * @throws RpcMethodNotFoundException
@@ -58,20 +53,8 @@ class ServiceDescriptor
         return $this->methodReflection->getParameters();
     }
 
-    /**
-     * @return ConfigurationAnnotation[]|ConfigurationAnnotation[][]
-     */
-    public function getMethodConfigurations(): array
+    public function getMethodAttribute(string $class): ?\ReflectionAttribute
     {
-        return $this->methodConfigurations;
-    }
-
-    public function addMethodConfiguration(ConfigurationAnnotation $configuration): void
-    {
-        if ($configuration->allowArray()) {
-            $this->methodConfigurations['_'.$configuration->getAliasName()][] = $configuration;
-        } else {
-            $this->methodConfigurations['_'.$configuration->getAliasName()] = $configuration;
-        }
+        return $this->methodReflection->getAttributes($class)[0] ?? null;
     }
 }

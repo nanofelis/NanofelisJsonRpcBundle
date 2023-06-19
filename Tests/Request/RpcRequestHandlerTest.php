@@ -9,7 +9,6 @@ use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestHandler;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
-use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -26,11 +25,10 @@ class RpcRequestHandlerTest extends TestCase
     protected function setUp(): void
     {
         $services = new \ArrayIterator(['mockService' => new MockService()]);
-        $serviceConfigLoader = $this->createMock(ServiceConfigLoader::class);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
 
-        $serviceFinder = new ServiceFinder($services, $serviceConfigLoader);
+        $serviceFinder = new ServiceFinder($services);
         $this->requestHandler = new RpcRequestHandler($serviceFinder, $this->normalizer, $eventDispatcher);
     }
 

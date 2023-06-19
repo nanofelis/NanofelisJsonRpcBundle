@@ -6,7 +6,6 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
-use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -20,7 +19,6 @@ class ServiceFinderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->configLoader = $this->createMock(ServiceConfigLoader::class);
         $this->services = new \ArrayIterator([
             'mockService' => new MockService(),
         ]);
@@ -35,11 +33,9 @@ class ServiceFinderTest extends TestCase
     {
         if ($expectedException) {
             $this->expectException($expectedException);
-        } else {
-            $this->configLoader->expects($this->once())->method('loadConfig');
         }
 
-        $serviceLocator = new ServiceFinder($this->services, $this->configLoader);
+        $serviceLocator = new ServiceFinder($this->services);
 
         $this->assertInstanceOf($expectedResult, $serviceLocator->find($payload));
     }

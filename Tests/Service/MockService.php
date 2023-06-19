@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
-use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
+use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Service\AbstractRpcService;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\HttpKernel\Attribute\Cache;
+use Symfony\Component\HttpKernel\Attribute\MapDateTime;
 
 class MockService extends AbstractRpcService
 {
@@ -28,11 +28,8 @@ class MockService extends AbstractRpcService
         return $b;
     }
 
-    /**
-     * @Cache(public=true, maxage=3600)
-     * @ParamConverter("date", options={"format": "Y-m-d"})
-     */
-    public function dateParamConverter(\DateTime $date): string
+    #[Cache(maxage: 3600, public: true)]
+    public function dateParamConverter(#[MapDateTime(format: "y-m-d")] \DateTime $date): string
     {
         return $date->format('d-m-Y');
     }
@@ -42,11 +39,9 @@ class MockService extends AbstractRpcService
      */
     public function returnObject(): object
     {
-        $object = new class() {
+        return new class() {
             public $prop = 'test';
         };
-
-        return $object;
     }
 
     /**

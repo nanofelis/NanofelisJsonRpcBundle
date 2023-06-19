@@ -6,7 +6,6 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests;
 
 use Nanofelis\Bundle\JsonRpcBundle\NanofelisJsonRpcBundle;
 use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
-use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -32,7 +31,6 @@ class TestKernel extends Kernel implements CompilerPassInterface
     {
         return [
             new FrameworkBundle(),
-            new SensioFrameworkExtraBundle(),
             new TwigBundle(),
             new NanofelisJsonRpcBundle(),
         ];
@@ -49,11 +47,6 @@ class TestKernel extends Kernel implements CompilerPassInterface
             'test' => true,
             'serializer' => [
                 'enabled' => true,
-            ],
-        ]);
-        $c->loadFromExtension('sensio_framework_extra', [
-            'router' => [
-                'annotations' => false,
             ],
         ]);
         $c->setParameter('kernel.secret', 'fake');
@@ -78,17 +71,6 @@ class TestKernel extends Kernel implements CompilerPassInterface
         $collection = new RouteCollection();
 
         $configureRoutes = new \ReflectionMethod($this, 'configureRoutes');
-        $configuratorClass = $configureRoutes->getNumberOfParameters() > 0 && ($type = $configureRoutes->getParameters()[0]->getType()) instanceof \ReflectionNamedType && !$type->isBuiltin() ? $type->getName() : null;
-
-        if ($configuratorClass && !is_a(RoutingConfigurator::class, $configuratorClass, true)) {
-            trigger_deprecation('symfony/framework-bundle', '5.1', 'Using type "%s" for argument 1 of method "%s:configureRoutes()" is deprecated, use "%s" instead.', RouteCollectionBuilder::class, self::class, RoutingConfigurator::class);
-
-            $routes = new RouteCollectionBuilder($loader);
-            $this->configureRoutes($routes);
-
-            return $routes->build();
-        }
-
         $configureRoutes->getClosure($this)(new RoutingConfigurator($collection, $kernelLoader, $file, $file, $this->getEnvironment()));
 
         foreach ($collection as $route) {
