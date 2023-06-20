@@ -6,8 +6,8 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Service\AbstractRpcService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\Cache;
-use Symfony\Component\HttpKernel\Attribute\MapDateTime;
 
 class MockService extends AbstractRpcService
 {
@@ -21,17 +21,16 @@ class MockService extends AbstractRpcService
         return $arg1 + $arg2;
     }
 
-    public function testArrayParam(array $b, int $a): array
+    public function arrayParam(array $a, int $b): array
     {
-        $b[] = $a;
+        $a[] = $b;
 
-        return $b;
+        return $a;
     }
 
-    #[Cache(maxage: 3600, public: true)]
-    public function dateParamConverter(#[MapDateTime(format: "y-m-d")] \DateTime $date): string
+    public function requestValueResolver(Request $request): string
     {
-        return $date->format('d-m-Y');
+        return $request->getMethod();
     }
 
     /**

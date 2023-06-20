@@ -66,7 +66,7 @@ class RpcRequestHandler
 
         [$service, $method] = [$serviceDescriptor->getService(), $serviceDescriptor->getMethodName()];
         $request = Request::create('/');
-        $request->attributes->replace($rpcRequest->getParams());
+        $request->attributes->replace($rpcRequest->getParams() ?? []);
         $arguments = $this->argumentResolver->getArguments($request, [$service, $method]);
 
         try {

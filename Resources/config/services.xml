@@ -11,12 +11,6 @@
             <argument type="service" id="nanofelis_json_rpc.response.rpc_responder"/>
         </service>
 
-        <service id="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DateTimeValueResolver"
-                 class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DateTimeValueResolver"
-                 public="false">
-            <tag name="controller.argument_value_resolver" />
-        </service>
-
         <service id="nanofelis_json_rpc.request.parser" class="Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestParser"
                  public="false">
         </service>

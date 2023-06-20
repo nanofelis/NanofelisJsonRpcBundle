@@ -43,6 +43,8 @@ class RpcRequestHandlerTest extends TestCase
      */
     public function testHandle(RpcRequest $rpcRequest, $expectedResult = null, RpcResponseError $expectedError = null)
     {
+        $this->argumentResolver->method('getArguments')->willReturn($rpcRequest->getParams() ?? []);
+
         if ($expectedError) {
             $this->assertSame($expectedResult, $rpcRequest->getResponse());
         } else {
