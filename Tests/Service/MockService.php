@@ -7,7 +7,6 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Service\AbstractRpcService;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Attribute\Cache;
 
 class MockService extends AbstractRpcService
 {
@@ -33,14 +32,10 @@ class MockService extends AbstractRpcService
         return $request->getMethod();
     }
 
-    /**
-     * @RpcNormalizationContext(contexts={"test"})
-     */
-    public function returnObject(): object
+    #[RpcNormalizationContext(["test"])]
+    public function returnObject(): \stdClass
     {
-        return new class() {
-            public $prop = 'test';
-        };
+        return (object) ['prop' => 'test'];
     }
 
     /**

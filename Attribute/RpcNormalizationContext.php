@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Attribute;
 
-#[\Attribute(\Attribute::TARGET_FUNCTION)]
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class RpcNormalizationContext
 {
     /**

@@ -15,6 +15,7 @@ use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
+use PHPStan\BetterReflection\Reflection\ReflectionAttribute;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -126,9 +127,10 @@ class RpcRequestHandler
      */
     private function normalizeResult(mixed $result, ServiceDescriptor $serviceDescriptor): mixed
     {
-        /** @var RpcNormalizationContext|null $normalizationConfig */
+        /** @var ReflectionAttribute|null $normalizationConfig */
         $normalizationConfig = $serviceDescriptor->getMethodAttribute(RpcNormalizationContext::class);
+        $contexts = $normalizationConfig->getArguments()[0] ?? [];
 
-        return $this->normalizer->normalize($result, null, $normalizationConfig ? $normalizationConfig->contexts : []);
+        return $this->normalizer->normalize($result, null, $contexts);
     }
 }
