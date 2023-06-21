@@ -68,7 +68,12 @@ class RpcRequestHandler
         [$service, $method] = [$serviceDescriptor->getService(), $serviceDescriptor->getMethodName()];
         $request = Request::create('/');
         $request->attributes->replace($rpcRequest->getParams() ?? []);
-        $arguments = $this->argumentResolver->getArguments($request, [$service, $method]);
+
+        try {
+            $arguments = $this->argumentResolver->getArguments($request, [$service, $method]);
+        } catch (\Exception) {
+            throw new RpcInvalidParamsException();
+        }
 
         try {
             $result = $serviceDescriptor->getService()->$method(...$arguments);
@@ -80,24 +85,6 @@ class RpcRequestHandler
         }
 
         return $this->normalizeResult($result, $serviceDescriptor);
-    }
-
-    /**
-     * @return array<int,mixed>
-     */
-    private function getOrderedParams(ServiceDescriptor $serviceDescriptor, RpcRequest $rpcRequest): array
-    {
-        $params = $rpcRequest->getParams() ?: [];
-        $orderedParams = [];
-        $reflectionParams = $serviceDescriptor->getMethodParameters();
-
-        foreach ($reflectionParams as $reflectionParam) {
-            if (\array_key_exists($reflectionParam->getName(), $params)) {
-                $orderedParams[] = $params[$reflectionParam->getName()];
-            }
-        }
-
-        return empty($orderedParams) ? array_values($params) : $orderedParams;
     }
 
     private function isInvalidParamsException(\TypeError $e, ServiceDescriptor $serviceDescriptor): bool
@@ -129,7 +116,7 @@ class RpcRequestHandler
     {
         /** @var ReflectionAttribute|null $normalizationConfig */
         $normalizationConfig = $serviceDescriptor->getMethodAttribute(RpcNormalizationContext::class);
-        $contexts = $normalizationConfig->getArguments()[0] ?? [];
+        $contexts = $normalizationConfig?->getArguments()[0] ?? [];
 
         return $this->normalizer->normalize($result, null, $contexts);
     }
