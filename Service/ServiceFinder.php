@@ -12,7 +12,7 @@ class ServiceFinder
     /**
      * @param \Traversable<string,AbstractRpcService> $rpcServices
      */
-    public function __construct(private \Traversable $rpcServices, private ServiceConfigLoader $serviceConfigLoader)
+    public function __construct(private \Traversable $rpcServices)
     {
     }
 
@@ -27,10 +27,7 @@ class ServiceFinder
             throw new RpcMethodNotFoundException();
         }
 
-        $descriptor = new ServiceDescriptor($service, $rpcRequest->getMethodKey());
-        $this->serviceConfigLoader->loadConfig($descriptor);
-
-        return $descriptor;
+        return new ServiceDescriptor($service, $rpcRequest->getMethodKey());
     }
 
     /**

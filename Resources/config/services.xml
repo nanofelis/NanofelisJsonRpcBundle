@@ -17,6 +17,7 @@
 
         <service id="nanofelis_json_rpc.request.handler"
                  class="Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestHandler" public="false">
+            <argument type="service" id="argument_resolver"/>
             <argument type="service" id="nanofelis_json_rpc.service.finder"/>
             <argument type="service" id="serializer"/>
             <argument type="service" id="event_dispatcher"/>
@@ -25,26 +26,12 @@
         <service id="nanofelis_json_rpc.service.finder" class="Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder"
                  public="false">
             <argument type="tagged" tag="nanofelis_json_rpc" default-index-method="getServiceKey"/>
-            <argument type="service" id="nanofelis_bundle_json_rpc.service.config_loader" />
-        </service>
-
-        <service id="nanofelis_bundle_json_rpc.service.config_loader"
-                 class="Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader" public="false">
-            <argument type="service" id="annotations.reader" />
         </service>
 
         <service id="nanofelis_json_rpc.response.rpc_responder" class="Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponder"
                  public="false">
             <argument type="service" id="event_dispatcher"/>
         </service>
-
-        <service id="nanofelis_json_rpc.listener.before_method"
-                 class="Nanofelis\Bundle\JsonRpcBundle\EventListener\RpcParamConverterListener" public="false">
-            <argument type="service" id="request_stack"/>
-            <argument type="service" id="sensio_framework_extra.converter.manager"/>
-            <tag name="kernel.event_listener" event="nanofelis_json_rpc.before_method" method="convertParams" priority="1" />
-        </service>
-
 
         <service id="nanofelis_json_rpc.action.doc" class="Nanofelis\Bundle\JsonRpcBundle\Action\Doc"
                  public="true">

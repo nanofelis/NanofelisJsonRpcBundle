@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 
-use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
+use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Service\AbstractRpcService;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\HttpFoundation\Request;
 
 class MockService extends AbstractRpcService
 {
@@ -21,32 +20,22 @@ class MockService extends AbstractRpcService
         return $arg1 + $arg2;
     }
 
-    public function testArrayParam(array $b, int $a): array
+    public function arrayParam(array $a, int $b): array
     {
-        $b[] = $a;
+        $a[] = $b;
 
-        return $b;
+        return $a;
     }
 
-    /**
-     * @Cache(public=true, maxage=3600)
-     * @ParamConverter("date", options={"format": "Y-m-d"})
-     */
-    public function dateParamConverter(\DateTime $date): string
+    public function requestValueResolver(Request $request): string
     {
-        return $date->format('d-m-Y');
+        return $request->getMethod();
     }
 
-    /**
-     * @RpcNormalizationContext(contexts={"test"})
-     */
-    public function returnObject(): object
+    #[RpcNormalizationContext(["test"])]
+    public function returnObject(): \stdClass
     {
-        $object = new class() {
-            public $prop = 'test';
-        };
-
-        return $object;
+        return (object) ['prop' => 'test'];
     }
 
     /**

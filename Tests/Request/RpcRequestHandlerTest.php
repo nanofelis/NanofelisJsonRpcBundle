@@ -9,12 +9,12 @@ use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\Bundle\JsonRpcBundle\Request\RpcRequestHandler;
 use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
-use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceConfigLoader;
 use Nanofelis\Bundle\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RpcRequestHandlerTest extends TestCase
@@ -23,15 +23,17 @@ class RpcRequestHandlerTest extends TestCase
 
     private NormalizerInterface|MockObject $normalizer;
 
+    private ArgumentResolverInterface|MockObject $argumentResolver;
+
     protected function setUp(): void
     {
         $services = new \ArrayIterator(['mockService' => new MockService()]);
-        $serviceConfigLoader = $this->createMock(ServiceConfigLoader::class);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
+        $this->argumentResolver = $this->createMock(ArgumentResolverInterface::class);
 
-        $serviceFinder = new ServiceFinder($services, $serviceConfigLoader);
-        $this->requestHandler = new RpcRequestHandler($serviceFinder, $this->normalizer, $eventDispatcher);
+        $serviceFinder = new ServiceFinder($services);
+        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher);
     }
 
     /**
@@ -41,6 +43,8 @@ class RpcRequestHandlerTest extends TestCase
      */
     public function testHandle(RpcRequest $rpcRequest, $expectedResult = null, RpcResponseError $expectedError = null)
     {
+        $this->argumentResolver->method('getArguments')->willReturn($rpcRequest->getParams() ?? []);
+
         if ($expectedError) {
             $this->assertSame($expectedResult, $rpcRequest->getResponse());
         } else {
@@ -50,31 +54,35 @@ class RpcRequestHandlerTest extends TestCase
         $this->requestHandler->handle($rpcRequest);
     }
 
+    public function testNormalizationContext()
+    {
+        $rpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'returnObject');
+
+        $this->argumentResolver->method('getArguments')->willReturn([]);
+
+        $this->normalizer->expects($this->once())->method('normalize')
+            ->with($this->isInstanceOf(\stdClass::class), null, ['test']);
+
+        $this->requestHandler->handle($rpcRequest);
+    }
+
     public function provideRpcRequest(): \Generator
     {
-        $badTypeRpcRequest = new RpcRequest();
-        $badTypeRpcRequest->setMethodKey('add');
-        $badTypeRpcRequest->setServiceKey('mockService');
+        $badTypeRpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'add');
         $badTypeRpcRequest->setParams(['arg1' => '5', 'arg2' => 5]);
 
         yield [$badTypeRpcRequest, null, new RpcResponseError(new RpcInvalidRequestException())];
 
-        $badArgCountRpcRequest = new RpcRequest();
-        $badArgCountRpcRequest->setMethodKey('add');
-        $badArgCountRpcRequest->setServiceKey('mockService');
+        $badArgCountRpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'add');
         $badArgCountRpcRequest->setParams(['arg1' => 5]);
 
         yield [$badArgCountRpcRequest, null, new RpcResponseError(new RpcInvalidRequestException())];
 
-        $exceptionRpcRequest = new RpcRequest();
-        $exceptionRpcRequest->setMethodKey('willThrowException');
-        $exceptionRpcRequest->setServiceKey('mockService');
+        $exceptionRpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'willThrowException');
 
         yield [$exceptionRpcRequest, null, new RpcResponseError(new RpcApplicationException())];
 
-        $successRpcRequest = new RpcRequest();
-        $successRpcRequest->setMethodKey('add');
-        $successRpcRequest->setServiceKey('mockService');
+        $successRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add');
         $successRpcRequest->setParams(['arg1' => 5, 'arg2' => 5]);
 
         yield [$successRpcRequest, 10, null];

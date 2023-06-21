@@ -56,37 +56,27 @@ class RpcTest extends WebTestCase
     {
         // Test regular rpc request
         yield [
-            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => [1, 2], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'test'],
             ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test'],
         ];
 
         // Test regular rpc request with params in wrong order
         yield [
-            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg2' => 1, 'arg1' => 2], 'id' => 'test'],
-            ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg2' => 1, 'arg1' => 3], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'result' => 4, 'id' => 'test'],
         ];
 
-        // Test date param converter options @ParamConverter("date", options={"format": "!Y-m-d"}) wrong format
+        // Test request resolver
         yield [
-            ['jsonrpc' => '2.0', 'method' => 'mockService.dateParamConverter', 'params' => ['date' => '2017/01/01'], 'id' => 'test'],
-            ['jsonrpc' => '2.0', 'error' => [
-                'code' => AbstractRpcException::INVALID_PARAMS,
-                'message' => 'Param conversion error: Invalid date given for parameter "date".',
-                'data' => null,
-            ], 'id' => 'test'],
-        ];
-
-        // Test date param converter options @ParamConverter("date", options={"format": "!Y-m-d"}) correct format
-        yield [
-            ['jsonrpc' => '2.0', 'method' => 'mockService.dateParamConverter', 'params' => ['date' => '2017-01-01'], 'id' => 'test'],
-            ['jsonrpc' => '2.0', 'result' => '01-01-2017', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.requestValueResolver', 'params' => ['date' => '2017/01/01'], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'result' => 'GET', 'id' => 'test'],
         ];
 
         // Test batch of regular rpc request
         yield [
             [
-                ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => [1, 2], 'id' => 'test_0'],
-                ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => [3, 4], 'id' => 'test_1'],
+                ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'test_0'],
+                ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 3, 'arg2' => 4], 'id' => 'test_1'],
             ],
             [
                 ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test_0'],
@@ -96,7 +86,7 @@ class RpcTest extends WebTestCase
 
         // Test rpc request with an array parameter
         yield [
-            ['jsonrpc' => '2.0', 'method' => 'mockService.testArrayParam', 'params' => [[1, 2], 3]],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.arrayParam', 'params' => ['a' => [1, 2], 'b' => 3]],
             ['jsonrpc' => '2.0', 'result' => [1, 2, 3], 'id' => null],
         ];
 
@@ -118,7 +108,7 @@ class RpcTest extends WebTestCase
 
         // Test wrong parameter type
         yield [
-            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['', 2], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => '', 'arg2' => 2], 'id' => 'test'],
             ['jsonrpc' => '2.0', 'error' => [
                 'code' => AbstractRpcException::INVALID_PARAMS,
                 'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_PARAMS],

@@ -192,7 +192,7 @@ Responses are always processed by a Symfony normalizer. If you need to specify a
 ```php
 namespace App\RpcServices;
 
-use Nanofelis\Bundle\JsonRpcBundle\Annotation\RpcNormalizationContext;
+use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 
 class MyService 
 {

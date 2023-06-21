@@ -6,7 +6,6 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests;
 
 use Nanofelis\Bundle\JsonRpcBundle\NanofelisJsonRpcBundle;
 use Nanofelis\Bundle\JsonRpcBundle\Tests\Service\MockService;
-use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -14,6 +13,7 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver\DateTimeValueResolver;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\Loader\PhpFileLoader as RoutingPhpFileLoader;
@@ -32,38 +32,35 @@ class TestKernel extends Kernel implements CompilerPassInterface
     {
         return [
             new FrameworkBundle(),
-            new SensioFrameworkExtraBundle(),
             new TwigBundle(),
             new NanofelisJsonRpcBundle(),
         ];
     }
 
-    protected function configureRoutes(RoutingConfigurator $routes)
+    protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import(__DIR__.'/../Resources/config/routing/routing.xml');
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
-        $c->loadFromExtension('framework', [
+        $container->loadFromExtension('framework', [
             'test' => true,
             'serializer' => [
                 'enabled' => true,
             ],
         ]);
-        $c->loadFromExtension('sensio_framework_extra', [
-            'router' => [
-                'annotations' => false,
-            ],
-        ]);
-        $c->setParameter('kernel.secret', 'fake');
+        $container->setParameter('kernel.secret', 'fake');
     }
 
-    public function process(ContainerBuilder $c)
+    public function process(ContainerBuilder $container): void
     {
-        $c->register(MockService::class, MockService::class)
+        $container->register(MockService::class, MockService::class)
             ->addTag('nanofelis_json_rpc')
             ->setPublic(true);
+//        $container->register('argument_resolver.date', DateTimeValueResolver::class)
+//            ->addTag('controller.argument_value_resolver', ['name' => 'argument_resolver.date'])
+//            ->setPublic(true);
     }
 
     /**
@@ -78,17 +75,6 @@ class TestKernel extends Kernel implements CompilerPassInterface
         $collection = new RouteCollection();
 
         $configureRoutes = new \ReflectionMethod($this, 'configureRoutes');
-        $configuratorClass = $configureRoutes->getNumberOfParameters() > 0 && ($type = $configureRoutes->getParameters()[0]->getType()) instanceof \ReflectionNamedType && !$type->isBuiltin() ? $type->getName() : null;
-
-        if ($configuratorClass && !is_a(RoutingConfigurator::class, $configuratorClass, true)) {
-            trigger_deprecation('symfony/framework-bundle', '5.1', 'Using type "%s" for argument 1 of method "%s:configureRoutes()" is deprecated, use "%s" instead.', RouteCollectionBuilder::class, self::class, RoutingConfigurator::class);
-
-            $routes = new RouteCollectionBuilder($loader);
-            $this->configureRoutes($routes);
-
-            return $routes->build();
-        }
-
         $configureRoutes->getClosure($this)(new RoutingConfigurator($collection, $kernelLoader, $file, $file, $this->getEnvironment()));
 
         foreach ($collection as $route) {

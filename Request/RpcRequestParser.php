@@ -101,7 +101,7 @@ class RpcRequestParser
     {
         $payload = new RpcPayload();
 
-        if ($this->isBatch($data)) {
+        if (array_is_list($data)) {
             $payload->setIsBatch(true);
 
             foreach ($data as $subData) {
@@ -112,16 +112,6 @@ class RpcRequestParser
         }
 
         return $payload;
-    }
-
-    /**
-     * @param array<string|int,mixed> $data
-     */
-    private function isBatch(array $data): bool
-    {
-        $keys = array_keys($data);
-
-        return !empty($keys) && \is_int($keys[0]);
     }
 
     /**
