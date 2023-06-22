@@ -66,17 +66,18 @@ class RpcRequestHandler
         $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 
         [$service, $method] = [$serviceDescriptor->getService(), $serviceDescriptor->getMethodName()];
-        $request = Request::create('/');
-        $request->attributes->replace($rpcRequest->getParams() ?? []);
 
         try {
-            $arguments = $this->argumentResolver->getArguments($request, [$service, $method]);
+            $arguments = $this->argumentResolver->getArguments(
+                new Request(attributes: $rpcRequest->getParams() ?? []),
+                [$service, $method]
+            );
         } catch (\Exception) {
             throw new RpcInvalidParamsException();
         }
 
         try {
-            $result = $serviceDescriptor->getService()->$method(...$arguments);
+            $result = $service->$method(...$arguments);
         } catch (\TypeError $e) {
             if ($this->isInvalidParamsException($e, $serviceDescriptor)) {
                 throw new RpcInvalidParamsException();

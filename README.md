@@ -163,18 +163,18 @@ curl -d '[{"jsonrpc": "2.0", "method": "myService.add", "params": [1, 2], "id": 
 
 ```
 
-Param Conversion
+Arguments Resolver
 ----------------
-The bundle supports the [Param Converter](https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/annotations/converters.html) from the [SensioFrameworkExtraBundle](https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html#annotations-for-controllers)
+This bundle supports the built-in [Argument Resolver](https://symfony.com/doc/current/controller/value_resolver.html) from the Symfony Core for RPC methods.
 
-As for a regular controller method, dates and Doctrine entities are automatically converted if a parameter's name matches a method argument with the correct type hinting. 
+As for a regular controller method, dates and Doctrine entities for example are automatically converted if a parameter's name matches a method argument with the correct type hinting or attribute. 
 
 ```php
 namespace App\RpcServices;
 
 class MyService 
 {
-    function workWithEntity(MyEntity $entity, \DateTime $date)
+    function workWithEntity(MyEntity $entity, #[MapDateTime(format: 'Y-m-d')] \DateTime $date)
     {
         //
     }
@@ -187,7 +187,7 @@ curl -d '{'jsonrpc': "2.0", "method": "myService.workWithEntity", "params": ["en
 
 Normalization and Contexts
 --------------------------
-Responses are always processed by a Symfony normalizer. If you need to specify a normalization context, you can use the `RpcNormalizationContext` annotation:
+Responses are always processed by a Symfony normalizer. If you need to specify a normalization context, you can use the `RpcNormalizationContext` attribute:
 
 ```php
 namespace App\RpcServices;
@@ -196,9 +196,8 @@ use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 
 class MyService 
 {
-    /**
-     * RpcNormalizationContext(contexts={'custom'})
-     */
+    
+    #[RpcNormalizationContext(contexts: ['custom'])]
     function doSomething($data): Article
     {
         $article = $this->handler($data);
@@ -275,7 +274,7 @@ It also supports the [cache annotation](https://symfony.com/doc/current/bundles/
 
 ```shell script
 # Example GET call
-curl http://localhost?jsonrpc=2.0&method=myService.add&params[0]=1&params[1]=2&id=test-call | fx this
+curl http://localhost?jsonrpc=2.0&method=myService.add&params[0]=1&params[1]=2&id=test-call | jq this
 
 {
   "jsonrpc": "2.0",
