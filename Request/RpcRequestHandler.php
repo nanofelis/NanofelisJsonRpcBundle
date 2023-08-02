@@ -66,18 +66,27 @@ class RpcRequestHandler
         $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 
         [$service, $method] = [$serviceDescriptor->getService(), $serviceDescriptor->getMethodName()];
-
+        $request = new Request(
+            attributes: $rpcRequest->getParams() ?? [],
+            request: $rpcRequest->getParams(),
+            server: ['CONTENT_TYPE' => 'application/json'],
+        );
         try {
-            $arguments = $this->argumentResolver->getArguments(
-                new Request(attributes: $rpcRequest->getParams() ?? []),
-                [$service, $method]
-            );
+            $arguments = $this->argumentResolver->getArguments($request, [$service, $method]);
         } catch (\Exception) {
             throw new RpcInvalidParamsException();
         }
 
+        $this->eventDispatcher->dispatch($ctrlEvent = new ControllerArgumentsEvent(
+            kernel: $this->kernel,
+            controller: [$service, $method],
+            arguments: $arguments,
+            request: $request,
+            requestType: HttpKernelInterface::SUB_REQUEST,
+        ), KernelEvents::CONTROLLER_ARGUMENTS);
+
         try {
-            $result = $service->$method(...$arguments);
+            $result = $service->$method(...$ctrlEvent->getArguments());
         } catch (\TypeError $e) {
             if ($this->isInvalidParamsException($e, $serviceDescriptor)) {
                 throw new RpcInvalidParamsException();
