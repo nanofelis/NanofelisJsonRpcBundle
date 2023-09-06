@@ -56,7 +56,7 @@ class RpcRequestHandlerTest extends TestCase
 
     public function testNormalizationContext()
     {
-        $rpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'returnObject');
+        $rpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'returnObject');
 
         $this->argumentResolver->method('getArguments')->willReturn([]);
 
@@ -68,17 +68,17 @@ class RpcRequestHandlerTest extends TestCase
 
     public function provideRpcRequest(): \Generator
     {
-        $badTypeRpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'add');
+        $badTypeRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add');
         $badTypeRpcRequest->setParams(['arg1' => '5', 'arg2' => 5]);
 
         yield [$badTypeRpcRequest, null, new RpcResponseError(new RpcInvalidRequestException())];
 
-        $badArgCountRpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'add');
+        $badArgCountRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add');
         $badArgCountRpcRequest->setParams(['arg1' => 5]);
 
         yield [$badArgCountRpcRequest, null, new RpcResponseError(new RpcInvalidRequestException())];
 
-        $exceptionRpcRequest = new RpcRequest(serviceKey:'mockService', methodKey: 'willThrowException');
+        $exceptionRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'willThrowException');
 
         yield [$exceptionRpcRequest, null, new RpcResponseError(new RpcApplicationException())];
 

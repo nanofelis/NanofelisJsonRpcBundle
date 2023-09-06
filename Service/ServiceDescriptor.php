@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Nanofelis\Bundle\JsonRpcBundle\Service;
 
 use Nanofelis\Bundle\JsonRpcBundle\Exception\RpcMethodNotFoundException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ConfigurationAnnotation;
 
 class ServiceDescriptor
 {
@@ -46,13 +45,12 @@ class ServiceDescriptor
     }
 
     /**
-     * @return \ReflectionParameter[]
+     * @template T of object
+     *
+     * @param class-string<T> $class
+     *
+     * @return \ReflectionAttribute<T>|null
      */
-    public function getMethodParameters(): array
-    {
-        return $this->methodReflection->getParameters();
-    }
-
     public function getMethodAttribute(string $class): ?\ReflectionAttribute
     {
         return $this->methodReflection->getAttributes($class)[0] ?? null;

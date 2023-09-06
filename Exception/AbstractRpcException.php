@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Exception;
 
-use Throwable;
-
 abstract class AbstractRpcException extends \Exception implements RpcDataExceptionInterface
 {
     public const PARSE = -32700;
@@ -27,7 +25,7 @@ abstract class AbstractRpcException extends \Exception implements RpcDataExcepti
      */
     private ?array $data = null;
 
-    public function __construct(string $message = '', int $code = 0, Throwable $previous = null)
+    public function __construct(string $message = '', int $code = 0, \Throwable $previous = null)
     {
         if (empty($message) && isset(self::MESSAGES[$code])) {
             $message = self::MESSAGES[$code];

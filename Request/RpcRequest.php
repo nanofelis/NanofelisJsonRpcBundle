@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\Bundle\JsonRpcBundle\Request;
 
-use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponse;
-use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseError;
+use Nanofelis\Bundle\JsonRpcBundle\Response\RpcResponseInterface;
 
 class RpcRequest
 {
@@ -20,7 +19,7 @@ class RpcRequest
          * @var array<string,mixed>|null
          */
         private ?array $params = null,
-        private RpcResponse|RpcResponseError|null $response = null,
+        private RpcResponseInterface|null $response = null,
     ) {
     }
 
@@ -70,12 +69,12 @@ class RpcRequest
         $this->params = $params;
     }
 
-    public function getResponse(): RpcResponse|RpcResponseError|null
+    public function getResponse(): RpcResponseInterface|null
     {
         return $this->response;
     }
 
-    public function setResponse(RpcResponse|RpcResponseError|null $response): void
+    public function setResponse(RpcResponseInterface|null $response): void
     {
         $this->response = $response;
     }

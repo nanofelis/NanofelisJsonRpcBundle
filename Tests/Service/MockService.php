@@ -32,7 +32,7 @@ class MockService extends AbstractRpcService
         return $request->getMethod();
     }
 
-    #[RpcNormalizationContext(["test"])]
+    #[RpcNormalizationContext(['test'])]
     public function returnObject(): \stdClass
     {
         return (object) ['prop' => 'test'];

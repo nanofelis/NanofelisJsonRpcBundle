@@ -17,7 +17,7 @@ class Doc
     }
 
     /**
-     * @throws Error
+     * @throws Error|\ReflectionException
      */
     public function __invoke(): Response
     {
