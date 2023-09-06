@@ -21,7 +21,7 @@ class RpcRequestParserTest extends TestCase
 
     public function testParsePostRequest()
     {
-        $request = Request::create('/', 'POST', [], [], [], [], json_encode([
+        $request = Request::create(uri: '/', method: 'POST', content: json_encode([
             'jsonrpc' => '2.0',
             'method' => 'mockService.add',
             'params' => [1, 2],
@@ -72,7 +72,7 @@ class RpcRequestParserTest extends TestCase
 
     public function testParseBadInvalidRpcFormat()
     {
-        $request = Request::create('/', 'POST', [], [], [], [], json_encode([
+        $request = Request::create(uri: '/', method: 'POST', content: json_encode([
             'jsonrpc' => '2.0',
             'wrongFormat' => 'mockService->add',
         ]));

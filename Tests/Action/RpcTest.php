@@ -29,7 +29,7 @@ class RpcTest extends WebTestCase
 
     public function testInvalidJson()
     {
-        self::$client->request('POST', $this->router->generate('nanofelis_json_rpc.endpoint'), [], [], [], '@');
+        self::$client->request(method: 'POST', uri: $this->router->generate('nanofelis_json_rpc.endpoint'), content: '@');
         $expected = [
             'jsonrpc' => '2.0',
             'error' => [
@@ -47,7 +47,7 @@ class RpcTest extends WebTestCase
      */
     public function testRpc(array $requestData, array $expected)
     {
-        self::$client->request('POST', $this->router->generate('nanofelis_json_rpc.endpoint'), [], [], [], json_encode($requestData));
+        self::$client->request(method: 'POST', uri: $this->router->generate('nanofelis_json_rpc.endpoint'), content: json_encode($requestData));
 
         $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
     }

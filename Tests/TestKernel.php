@@ -13,7 +13,6 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
-use Symfony\Component\HttpKernel\Controller\ArgumentResolver\DateTimeValueResolver;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\Loader\PhpFileLoader as RoutingPhpFileLoader;
@@ -58,9 +57,6 @@ class TestKernel extends Kernel implements CompilerPassInterface
         $container->register(MockService::class, MockService::class)
             ->addTag('nanofelis_json_rpc')
             ->setPublic(true);
-//        $container->register('argument_resolver.date', DateTimeValueResolver::class)
-//            ->addTag('controller.argument_value_resolver', ['name' => 'argument_resolver.date'])
-//            ->setPublic(true);
     }
 
     /**

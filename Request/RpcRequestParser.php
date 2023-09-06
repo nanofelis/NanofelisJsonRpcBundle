@@ -55,7 +55,7 @@ class RpcRequestParser
     {
         return match ($request->getMethod()) {
             Request::METHOD_POST => $this->getPostData($request),
-            Request::METHOD_GET => $this->getQueryData($request),
+            Request::METHOD_GET => $request->query->all(),
             default => throw new RpcInvalidRequestException()
         };
     }
@@ -72,14 +72,6 @@ class RpcRequestParser
         }
 
         return $data;
-    }
-
-    /**
-     * @return array<string,mixed>
-     */
-    private function getQueryData(Request $request): array
-    {
-        return $request->query->all();
     }
 
     private function getRpcPayloadError(AbstractRpcException $e): RpcPayload
@@ -130,7 +122,7 @@ class RpcRequestParser
 
         try {
             $this->rpcResolver->resolve($data);
-        } catch (OptionResolverException $e) {
+        } catch (OptionResolverException) {
             $rpcRequest->setResponse(new RpcResponseError(new RpcInvalidRequestException(), $rpcRequest->getId()));
 
             return $rpcRequest;

@@ -29,7 +29,7 @@ class ServiceFinderTest extends TestCase
      *
      * @throws RpcMethodNotFoundException
      */
-    public function testFind(RpcRequest $payload, ?string $expectedResult, ?string $expectedException = null)
+    public function testFind(RpcRequest $payload, ?string $expectedResult, string $expectedException = null)
     {
         if ($expectedException) {
             $this->expectException($expectedException);
