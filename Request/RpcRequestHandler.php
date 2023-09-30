@@ -93,7 +93,7 @@ class RpcRequestHandler
             return $e;
         }
 
-        $rpcException = new RpcApplicationException($e->getMessage(), $e->getCode());
+        $rpcException = new RpcApplicationException($e->getMessage(), $e->getCode(), $e);
 
         if ($e instanceof RpcDataExceptionInterface) {
             $rpcException->setData($e->getData());
