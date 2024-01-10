@@ -2,7 +2,7 @@
     "name": "nanofelis/json-rpc-bundle",
     "type": "symfony-bundle",
     "description": "This bundle provides a JSON RPC 2.0 implementation for Symfony",
-    "keywords": ["json-rpc"],
+    "keywords": ["json-rpc", "api", "symfony"],
     "license": "MIT",
     "authors": [
         {
@@ -13,18 +13,18 @@
     "require": {
         "php": "^8.0",
         "ext-json": "*",
-        "symfony/event-dispatcher": "^5.4|^6.0",
-        "symfony/options-resolver": "^5.4|^6.0",
-        "symfony/property-access": "^5.4|^6.0",
-        "symfony/serializer": "^5.4|^6.0",
-        "symfony/twig-bundle": "^5.4|^6.0",
-        "symfony/framework-bundle": "^5.4|^6.0"
+        "symfony/event-dispatcher": "^5.4|^6.3|^7.0",
+        "symfony/options-resolver": "^5.4|^6.3|^7.0",
+        "symfony/property-access": "^5.4|^6.3|^7.0",
+        "symfony/serializer": "^5.4|^6.3|^7.0",
+        "symfony/twig-bundle": "^5.4|^6.3|^7.0",
+        "symfony/framework-bundle": "^5.4|^6.3|^7.0"
     },
     "require-dev": {
-        "symfony/phpunit-bridge": "^6.0",
-        "symfony/var-dumper": "^5.4|^6.0",
+        "symfony/phpunit-bridge": "^5.4|^6.3|^7.0",
+        "symfony/var-dumper": "^5.4|^6.3|^7.0",
         "phpstan/phpstan-symfony": "^1.0",
-        "symfony/browser-kit": "^5.4|^6.0",
+        "symfony/browser-kit": "^5.4|^6.3|^7.0",
         "friendsofphp/php-cs-fixer": "^3.3"
     },
     "autoload": {

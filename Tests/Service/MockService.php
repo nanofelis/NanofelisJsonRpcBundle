@@ -45,4 +45,9 @@ class MockService extends AbstractRpcService
     {
         throw new \Exception('it went wrong', 99);
     }
+
+    public function withNullables(?string $a = null, ?string $b = null): array
+    {
+        return ['a' => $a, 'b' => $b];
+    }
 }

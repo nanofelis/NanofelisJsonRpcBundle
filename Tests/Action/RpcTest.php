@@ -135,5 +135,11 @@ class RpcTest extends WebTestCase
                 'data' => null,
             ], 'id' => null],
         ];
+
+        // Test nullable arguments
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.withNullables', 'params' => ['b' => 'beta']],
+            ['jsonrpc' => '2.0', 'result' => ['a' => null, 'b' => 'beta'], 'id' => null],
+        ];
     }
 }
