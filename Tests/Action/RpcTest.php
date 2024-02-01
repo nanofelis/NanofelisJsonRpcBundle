@@ -141,5 +141,11 @@ class RpcTest extends WebTestCase
             ['jsonrpc' => '2.0', 'method' => 'mockService.withNullables', 'params' => ['b' => 'beta']],
             ['jsonrpc' => '2.0', 'result' => ['a' => null, 'b' => 'beta'], 'id' => null],
         ];
+
+        // Test with a MapRequestPayload annotation
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.withMapRequest', 'params' => ['a' => 10, 'b' => 'alpha', 'c' => true]],
+            ['jsonrpc' => '2.0', 'result' => ['a' => 10, 'b' => 'alpha', 'c' => true], 'id' => null],
+        ];
     }
 }

@@ -7,6 +7,7 @@ namespace Nanofelis\Bundle\JsonRpcBundle\Tests\Service;
 use Nanofelis\Bundle\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\Bundle\JsonRpcBundle\Service\AbstractRpcService;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 
 class MockService extends AbstractRpcService
 {
@@ -49,5 +50,13 @@ class MockService extends AbstractRpcService
     public function withNullables(?string $a = null, ?string $b = null): array
     {
         return ['a' => $a, 'b' => $b];
+    }
+
+    /**
+     * @return array{a:int, b: string, c: bool}
+     */
+    public function withMapRequest(#[MapRequestPayload] MockDTO $fakeDTO): array
+    {
+        return ['a' => $fakeDTO->a, 'b' => $fakeDTO->b, 'c' => $fakeDTO->c];
     }
 }
