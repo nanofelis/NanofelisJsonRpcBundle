@@ -11,6 +11,7 @@ use Nanofelis\JsonRpcBundle\Exception\RpcInvalidParamsException;
 use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
+use Nanofelis\JsonRpcBundle\Response\RpcResponseInterface;
 use Nanofelis\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,16 +34,15 @@ class RpcRequestHandler
      * @throws AbstractRpcException
      * @throws ExceptionInterface
      */
-    public function handle(RpcRequest $rpcRequest): void
+    public function handle(RpcRequest $rpcRequest): RpcResponseInterface
     {
         try {
-            $result = $this->execute($rpcRequest);
-            $rpcRequest->setResponse(new RpcResponse($result, $rpcRequest->getId()));
+            return new RpcResponse($this->execute($rpcRequest), $rpcRequest->getId());
         } catch (\Throwable $e) {
             if (!$e instanceof AbstractRpcException) {
                 throw $e;
             }
-            $rpcRequest->setResponse(new RpcResponseError($e, $rpcRequest->getId()));
+            return new RpcResponseError($e, $rpcRequest->getId());
         }
     }
 
@@ -54,20 +54,23 @@ class RpcRequestHandler
     private function execute(RpcRequest $rpcRequest): mixed
     {
         $serviceDescriptor = $this->serviceFinder->find($rpcRequest);
-        [$service, $method] = [$serviceDescriptor->getService(), $serviceDescriptor->getMethodName()];
+        $service = $serviceDescriptor->getService();
+        $method = $serviceDescriptor->getMethodName();
+        /** @var callable $callable */
+        $callable = [$service, $method];
 
         $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 
         try {
             $arguments = $this->argumentResolver->getArguments(
                 new Request(attributes: $rpcRequest->getParams() ?? []),
-                [$service, $method]
+                $callable
             );
         } catch (\Exception $e) {
             throw new RpcInvalidParamsException(previous: $e);
         }
 
-        $result = $service->$method(...$arguments);
+        $result = $callable(...$arguments);
 
         return $this->normalizeResult($result, $serviceDescriptor);
     }

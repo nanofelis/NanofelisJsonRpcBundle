@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests\Service;
+namespace Nanofelis\JsonRpcBundle\Tests\Service;
 
 class MockDTO
 {

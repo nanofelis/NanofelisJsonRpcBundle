@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Request;
 
+use Nanofelis\JsonRpcBundle\Response\RpcResponseInterface;
+
 class RpcPayload
 {
     /**
@@ -11,7 +13,20 @@ class RpcPayload
      */
     private array $rpcRequests = [];
 
+    /**
+     * @var RpcResponseInterface[]
+     */
+    private array $rpcResponses = [];
+
     private bool $isBatch = false;
+
+    /**
+     * @return RpcResponseInterface[]
+     */
+    public function getRpcResponses(): array
+    {
+        return $this->rpcResponses;
+    }
 
     /**
      * @return RpcRequest[]
@@ -21,17 +36,14 @@ class RpcPayload
         return $this->rpcRequests;
     }
 
-    /**
-     * @return RpcRequest[]
-     */
-    public function getUnhandledRpcRequests(): array
-    {
-        return array_filter($this->rpcRequests, fn(RpcRequest $rpcRequest) => !$rpcRequest->getResponse());
-    }
-
     public function addRpcRequest(RpcRequest $rpcRequest): void
     {
         $this->rpcRequests[] = $rpcRequest;
+    }
+
+    public function addRpcResponse(RpcResponseInterface $rpcResponse): void
+    {
+        $this->rpcResponses[] = $rpcResponse;
     }
 
     public function isBatch(): bool

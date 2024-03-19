@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests\Exception;
+namespace Nanofelis\JsonRpcBundle\Tests\Exception;
 
 use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use PHPUnit\Framework\TestCase;

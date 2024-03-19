@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests\Action;
+namespace Nanofelis\JsonRpcBundle\Tests\Action;
 
-use Nanofelis\JsonRpcBundle\tests\Service\MockService;
+use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\RouterInterface;
@@ -21,7 +21,7 @@ class DocTest extends WebTestCase
         $this->router = self::$client->getContainer()->get('router');
     }
 
-    public function testDoc()
+    public function testDoc(): void
     {
         $crawler = self::$client->request('GET', $this->router->generate('nanofelis_json_rpc.doc'));
 

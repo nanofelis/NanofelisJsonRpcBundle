@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests\Service;
+namespace Nanofelis\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\JsonRpcBundle\Service\AbstractRpcService;

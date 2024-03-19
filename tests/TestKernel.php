@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests;
+namespace Nanofelis\JsonRpcBundle\Tests;
 
 use Nanofelis\JsonRpcBundle\NanofelisJsonRpcBundle;
-use Nanofelis\JsonRpcBundle\tests\Service\MockService;
+use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -38,7 +38,7 @@ class TestKernel extends Kernel implements CompilerPassInterface
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
-        $routes->import(__DIR__.'/../Resources/config/routing/routing.xml');
+        $routes->import(__DIR__.'/../config/routing/routing.xml');
     }
 
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void

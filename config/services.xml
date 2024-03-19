@@ -28,7 +28,7 @@
             <argument type="tagged" tag="nanofelis_json_rpc" default-index-method="getServiceKey"/>
         </service>
 
-        <service id="nanofelis_json_rpc.response.rpc_responder" class="Nanofelis\JsonRpcBundle\Response\RpcResponder"
+        <service id="nanofelis_json_rpc.response.rpc_responder" class="Nanofelis\JsonRpcBundle\Responder\RpcResponder"
                  public="false">
             <argument type="service" id="event_dispatcher"/>
         </service>
@@ -39,7 +39,7 @@
             <argument type="service" id="nanofelis_json_rpc.service.finder"/>
         </service>
 
-        <service id="nanofelis_json_rpc.doc.responder" class="Nanofelis\JsonRpcBundle\Doc\DocResponder"
+        <service id="nanofelis_json_rpc.doc.responder" class="Nanofelis\JsonRpcBundle\Responder\DocResponder"
                  public="false">
             <argument type="service" id="twig"/>
         </service>

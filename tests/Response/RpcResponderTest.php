@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests\Response;
+namespace Nanofelis\JsonRpcBundle\Tests\Response;
 
 use Nanofelis\JsonRpcBundle\Exception\RpcApplicationException;
+use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
 use Nanofelis\JsonRpcBundle\Request\RpcPayload;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Responder\RpcResponder;
@@ -16,14 +17,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class RpcResponderTest extends TestCase
 {
-    private MockObject $eventDispatcher;
-
     private RpcResponder $responder;
 
     protected function setUp(): void
     {
         $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $this->responder = new RpcResponder($this->eventDispatcher);
+        $this->responder = new RpcResponder();
     }
 
     /**
@@ -38,32 +37,29 @@ class RpcResponderTest extends TestCase
 
     public function provideRpcPayload(): \Generator
     {
-        $successRequest = new RpcRequest();
-        $successRequest->setResponse(new RpcResponse('success', 1));
-
-        $errorRequest = new RpcRequest();
         $errorException = new RpcApplicationException('error', 99);
-        $errorException->setData(['details']);
-        $errorRequest->setResponse(new RpcResponseError($errorException, 2));
+        $errorException->setData(['message' => 'details']);
 
         $payload = new RpcPayload();
         $payload->setIsBatch(true);
-        $payload->addRpcRequest($successRequest);
-        $payload->addRpcRequest($errorRequest);
+        $payload->addRpcRequest(new RpcRequest(serviceKey: 'mockService', methodKey: 'add'));
+        $payload->addRpcResponse(new RpcResponse('success', 1));
+        $payload->addRpcRequest(new RpcRequest(serviceKey: 'mockService', methodKey: 'add'));
+        $payload->addRpcResponse(new RpcResponseError($errorException, 2));
 
         yield [$payload,
             [
                 [
-                    'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
+                    'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
                     'result' => 'success',
                     'id' => 1,
                 ],
                 [
-                    'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
+                    'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
                     'error' => [
                         'code' => 99,
                         'message' => 'error',
-                        'data' => ['details'],
+                        'data' => ['message' => 'details'],
                     ],
                     'id' => 2,
                 ],
@@ -71,10 +67,10 @@ class RpcResponderTest extends TestCase
         ];
 
         $payload = new RpcPayload();
-        $payload->addRpcRequest($successRequest);
+        $payload->addRpcRequest(new RpcRequest(serviceKey: 'mockService', methodKey: 'add'));
 
         yield [$payload, [
-            'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
+            'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
             'result' => 'success',
             'id' => 1,
         ]];

@@ -17,8 +17,7 @@
         "symfony/property-access": "^5.4|^6.3|^7.0",
         "symfony/serializer": "^5.4|^6.3|^7.0",
         "symfony/twig-bundle": "^5.4|^6.3|^7.0",
-        "symfony/framework-bundle": "^5.4|^6.3|^7.0",
-        "symfony/options-resolver": "^7.0"
+        "symfony/framework-bundle": "^5.4|^6.3|^7.0"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^5.4|^6.3|^7.0",
@@ -37,7 +36,7 @@
         ]
     },
     "autoload-dev": {
-        "psr-4": { "Tests\\": "Tests/" }
+        "psr-4": { "Nanofelis\\JsonRpcBundle\\Tests\\": "tests/" }
     },
     "extra": {
         "branch-alias": {

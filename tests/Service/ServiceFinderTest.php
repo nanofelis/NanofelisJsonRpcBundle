@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests\Service;
+namespace Nanofelis\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
@@ -13,8 +13,9 @@ use PHPUnit\Framework\TestCase;
 
 class ServiceFinderTest extends TestCase
 {
-    private MockObject $configLoader;
-
+    /**
+     * @var \ArrayIterator<string,MockService>
+     */
     private \ArrayIterator $services;
 
     protected function setUp(): void
@@ -29,7 +30,7 @@ class ServiceFinderTest extends TestCase
      *
      * @throws RpcMethodNotFoundException
      */
-    public function testFind(RpcRequest $payload, ?string $expectedResult, string $expectedException = null)
+    public function testFind(RpcRequest $payload, ?string $expectedResult, string $expectedException = null): void
     {
         if ($expectedException) {
             $this->expectException($expectedException);
@@ -42,21 +43,15 @@ class ServiceFinderTest extends TestCase
 
     public function providePayload(): \Generator
     {
-        $rpcRequest = new RpcRequest();
-        $rpcRequest->setMethodKey('add');
-        $rpcRequest->setServiceKey('mockService');
+        $rpcRequest = new RpcRequest(serviceKey: 'add', methodKey: 'mockService');
 
         yield [$rpcRequest, ServiceDescriptor::class];
 
-        $rpcRequestUnknownService = new RpcRequest();
-        $rpcRequestUnknownService->setMethodKey('add');
-        $rpcRequestUnknownService->setServiceKey('unknown');
+        $rpcRequestUnknownService = new RpcRequest(serviceKey: 'unknown', methodKey: 'add');
 
         yield [$rpcRequestUnknownService, null, RpcMethodNotFoundException::class];
 
-        $rpcRequestUnknownMethod = new RpcRequest();
-        $rpcRequestUnknownMethod->setMethodKey('unknown');
-        $rpcRequestUnknownMethod->setServiceKey('mockService');
+        $rpcRequestUnknownMethod = new RpcRequest(serviceKey: 'add', methodKey: 'unknown');
 
         yield [$rpcRequestUnknownMethod, null, RpcMethodNotFoundException::class];
     }

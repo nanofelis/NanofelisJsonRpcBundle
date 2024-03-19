@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\tests\Action;
+namespace Nanofelis\JsonRpcBundle\Tests\Action;
 
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
-use Nanofelis\JsonRpcBundle\tests\TestKernel;
+use Nanofelis\JsonRpcBundle\Tests\TestKernel;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\RouterInterface;
@@ -27,7 +27,7 @@ class RpcTest extends WebTestCase
         return TestKernel::class;
     }
 
-    public function testInvalidJson()
+    public function testInvalidJson(): void
     {
         self::$client->request(method: 'POST', uri: $this->router->generate('nanofelis_json_rpc.endpoint'), content: '@');
         $expected = [
@@ -45,7 +45,7 @@ class RpcTest extends WebTestCase
     /**
      * @dataProvider provideRpcRequest
      */
-    public function testRpc(array $requestData, array $expected)
+    public function testRpc(array $requestData, array $expected): void
     {
         self::$client->request(method: 'POST', uri: $this->router->generate('nanofelis_json_rpc.endpoint'), content: json_encode($requestData));
 

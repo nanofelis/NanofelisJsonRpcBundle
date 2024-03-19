@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Response;
 
+use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 
 class RpcResponse implements RpcResponseInterface
@@ -21,7 +22,7 @@ class RpcResponse implements RpcResponseInterface
     public function getContent(): array
     {
         return [
-            'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
+            'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
             'result' => $this->data,
             'id' => $this->id,
         ];

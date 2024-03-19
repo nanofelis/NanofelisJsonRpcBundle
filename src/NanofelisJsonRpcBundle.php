@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Nanofelis\JsonRpcBundle\src;
+namespace Nanofelis\JsonRpcBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
