@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="nanofelis_json_rpc.action.rpc" class="Nanofelis\JsonRpcBundle\Action\Rpc"
+                 public="true">
+            <argument type="service" id="nanofelis_json_rpc.request.parser"/>
+            <argument type="service" id="nanofelis_json_rpc.request.handler"/>
+            <argument type="service" id="nanofelis_json_rpc.response.rpc_responder"/>
+        </service>
+
+        <service id="nanofelis_json_rpc.request.parser" class="Nanofelis\JsonRpcBundle\Request\RpcRequestParser"
+                 public="false">
+        </service>
+
+        <service id="nanofelis_json_rpc.request.handler"
+                 class="Nanofelis\JsonRpcBundle\Request\RpcRequestHandler" public="false">
+            <argument type="service" id="argument_resolver"/>
+            <argument type="service" id="nanofelis_json_rpc.service.finder"/>
+            <argument type="service" id="serializer"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="nanofelis_json_rpc.service.finder" class="Nanofelis\JsonRpcBundle\Service\ServiceFinder"
+                 public="false">
+            <argument type="tagged" tag="nanofelis_json_rpc" default-index-method="getServiceKey"/>
+        </service>
+
+        <service id="nanofelis_json_rpc.response.rpc_responder" class="Nanofelis\JsonRpcBundle\Response\RpcResponder"
+                 public="false">
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="nanofelis_json_rpc.action.doc" class="Nanofelis\JsonRpcBundle\Action\Doc"
+                 public="true">
+            <argument type="service" id="nanofelis_json_rpc.doc.responder"/>
+            <argument type="service" id="nanofelis_json_rpc.service.finder"/>
+        </service>
+
+        <service id="nanofelis_json_rpc.doc.responder" class="Nanofelis\JsonRpcBundle\Doc\DocResponder"
+                 public="false">
+            <argument type="service" id="twig"/>
+        </service>
+    </services>
+</container>

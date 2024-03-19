@@ -3,6 +3,6 @@ parameters:
         - .
     excludePaths:
         - %rootDir%/../../../vendor
-        - %rootDir%/../../../Tests
+        - %rootDir%/../../../tests
         - %rootDir%/../../../var
-    level: 6
+    level: 8

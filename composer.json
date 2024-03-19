@@ -14,22 +14,23 @@
         "php": "^8.0",
         "ext-json": "*",
         "symfony/event-dispatcher": "^5.4|^6.3|^7.0",
-        "symfony/options-resolver": "^5.4|^6.3|^7.0",
         "symfony/property-access": "^5.4|^6.3|^7.0",
         "symfony/serializer": "^5.4|^6.3|^7.0",
         "symfony/twig-bundle": "^5.4|^6.3|^7.0",
-        "symfony/framework-bundle": "^5.4|^6.3|^7.0"
+        "symfony/framework-bundle": "^5.4|^6.3|^7.0",
+        "symfony/options-resolver": "^7.0"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^5.4|^6.3|^7.0",
         "symfony/var-dumper": "^5.4|^6.3|^7.0",
         "phpstan/phpstan-symfony": "^1.0",
         "symfony/browser-kit": "^5.4|^6.3|^7.0",
-        "friendsofphp/php-cs-fixer": "^3.3"
+        "friendsofphp/php-cs-fixer": "^3.3",
+        "phpstan/phpstan": "^1.10"
     },
     "autoload": {
         "psr-4": {
-            "Nanofelis\\Bundle\\JsonRpcBundle\\": ""
+            "Nanofelis\\JsonRpcBundle\\": "src"
         },
         "exclude-from-classmap": [
             "/Tests/"
