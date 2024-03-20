@@ -12,7 +12,7 @@ class RpcResponse implements RpcResponseInterface
     /**
      * RpcResponse constructor.
      */
-    public function __construct(private mixed $data, private mixed $id = null)
+    public function __construct(private mixed $data, private int|string|null $id = null)
     {
     }
 

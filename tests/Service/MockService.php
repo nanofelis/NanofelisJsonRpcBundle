@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\JsonRpcBundle\Attribute\RpcNormalizationContext;
+use Nanofelis\JsonRpcBundle\Exception\RpcApplicationException;
 use Nanofelis\JsonRpcBundle\Service\AbstractRpcService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -44,7 +45,7 @@ class MockService extends AbstractRpcService
      */
     public function willThrowException()
     {
-        throw new \Exception('it went wrong', 99);
+        throw new RpcApplicationException('it went wrong', 99);
     }
 
     public function withNullables(?string $a = null, ?string $b = null): array

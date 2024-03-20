@@ -9,6 +9,7 @@ use Nanofelis\JsonRpcBundle\Exception\RpcInvalidParamsException;
 use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Request\RpcRequestHandler;
+use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
@@ -42,16 +43,17 @@ class RpcRequestHandlerTest extends TestCase
      *
      * @param null $expectedResult
      */
-    public function testHandle(RpcRequest $rpcRequest, $expectedResult = null, RpcResponseError $expectedError = null): void
+    public function testHandle(RpcRequest $rpcRequest, RpcResponse $expectedResult = null, RpcResponseError $expectedError = null): void
     {
         $this->argumentResolver->method('getArguments')->willReturn($rpcRequest->getParams() ?? []);
+        $this->normalizer->method('normalize')->willReturnArgument(0);
 
         $response = $this->requestHandler->handle($rpcRequest);
 
         if ($expectedError) {
             $this->assertSame($expectedError->getContent(), $response->getContent());
         } else {
-            $this->assertSame($expectedResult, $response);
+            $this->assertSame($expectedResult->getContent(), $response->getContent());
         }
     }
 
@@ -64,7 +66,7 @@ class RpcRequestHandlerTest extends TestCase
         $this->normalizer->expects($this->once())->method('normalize')
             ->with($this->isInstanceOf(\stdClass::class), null, ['test']);
 
-        $r = $this->requestHandler->handle($rpcRequest);
+        $this->requestHandler->handle($rpcRequest);
     }
 
     public function provideRpcRequest(): \Generator
@@ -72,17 +74,17 @@ class RpcRequestHandlerTest extends TestCase
         $badTypeRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add', params: ['arg1' => '5', 'arg2' => 5]);
 
         yield [$badTypeRpcRequest, null, new RpcResponseError(new RpcInvalidParamsException())];
-//
-//        $badArgCountRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add', params: ['arg1' => 5]);
-//
-//        yield [$badArgCountRpcRequest, null, new RpcResponseError(new RpcInvalidRequestException())];
-//
-//        $exceptionRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'willThrowException');
-//
-//        yield [$exceptionRpcRequest, null, new RpcResponseError(new RpcApplicationException())];
-//
-//        $successRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add', params: ['arg1' => 5, 'arg2' => 5]);
-//
-//        yield [$successRpcRequest, 10, null];
+
+        $badArgCountRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add', params: ['arg1' => 5]);
+
+        yield [$badArgCountRpcRequest, null, new RpcResponseError(new RpcInvalidParamsException())];
+
+        $exceptionRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'willThrowException');
+
+        yield [$exceptionRpcRequest, null, new RpcResponseError(new RpcApplicationException('it went wrong', 99))];
+
+        $successRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add', params: ['arg1' => 5, 'arg2' => 5]);
+
+        yield [$successRpcRequest, new RpcResponse(10), null];
     }
 }

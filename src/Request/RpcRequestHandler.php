@@ -70,9 +70,24 @@ class RpcRequestHandler
             throw new RpcInvalidParamsException(previous: $e);
         }
 
-        $result = $callable(...$arguments);
+        try {
+            $result = $callable(...$arguments);
+        } catch (\TypeError $e) {
+            if ($this->isInvalidParamsException($e, $serviceDescriptor)) {
+                throw new RpcInvalidParamsException(previous: $e);
+            }
+            throw $e;
+        }
 
         return $this->normalizeResult($result, $serviceDescriptor);
+    }
+
+    private function isInvalidParamsException(\TypeError $e, ServiceDescriptor $serviceDescriptor): bool
+    {
+        $trace = $e->getTrace();
+
+        /** @phpstan-ignore-next-line */
+        return $trace[0]['class'] === $serviceDescriptor->getServiceClass() && $trace[0]['function'] === $serviceDescriptor->getMethodName();
     }
 
     /**

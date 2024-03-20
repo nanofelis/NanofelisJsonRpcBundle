@@ -13,7 +13,7 @@ class RpcResponseError implements RpcResponseInterface
     /**
      * RpcResponseError constructor.
      */
-    public function __construct(private AbstractRpcException $rpcException, private mixed $id = null)
+    public function __construct(private AbstractRpcException $rpcException, private int|string|null $id = null)
     {
     }
 
@@ -36,10 +36,5 @@ class RpcResponseError implements RpcResponseInterface
     public function getRpcException(): AbstractRpcException
     {
         return $this->rpcException;
-    }
-
-    public function setRpcException(AbstractRpcException $rpcException): void
-    {
-        $this->rpcException = $rpcException;
     }
 }
