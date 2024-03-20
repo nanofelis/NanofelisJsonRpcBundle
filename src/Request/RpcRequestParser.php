@@ -69,7 +69,6 @@ class RpcRequestParser
 
             return $payload;
         }
-
         $payload->setIsBatch(true);
 
         foreach ($data as $subData) {
@@ -86,13 +85,20 @@ class RpcRequestParser
      */
     private function getRpcRequest(array $data): RpcRequest
     {
-        try {
-            /** @var RawRpcRequest $rawRpcRequest */
-            $rawRpcRequest = $this->serializer->denormalize($data, RawRpcRequest::class);
-        } catch (ExceptionInterface) {
+        if ($data['jsonrpc'] !== RpcRequest::JSON_RPC_VERSION) {
+            throw new RpcInvalidRequestException();
+        }
+        $methodParts = explode('.', $data['method'] ?? '');
+
+        if (count($methodParts) !== 2) {
             throw new RpcInvalidRequestException();
         }
 
-        return RpcRequest::fromRaw($rawRpcRequest);
+        return new RpcRequest(
+            serviceKey: $methodParts[0],
+            methodKey: $methodParts[1],
+            id: $data['id'] ?? null,
+            params: $data['params'] ?? null
+        );
     }
 }

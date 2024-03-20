@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Response;
 
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
-use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
+use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 
 class RpcResponseError implements RpcResponseInterface
 {
@@ -22,7 +22,7 @@ class RpcResponseError implements RpcResponseInterface
     public function getContent(): array
     {
         return [
-            'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
+            'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
             'error' => [
                 'code' => $this->rpcException->getCode(),
                 'message' => $this->rpcException->getMessage(),

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Request;
 
-use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
-
 class RpcRequest
 {
+    public const JSON_RPC_VERSION = '2.0';
+
     public function __construct(
         private string $serviceKey,
         private string $methodKey,
@@ -17,25 +17,6 @@ class RpcRequest
          */
         private ?array $params = null,
     ) {
-    }
-
-    /**
-     * @throws RpcInvalidRequestException
-     */
-    public static function fromRaw(RawRpcRequest $rawRpcRequest): self
-    {
-        $methodParts = explode('.', $rawRpcRequest->getMethod());
-
-        if (!\is_array($methodParts)) {
-            throw new RpcInvalidRequestException();
-        }
-
-        return new self(
-            serviceKey: $methodParts[0],
-            methodKey: $methodParts[1],
-            id: $rawRpcRequest->getId(),
-            params: $rawRpcRequest->getParams()
-        );
     }
 
     public function getId(): string|int|null

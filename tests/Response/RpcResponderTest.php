@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Tests\Response;
 
 use Nanofelis\JsonRpcBundle\Exception\RpcApplicationException;
-use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
 use Nanofelis\JsonRpcBundle\Request\RpcPayload;
+use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Responder\RpcResponder;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
@@ -43,12 +43,12 @@ class RpcResponderTest extends TestCase
         yield [$payload,
             [
                 [
-                    'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
+                    'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
                     'result' => 'success',
                     'id' => 1,
                 ],
                 [
-                    'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
+                    'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
                     'error' => [
                         'code' => 99,
                         'message' => 'error',
@@ -63,7 +63,7 @@ class RpcResponderTest extends TestCase
         $payload->addRpcResponse(new RpcResponse('success', 1));
 
         yield [$payload, [
-            'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,
+            'jsonrpc' => RpcRequest::JSON_RPC_VERSION,
             'result' => 'success',
             'id' => 1,
         ]];
