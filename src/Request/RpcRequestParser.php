@@ -46,8 +46,8 @@ class RpcRequestParser
     private function getPostData(Request $request): array
     {
         try {
-            $data = json_decode((string) $request->getContent(), true, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $e) {
+            $data = json_decode((string) $request->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        } catch (\Exception $e) {
             throw new RpcParseException(previous: $e);
         }
         if (!is_array($data)) {

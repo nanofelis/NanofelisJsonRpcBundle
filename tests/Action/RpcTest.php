@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Tests\Action;
 
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
+use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
 use Nanofelis\JsonRpcBundle\Tests\TestKernel;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -54,25 +55,25 @@ class RpcTest extends WebTestCase
 
     public function provideRpcRequest(): \Generator
     {
-        // Test regular rpc request
+        // regular rpc request
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'test'],
             ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test'],
         ];
 
-        // Test regular rpc request with params in wrong order
+        // regular rpc request with params in wrong order
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg2' => 1, 'arg1' => 3], 'id' => 'test'],
             ['jsonrpc' => '2.0', 'result' => 4, 'id' => 'test'],
         ];
 
-        // Test request resolver
+        // request resolver
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.requestValueResolver', 'params' => ['date' => '2017/01/01'], 'id' => 'test'],
             ['jsonrpc' => '2.0', 'result' => 'GET', 'id' => 'test'],
         ];
 
-        // Test batch of regular rpc request
+        // batch of regular rpc request
         yield [
             [
                 ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'test_0'],
@@ -84,19 +85,19 @@ class RpcTest extends WebTestCase
             ],
         ];
 
-        // Test rpc request with an array parameter
+        // rpc request with an array parameter
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.arrayParam', 'params' => ['a' => [1, 2], 'b' => 3]],
             ['jsonrpc' => '2.0', 'result' => [1, 2, 3], 'id' => null],
         ];
 
-        // Test rpc method which returns an object
+        // rpc method which returns an object
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.returnObject'],
             ['jsonrpc' => '2.0', 'result' => ['prop' => 'test'], 'id' => null],
         ];
 
-        // Test unknown method
+        // unknown method
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.unknownMethod', 'id' => 'test'],
             ['jsonrpc' => '2.0', 'error' => [
@@ -106,7 +107,7 @@ class RpcTest extends WebTestCase
             ], 'id' => 'test'],
         ];
 
-        // Test wrong parameter type
+        // wrong parameter type
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => '', 'arg2' => 2], 'id' => 'test'],
             ['jsonrpc' => '2.0', 'error' => [
@@ -116,7 +117,7 @@ class RpcTest extends WebTestCase
             ], 'id' => 'test'],
         ];
 
-        // Test wrong params names
+        // wrong params names
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['wrongParam' => 1]],
             ['jsonrpc' => '2.0', 'error' => [
@@ -126,7 +127,7 @@ class RpcTest extends WebTestCase
             ], 'id' => null],
         ];
 
-        // Test application exception handling
+        // application exception handling
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.willThrowException'],
             ['jsonrpc' => '2.0', 'error' => [
@@ -136,13 +137,13 @@ class RpcTest extends WebTestCase
             ], 'id' => null],
         ];
 
-        // Test nullable arguments
+        // nullable arguments
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.withNullables', 'params' => ['b' => 'beta']],
             ['jsonrpc' => '2.0', 'result' => ['a' => null, 'b' => 'beta'], 'id' => null],
         ];
 
-        // Test with a MapRequestPayload annotation
+        // MapRequestPayload annotation
 //        yield [
 //            ['jsonrpc' => '2.0', 'method' => 'mockService.withMapRequest', 'params' => ['a' => 10, 'b' => 'alpha', 'c' => true]],
 //            ['jsonrpc' => '2.0', 'result' => ['a' => 10, 'b' => 'alpha', 'c' => true], 'id' => null],

@@ -25,7 +25,7 @@ class Rpc
         $rpcPayload = $this->parser->parse($request);
 
         foreach ($rpcPayload->getRpcRequests() as $rpcRequest) {
-            $this->rpcRequestHandler->handle($rpcRequest);
+            $rpcPayload->addRpcResponse($this->rpcRequestHandler->handle($rpcRequest));
         }
 
         return ($this->responder)($rpcPayload);

@@ -21,7 +21,6 @@ class RpcResponderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->responder = new RpcResponder();
     }
 
@@ -37,14 +36,11 @@ class RpcResponderTest extends TestCase
 
     public function provideRpcPayload(): \Generator
     {
-        $errorException = new RpcApplicationException('error', 99);
-        $errorException->setData(['message' => 'details']);
-
         $payload = new RpcPayload();
         $payload->setIsBatch(true);
-        $payload->addRpcRequest(new RpcRequest(serviceKey: 'mockService', methodKey: 'add'));
         $payload->addRpcResponse(new RpcResponse('success', 1));
-        $payload->addRpcRequest(new RpcRequest(serviceKey: 'mockService', methodKey: 'add'));
+        $errorException = new RpcApplicationException('error', 99);
+        $errorException->setData(['message' => 'details']);
         $payload->addRpcResponse(new RpcResponseError($errorException, 2));
 
         yield [$payload,
@@ -67,7 +63,7 @@ class RpcResponderTest extends TestCase
         ];
 
         $payload = new RpcPayload();
-        $payload->addRpcRequest(new RpcRequest(serviceKey: 'mockService', methodKey: 'add'));
+        $payload->addRpcResponse(new RpcResponse('success', 1));
 
         yield [$payload, [
             'jsonrpc' => RawRpcRequest::JSON_RPC_VERSION,

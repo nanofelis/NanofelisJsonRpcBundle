@@ -26,33 +26,32 @@ class ServiceFinderTest extends TestCase
     }
 
     /**
-     * @dataProvider providePayload
-     *
      * @throws RpcMethodNotFoundException
      */
-    public function testFind(RpcRequest $payload, ?string $expectedResult, string $expectedException = null): void
+    public function testFind(): void
     {
-        if ($expectedException) {
-            $this->expectException($expectedException);
-        }
-
         $serviceLocator = new ServiceFinder($this->services);
+        $serviceDesc = $serviceLocator->find(new RpcRequest(serviceKey: 'mockService', methodKey: 'add'));
 
-        $this->assertInstanceOf($expectedResult, $serviceLocator->find($payload));
+        $this->assertInstanceOf(MockService::class, $serviceDesc->getService());
+        $this->assertSame('add', $serviceDesc->getMethodName());
     }
 
-    public function providePayload(): \Generator
+    public function testFindUnknownService(): void
     {
-        $rpcRequest = new RpcRequest(serviceKey: 'add', methodKey: 'mockService');
+        $serviceLocator = new ServiceFinder($this->services);
 
-        yield [$rpcRequest, ServiceDescriptor::class];
+        $this->expectException(RpcMethodNotFoundException::class);
 
-        $rpcRequestUnknownService = new RpcRequest(serviceKey: 'unknown', methodKey: 'add');
+        $serviceLocator->find(new RpcRequest(serviceKey: 'unknown', methodKey: 'add'));
+    }
 
-        yield [$rpcRequestUnknownService, null, RpcMethodNotFoundException::class];
+    public function testFindUnknownMethod(): void
+    {
+        $serviceLocator = new ServiceFinder($this->services);
 
-        $rpcRequestUnknownMethod = new RpcRequest(serviceKey: 'add', methodKey: 'unknown');
+        $this->expectException(RpcMethodNotFoundException::class);
 
-        yield [$rpcRequestUnknownMethod, null, RpcMethodNotFoundException::class];
+        $serviceLocator->find(new RpcRequest(serviceKey: 'mockService', methodKey: 'unknown'));
     }
 }
