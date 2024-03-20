@@ -25,7 +25,7 @@ abstract class AbstractRpcException extends \Exception implements RpcDataExcepti
      */
     private ?array $data = null;
 
-    public function __construct(string $message = '', int $code = 0, \Throwable $previous = null)
+    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null)
     {
         if (empty($message) && isset(self::MESSAGES[$code])) {
             $message = self::MESSAGES[$code];

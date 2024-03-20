@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Responder;
 
 use Nanofelis\JsonRpcBundle\Request\RpcPayload;
-use Nanofelis\JsonRpcBundle\Request\RpcRequest;
-use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -17,7 +15,7 @@ class RpcResponder
         $responses = $payload->getRpcResponses();
 
         if ($payload->isBatch()) {
-            $responseContent = array_map(fn(RpcResponseInterface $rpcResponse) => $rpcResponse->getContent(), $responses);
+            $responseContent = array_map(fn (RpcResponseInterface $rpcResponse) => $rpcResponse->getContent(), $responses);
         } else {
             $responseContent = $responses[0]->getContent();
         }

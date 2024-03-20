@@ -11,7 +11,7 @@ class RpcRequest
     public function __construct(
         private string $serviceKey,
         private string $methodKey,
-        private null|string|int $id = null,
+        private string|int|null $id = null,
         /**
          * @var array<string,mixed>|null
          */
@@ -26,7 +26,7 @@ class RpcRequest
     {
         $methodParts = explode('.', $rawRpcRequest->getMethod());
 
-        if (!is_array($methodParts)) {
+        if (!\is_array($methodParts)) {
             throw new RpcInvalidRequestException();
         }
 
@@ -38,7 +38,7 @@ class RpcRequest
         );
     }
 
-    public function getId(): mixed
+    public function getId(): string|int|null
     {
         return $this->id;
     }

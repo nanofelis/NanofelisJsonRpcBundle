@@ -42,6 +42,7 @@ class RpcRequestHandler
             if (!$e instanceof AbstractRpcException) {
                 throw $e;
             }
+
             return new RpcResponseError($e, $rpcRequest->getId());
         }
     }
@@ -86,7 +87,7 @@ class RpcRequestHandler
     {
         $trace = $e->getTrace();
 
-        /** @phpstan-ignore-next-line */
+        /* @phpstan-ignore-next-line */
         return $trace[0]['class'] === $serviceDescriptor->getServiceClass() && $trace[0]['function'] === $serviceDescriptor->getMethodName();
     }
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Response;
 
 use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
-use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 
 class RpcResponse implements RpcResponseInterface
 {

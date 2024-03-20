@@ -9,8 +9,6 @@ use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\JsonRpcBundle\Exception\RpcParseException;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\OptionsResolver\Exception\ExceptionInterface as OptionResolverException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Serializer;
@@ -46,11 +44,11 @@ class RpcRequestParser
     private function getPostData(Request $request): array
     {
         try {
-            $data = json_decode((string) $request->getContent(), true, flags: JSON_THROW_ON_ERROR);
+            $data = json_decode((string) $request->getContent(), true, flags: \JSON_THROW_ON_ERROR);
         } catch (\Exception $e) {
             throw new RpcParseException(previous: $e);
         }
-        if (!is_array($data)) {
+        if (!\is_array($data)) {
             throw new RpcInvalidRequestException();
         }
 

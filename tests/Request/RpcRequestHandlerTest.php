@@ -6,7 +6,6 @@ namespace Nanofelis\JsonRpcBundle\Tests\Request;
 
 use Nanofelis\JsonRpcBundle\Exception\RpcApplicationException;
 use Nanofelis\JsonRpcBundle\Exception\RpcInvalidParamsException;
-use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Request\RpcRequestHandler;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
@@ -43,7 +42,7 @@ class RpcRequestHandlerTest extends TestCase
      *
      * @param null $expectedResult
      */
-    public function testHandle(RpcRequest $rpcRequest, RpcResponse $expectedResult = null, RpcResponseError $expectedError = null): void
+    public function testHandle(RpcRequest $rpcRequest, ?RpcResponse $expectedResult = null, ?RpcResponseError $expectedError = null): void
     {
         $this->argumentResolver->method('getArguments')->willReturn($rpcRequest->getParams() ?? []);
         $this->normalizer->method('normalize')->willReturnArgument(0);

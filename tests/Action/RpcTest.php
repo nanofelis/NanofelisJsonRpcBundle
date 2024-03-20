@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Tests\Action;
 
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
-use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
 use Nanofelis\JsonRpcBundle\Tests\TestKernel;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -143,10 +142,10 @@ class RpcTest extends WebTestCase
             ['jsonrpc' => '2.0', 'result' => ['a' => null, 'b' => 'beta'], 'id' => null],
         ];
 
-        // MapRequestPayload annotation
-//        yield [
-//            ['jsonrpc' => '2.0', 'method' => 'mockService.withMapRequest', 'params' => ['a' => 10, 'b' => 'alpha', 'c' => true]],
-//            ['jsonrpc' => '2.0', 'result' => ['a' => 10, 'b' => 'alpha', 'c' => true], 'id' => null],
-//        ];
+        // todo: MapRequestPayload annotation
+        //        yield [
+        //            ['jsonrpc' => '2.0', 'method' => 'mockService.withMapRequest', 'params' => ['a' => 10, 'b' => 'alpha', 'c' => true]],
+        //            ['jsonrpc' => '2.0', 'result' => ['a' => 10, 'b' => 'alpha', 'c' => true], 'id' => null],
+        //        ];
     }
 }

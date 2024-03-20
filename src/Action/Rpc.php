@@ -16,8 +16,7 @@ class Rpc
         private RpcRequestParser $parser,
         private RpcRequestHandler $rpcRequestHandler,
         private RpcResponder $responder,
-    )
-    {
+    ) {
     }
 
     public function __invoke(Request $request): JsonResponse

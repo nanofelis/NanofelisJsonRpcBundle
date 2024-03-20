@@ -17,7 +17,7 @@ or
 rpc:
     path: /
     controller: nanofelis_json_rpc.action.rpc
-    methods: GET|POST
+    methods: POST
 
 rpc_doc:
     path: /doc
@@ -175,7 +175,7 @@ class ArticleNormalizer implements NormalizerInterface
 
 Events Hooks
 ------------
-You can hook to the 2 following events in the rpc request lifecycle:
+You can hook to the following event in the rpc request lifecycle:
 
 __nanofelis_json_rpc.before_method__  
 __Event Class__: RpcBeforeMethodEvent
@@ -190,22 +190,3 @@ public function onRpcBeforeMethod(RpcBeforeMethodEvent $event)
     $serviceDescriptor = $event->getServiceDescriptor();
 }
 ```
-
-__nanofelis_json_rpc.before_response__  
-__Event Class__: RpcBeforeResponseEvent
-
-This event is dispatched just before the error or success response is sent. You can use it to alter the RPC response data.
-
-```php
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
-
-public function onRpcBeforeResponse(RpcBeforeResponseEvent $event)
-{
-    $rpcRequest = $event->getRpcRequest();
-    $rpcResponse = $rpcRequest->getReponse() ?: $rpcRequest->getReponseError() 
-}
-```
-
-Documentation
------------
-The bundle generates a documentation page of all registered RPC services on the route `rpc_doc` 

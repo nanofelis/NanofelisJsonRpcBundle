@@ -6,7 +6,6 @@ namespace Nanofelis\JsonRpcBundle\Response;
 
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
-use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 
 class RpcResponseError implements RpcResponseInterface
 {

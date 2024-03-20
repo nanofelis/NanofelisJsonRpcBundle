@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Request;
@@ -20,9 +21,8 @@ class RawRpcRequest
          * @var array<string,mixed>|null
          */
         private ?array $params = null,
-    )
-    {
-        if ($this->jsonrpc !== self::JSON_RPC_VERSION) {
+    ) {
+        if (self::JSON_RPC_VERSION !== $this->jsonrpc) {
             throw new RpcInvalidRequestException();
         }
     }

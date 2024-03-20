@@ -32,16 +32,5 @@
                  public="false">
             <argument type="service" id="event_dispatcher"/>
         </service>
-
-        <service id="nanofelis_json_rpc.action.doc" class="Nanofelis\JsonRpcBundle\Action\Doc"
-                 public="true">
-            <argument type="service" id="nanofelis_json_rpc.doc.responder"/>
-            <argument type="service" id="nanofelis_json_rpc.service.finder"/>
-        </service>
-
-        <service id="nanofelis_json_rpc.doc.responder" class="Nanofelis\JsonRpcBundle\Responder\DocResponder"
-                 public="false">
-            <argument type="service" id="twig"/>
-        </service>
     </services>
 </container>

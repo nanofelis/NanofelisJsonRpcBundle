@@ -6,9 +6,7 @@ namespace Nanofelis\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
-use Nanofelis\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class ServiceFinderTest extends TestCase

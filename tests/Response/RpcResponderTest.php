@@ -7,13 +7,10 @@ namespace Nanofelis\JsonRpcBundle\Tests\Response;
 use Nanofelis\JsonRpcBundle\Exception\RpcApplicationException;
 use Nanofelis\JsonRpcBundle\Request\RawRpcRequest;
 use Nanofelis\JsonRpcBundle\Request\RpcPayload;
-use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Responder\RpcResponder;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class RpcResponderTest extends TestCase
 {
