@@ -12,6 +12,7 @@ return (new PhpCsFixer\Config())
         'declare_strict_types' => true,
         'array_syntax'         => ['syntax' => 'short'],
         'protected_to_private' => false,
+        'new_with_parentheses' => true,
     ))
     ->setRiskyAllowed(true)
     ->setFinder($finder);

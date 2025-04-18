@@ -57,7 +57,7 @@ class ServiceFinderTest extends TestCase
     public function testServiceWithoutAttributeThrowsException(): void
     {
         $services = new \ArrayIterator([
-            'brokenService' => new class {},
+            'brokenService' => new class() {},
         ]);
 
         $this->expectException(RpcServiceKeyMissingException::class);

@@ -15,7 +15,7 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                php: [8.0]
+                php: [8.2]
                 symfony: [^5.4, 6.0]
 
         steps:
@@ -51,7 +51,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: 8.0
+                  php-version: 8.2
                   coverage: none
 
             - name: Install dependencies
@@ -73,7 +73,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: 8.0
+                  php-version: 8.2
                   coverage: none
 
             - name: Validate composer.json
@@ -89,7 +89,7 @@ jobs:
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: 8.0
+                  php-version: 8.2
                   coverage: none
 
             - name: Install dependencies

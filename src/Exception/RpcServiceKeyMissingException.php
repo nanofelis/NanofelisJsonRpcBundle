@@ -8,7 +8,7 @@ class RpcServiceKeyMissingException extends AbstractRpcException
 {
     public function __construct(string $serviceClass, ?\Throwable $previous = null)
     {
-        $message = \sprintf('The service "%s" must define a key via #[JsonRpcService]', $serviceClass);
+        $message = sprintf('The service "%s" must define a key via #[JsonRpcService]', $serviceClass);
 
         parent::__construct($message, self::INTERNAL, $previous);
     }
