@@ -2,7 +2,11 @@
     "name": "nanofelis/json-rpc-bundle",
     "type": "symfony-bundle",
     "description": "This bundle provides a JSON RPC 2.0 implementation for Symfony",
-    "keywords": ["json-rpc", "api", "symfony"],
+    "keywords": [
+        "json-rpc",
+        "api",
+        "symfony"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -36,7 +40,9 @@
         ]
     },
     "autoload-dev": {
-        "psr-4": { "Nanofelis\\JsonRpcBundle\\Tests\\": "tests/" }
+        "psr-4": {
+            "Nanofelis\\JsonRpcBundle\\Tests\\": "tests/"
+        }
     },
     "extra": {
         "branch-alias": {

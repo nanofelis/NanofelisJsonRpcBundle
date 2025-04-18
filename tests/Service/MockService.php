@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Tests\Service;
 
+use Nanofelis\JsonRpcBundle\Attribute\JsonRpcService;
 use Nanofelis\JsonRpcBundle\Attribute\RpcNormalizationContext;
 use Nanofelis\JsonRpcBundle\Exception\RpcApplicationException;
-use Nanofelis\JsonRpcBundle\Service\AbstractRpcService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 
-class MockService extends AbstractRpcService
+#[JsonRpcService('mockService')]
+class MockService
 {
-    public static function getServiceKey(): string
-    {
-        return 'mockService';
-    }
-
     public function add(int $arg1, int $arg2): int
     {
         return $arg1 + $arg2;

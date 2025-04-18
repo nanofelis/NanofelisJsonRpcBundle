@@ -26,7 +26,7 @@ class RpcRequestHandler
         private ArgumentResolverInterface $argumentResolver,
         private ServiceFinder $serviceFinder,
         private NormalizerInterface $normalizer,
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 

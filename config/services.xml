@@ -25,7 +25,7 @@
 
         <service id="nanofelis_json_rpc.service.finder" class="Nanofelis\JsonRpcBundle\Service\ServiceFinder"
                  public="false">
-            <argument type="tagged" tag="nanofelis_json_rpc" default-index-method="getServiceKey"/>
+            <argument type="tagged_iterator" tag="nanofelis_json_rpc"/>
         </service>
 
         <service id="nanofelis_json_rpc.response.rpc_responder" class="Nanofelis\JsonRpcBundle\Responder\RpcResponder"
