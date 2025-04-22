@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Tests\Service;
 
 use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
+use Nanofelis\JsonRpcBundle\Exception\RpcServiceKeyMissingException;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use PHPUnit\Framework\TestCase;
@@ -51,5 +52,16 @@ class ServiceFinderTest extends TestCase
         $this->expectException(RpcMethodNotFoundException::class);
 
         $serviceLocator->find(new RpcRequest(serviceKey: 'mockService', methodKey: 'unknown'));
+    }
+
+    public function testServiceWithoutAttributeThrowsException(): void
+    {
+        $services = new \ArrayIterator([
+            'brokenService' => new class() {},
+        ]);
+
+        $this->expectException(RpcServiceKeyMissingException::class);
+
+        new ServiceFinder($services);
     }
 }

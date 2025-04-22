@@ -9,19 +9,9 @@ use Nanofelis\JsonRpcBundle\Exception\RpcInvalidRequestException;
 use Nanofelis\JsonRpcBundle\Exception\RpcParseException;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class RpcRequestParser
 {
-    private Serializer $serializer;
-
-    public function __construct()
-    {
-        $this->serializer = new Serializer([new GetSetMethodNormalizer()]);
-    }
-
     public function parse(Request $request): RpcPayload
     {
         try {
@@ -85,12 +75,12 @@ class RpcRequestParser
      */
     private function getRpcRequest(array $data): RpcRequest
     {
-        if ($data['jsonrpc'] !== RpcRequest::JSON_RPC_VERSION) {
+        if (RpcRequest::JSON_RPC_VERSION !== $data['jsonrpc']) {
             throw new RpcInvalidRequestException();
         }
         $methodParts = explode('.', $data['method'] ?? '');
 
-        if (count($methodParts) !== 2) {
+        if (2 !== \count($methodParts)) {
             throw new RpcInvalidRequestException();
         }
 

@@ -12,7 +12,7 @@
     </exclude>
   </coverage>
   <php>
-    <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[direct]=0"/>
+    <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
     <env name="KERNEL_CLASS" value="Nanofelis\JsonRpcBundle\Tests\TestKernel"/>
   </php>
   <testsuites>
