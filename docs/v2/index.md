@@ -188,3 +188,22 @@ public function onRpcBeforeMethod(RpcBeforeMethodEvent $event)
     $serviceDescriptor = $event->getServiceDescriptor();
 }
 ```
+
+## Authorization (Symfony Security)
+This bundle provides an optional authorization mechanism using
+the `#[RpcIsGranted]` attribute.
+
+### Requirements
+
+- `symfony/security-bundle`
+
+### Usage
+
+```php
+use Nanofelis\JsonRpcBundle\Attribute\RpcIsGranted;
+
+#[RpcIsGranted('ROLE_ADMIN')]
+public function delete(): void
+{
+}
+

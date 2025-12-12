@@ -12,6 +12,7 @@ use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseInterface;
+use Nanofelis\JsonRpcBundle\Service\RpcAuthorizationChecker;
 use Nanofelis\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ class RpcRequestHandler
         private ServiceFinder $serviceFinder,
         private NormalizerInterface $normalizer,
         private EventDispatcherInterface $eventDispatcher,
+        private RpcAuthorizationChecker $authorizationChecker,
     ) {
     }
 
@@ -59,6 +61,8 @@ class RpcRequestHandler
         $method = $serviceDescriptor->getMethodName();
         /** @var callable $callable */
         $callable = [$service, $method];
+
+        $this->authorizationChecker->check($serviceDescriptor->getMethodReflection());
 
         $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 

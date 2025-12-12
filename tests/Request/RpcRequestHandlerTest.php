@@ -10,6 +10,7 @@ use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Request\RpcRequestHandler;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
+use Nanofelis\JsonRpcBundle\Service\RpcAuthorizationChecker;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -25,6 +26,7 @@ class RpcRequestHandlerTest extends TestCase
     private NormalizerInterface|MockObject $normalizer;
 
     private ArgumentResolverInterface|MockObject $argumentResolver;
+    private RpcAuthorizationChecker|MockObject $authorizationChecker;
 
     protected function setUp(): void
     {
@@ -33,8 +35,17 @@ class RpcRequestHandlerTest extends TestCase
         $this->normalizer = $this->createMock(NormalizerInterface::class);
         $this->argumentResolver = $this->createMock(ArgumentResolverInterface::class);
 
+        $authorizationChecker = $this->createMock(RpcAuthorizationChecker::class);
+
         $serviceFinder = new ServiceFinder($services);
-        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher);
+
+        $this->requestHandler = new RpcRequestHandler(
+            $this->argumentResolver,
+            $serviceFinder,
+            $this->normalizer,
+            $eventDispatcher,
+            $authorizationChecker
+        );
     }
 
     /**

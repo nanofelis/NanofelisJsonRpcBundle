@@ -21,6 +21,7 @@
             <argument type="service" id="nanofelis_json_rpc.service.finder"/>
             <argument type="service" id="serializer"/>
             <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="nanofelis_json_rpc.service.authorization"/>
         </service>
 
         <service id="nanofelis_json_rpc.service.finder" class="Nanofelis\JsonRpcBundle\Service\ServiceFinder"
@@ -32,5 +33,12 @@
                  public="false">
             <argument type="service" id="event_dispatcher"/>
         </service>
+
+        <service id="nanofelis_json_rpc.service.authorization"
+                 class="Nanofelis\JsonRpcBundle\Service\RpcAuthorizationChecker"
+                 public="false">
+            <argument type="service" id="security.authorization_checker" on-invalid="null"/>
+        </service>
+
     </services>
 </container>

@@ -1,6 +1,6 @@
 The NanofelisJsonRpcBundle is a symfony friendly implementation of the  [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification.
 
-⚠️ Version 2.x – Breaking Change  
+⚠️ Version 5.x – Breaking Change  
 This version introduces a breaking change:  
 - All RPC services must now use the `#[JsonRpcService('serviceKey')]` attribute.  
 - The method `getServiceKey()` has been removed.  
@@ -47,6 +47,14 @@ return [
     Nanofelis\JsonRpcBundle\NanofelisJsonRpcBundle::class => ['all' => true],
 ];
 ```
+
+```md
+### Authorization (optional)
+
+RPC methods can be protected using the `#[RpcIsGranted]` attribute
+when Symfony Security is installed.
+
+See the documentation for details.
 
 Documentation
 =============
