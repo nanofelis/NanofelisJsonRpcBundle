@@ -8,7 +8,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
 class NanofelisJsonRpcExtension extends Extension implements CompilerPassInterface
 {
@@ -19,8 +19,8 @@ class NanofelisJsonRpcExtension extends Extension implements CompilerPassInterfa
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__).'/../config'));
-        $loader->load('services.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__).'/../config'));
+        $loader->load('services.php');
     }
 
     public function process(ContainerBuilder $container): void

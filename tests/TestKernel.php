@@ -38,7 +38,7 @@ class TestKernel extends Kernel implements CompilerPassInterface
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
-        $routes->import(__DIR__.'/../config/routes.xml');
+        $routes->import(__DIR__.'/../config/routes.php');
     }
 
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
