@@ -110,7 +110,9 @@ Arguments Resolver
 ----------------
 This bundle supports the built-in [Argument Resolver](https://symfony.com/doc/current/controller/value_resolver.html) from the Symfony Core for RPC methods.
 
-As for a regular controller method, dates and Doctrine entities for example are automatically converted if a parameter's name matches a method argument with the correct type hinting or attribute.
+RPC methods use the same controller argument lifecycle as regular Symfony controllers. Once arguments have been resolved, the bundle dispatches Symfony's `kernel.controller_arguments` event before invoking the RPC method. Framework and application listeners can therefore inspect, validate or replace the resolved arguments through the standard Symfony extension points.
+
+Dates and Doctrine entities, for example, are automatically converted if a parameter's name matches a method argument with the correct type hinting or attribute. JSON-RPC parameters are also exposed through the request used by Symfony's argument resolver.
 
 ```php
 namespace App\RpcServices;

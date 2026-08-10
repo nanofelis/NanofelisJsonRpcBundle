@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed
+
+- Run RPC methods through Symfony's standard controller argument lifecycle, including the `kernel.controller_arguments` event.
+
 ## [2.0.0] - 2025-XX-XX
 
 ### ⚠️ Breaking changes

@@ -16,6 +16,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RpcRequestHandlerTest extends TestCase
@@ -34,7 +35,8 @@ class RpcRequestHandlerTest extends TestCase
         $this->argumentResolver = $this->createMock(ArgumentResolverInterface::class);
 
         $serviceFinder = new ServiceFinder($services);
-        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher, $kernel);
     }
 
     /**
