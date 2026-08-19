@@ -99,7 +99,8 @@ class RpcRequestHandler
     {
         $trace = $e->getTrace();
 
-        return $trace[0]['class'] === $serviceDescriptor->getServiceClass() && $trace[0]['function'] === $serviceDescriptor->getMethodName();
+        // 'class' is absent for plain-function frames, so it must not be accessed blindly
+        return ($trace[0]['class'] ?? null) === $serviceDescriptor->getServiceClass() && $trace[0]['function'] === $serviceDescriptor->getMethodName();
     }
 
     /**
