@@ -13,9 +13,27 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 #[JsonRpcService('mockService')]
 class MockService
 {
+    /**
+     * Present so that the exposure guards can be covered: a scalar, defaulted constructor
+     * argument is exactly what makes __construct remotely callable if it is not rejected.
+     */
+    public function __construct(public string $dependency = 'injected')
+    {
+    }
+
     public function add(int $arg1, int $arg2): int
     {
         return $arg1 + $arg2;
+    }
+
+    public function __toString(): string
+    {
+        return 'magic';
+    }
+
+    public function readDependency(): string
+    {
+        return $this->dependency;
     }
 
     public function arrayParam(array $a, int $b): array
@@ -55,5 +73,10 @@ class MockService
     public function withMapRequest(#[MapRequestPayload] MockDTO $fakeDTO): array
     {
         return ['a' => $fakeDTO->a, 'b' => $fakeDTO->b, 'c' => $fakeDTO->c];
+    }
+
+    private function privateMethod(): string
+    {
+        return 'must not be reachable';
     }
 }

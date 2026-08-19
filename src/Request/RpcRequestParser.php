@@ -12,6 +12,14 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RpcRequestParser
 {
+    /**
+     * @param int $maxBatchSize maximum number of requests accepted in a single batch call,
+     *                          0 to disable the limit
+     */
+    public function __construct(private int $maxBatchSize = 0)
+    {
+    }
+
     public function parse(Request $request): RpcPayload
     {
         try {
@@ -60,6 +68,12 @@ class RpcRequestParser
             return $payload;
         }
         $payload->setIsBatch(true);
+
+        $batchSize = \count($data);
+
+        if ($this->maxBatchSize > 0 && $batchSize > $this->maxBatchSize) {
+            throw new RpcInvalidRequestException(\sprintf('batch size %d exceeds the maximum of %d', $batchSize, $this->maxBatchSize));
+        }
 
         foreach ($data as $subData) {
             $payload->addRpcRequest($this->getRpcRequest((array) $subData));

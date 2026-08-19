@@ -4,46 +4,23 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Service;
 
-use Nanofelis\JsonRpcBundle\Attribute\JsonRpcService;
 use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
-use Nanofelis\JsonRpcBundle\Exception\RpcServiceKeyMissingException;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
+use Psr\Container\ContainerInterface;
 
 class ServiceFinder
 {
     /**
-     * @var array<string, object>
+     * @var array<string,ServiceDescriptor>
      */
-    private array $rpcServices = [];
+    private array $descriptors = [];
 
     /**
-     * @param \Traversable<string, object> $rpcServices
+     * $rpcServices is a service locator keyed by #[JsonRpcService] key, built by RpcServicePass,
+     * so that only the service a request actually names is ever instantiated.
      */
-    public function __construct(\Traversable $rpcServices)
+    public function __construct(private ContainerInterface $rpcServices)
     {
-        foreach ($rpcServices as $service) {
-            $key = $this->resolveServiceKey($service);
-            if (null === $key) {
-                throw new RpcServiceKeyMissingException($service::class);
-            }
-
-            $this->rpcServices[$key] = $service;
-        }
-    }
-
-    private function resolveServiceKey(object $service): ?string
-    {
-        $reflectionClass = new \ReflectionClass($service);
-
-        $attribute = $reflectionClass->getAttributes(JsonRpcService::class)[0] ?? null;
-        if ($attribute) {
-            /** @var JsonRpcService $instance */
-            $instance = $attribute->newInstance();
-
-            return $instance->serviceKey;
-        }
-
-        return null;
     }
 
     /**
@@ -51,10 +28,29 @@ class ServiceFinder
      */
     public function find(RpcRequest $rpcRequest): ServiceDescriptor
     {
-        if (!$service = ($this->rpcServices[$rpcRequest->getServiceKey()] ?? null)) {
+        $serviceKey = $rpcRequest->getServiceKey();
+        $methodKey = $rpcRequest->getMethodKey();
+
+        // descriptors are immutable, so they can be shared across the requests of a batch
+        return $this->descriptors[$serviceKey.'.'.$methodKey] ??= new ServiceDescriptor(
+            $this->getService($serviceKey),
+            $methodKey,
+        );
+    }
+
+    /**
+     * @throws RpcMethodNotFoundException
+     */
+    private function getService(string $serviceKey): object
+    {
+        if (!$this->rpcServices->has($serviceKey)) {
             throw new RpcMethodNotFoundException();
         }
 
-        return new ServiceDescriptor($service, $rpcRequest->getMethodKey());
+        // PSR-11 get() is untyped, but a service locator only ever holds services
+        /** @var object $service */
+        $service = $this->rpcServices->get($serviceKey);
+
+        return $service;
     }
 }

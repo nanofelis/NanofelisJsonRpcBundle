@@ -14,6 +14,7 @@ use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -29,12 +30,13 @@ class RpcRequestHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $services = new \ArrayIterator(['mockService' => new MockService()]);
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
         $this->normalizer = $this->createMock(NormalizerInterface::class);
         $this->argumentResolver = $this->createMock(ArgumentResolverInterface::class);
 
-        $serviceFinder = new ServiceFinder($services);
+        $serviceFinder = new ServiceFinder(new ServiceLocator([
+            'mockService' => static fn () => new MockService(),
+        ]));
         $kernel = $this->createMock(HttpKernelInterface::class);
         $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher, $kernel);
     }

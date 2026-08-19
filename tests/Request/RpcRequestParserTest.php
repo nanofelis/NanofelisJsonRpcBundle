@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Tests\Request;
 
+use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\JsonRpcBundle\Request\RpcPayload;
 use Nanofelis\JsonRpcBundle\Request\RpcRequestParser;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
@@ -49,5 +50,43 @@ class RpcRequestParserTest extends TestCase
         $payload = $this->parser->parse($request);
 
         $this->assertInstanceOf(RpcResponseError::class, $payload->getRpcResponses()[0]);
+    }
+
+    public function testBatchWithinTheLimitIsAccepted(): void
+    {
+        $payload = (new RpcRequestParser(maxBatchSize: 2))->parse($this->createBatchRequest(2));
+
+        $this->assertCount(2, $payload->getRpcRequests());
+        $this->assertEmpty($payload->getRpcResponses());
+    }
+
+    public function testOversizedBatchIsRejected(): void
+    {
+        $payload = (new RpcRequestParser(maxBatchSize: 2))->parse($this->createBatchRequest(3));
+
+        $this->assertEmpty($payload->getRpcRequests());
+
+        $error = $payload->getRpcResponses()[0];
+        $this->assertInstanceOf(RpcResponseError::class, $error);
+        $this->assertSame(AbstractRpcException::INVALID_REQUEST, $error->getRpcException()->getCode());
+    }
+
+    public function testBatchLimitCanBeDisabled(): void
+    {
+        $payload = (new RpcRequestParser(maxBatchSize: 0))->parse($this->createBatchRequest(50));
+
+        $this->assertCount(50, $payload->getRpcRequests());
+    }
+
+    private function createBatchRequest(int $size): Request
+    {
+        $batch = array_fill(0, $size, [
+            'jsonrpc' => '2.0',
+            'method' => 'mockService.add',
+            'params' => [1, 2],
+            'id' => 'test',
+        ]);
+
+        return Request::create(uri: '/', method: 'POST', content: json_encode($batch));
     }
 }

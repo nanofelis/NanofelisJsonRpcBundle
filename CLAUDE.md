@@ -35,7 +35,9 @@ CI (`.github/workflows/ci.yml`) runs the four checks above on PHP 8.4, and tests
 
 ## Architecture
 
-Single POST endpoint (`config/routes.php` → `nanofelis_json_rpc.action.rpc`). All services are wired explicitly in `config/services.php` (PHP DSL) and loaded by `NanofelisJsonRpcExtension`; there is no bundle configuration tree and no `Configuration` class.
+Single POST endpoint (`config/routes.php` → `nanofelis_json_rpc.action.rpc`). All services are wired explicitly in `config/services.php` (PHP DSL) and loaded by `NanofelisJsonRpcExtension`. The configuration tree is deliberately minimal — `src/DependencyInjection/Configuration.php` exposes only `max_batch_size`.
+
+Two `config/services.php` arguments are `abstract_arg()` placeholders, so the container fails to compile if their provider ever stops running: the parser's batch limit (filled by `NanofelisJsonRpcExtension::load()`) and the finder's service locator (filled by `RpcServicePass`).
 
 Request flow, all through `src/Action/Rpc.php`:
 
@@ -45,7 +47,9 @@ Request flow, all through `src/Action/Rpc.php`:
 
 Key design points to preserve when changing things:
 
-- **Service discovery is two-part.** A class is exposed only if it carries the DI tag `nanofelis_json_rpc` *and* the `#[JsonRpcService('key')]` attribute. The tag makes it visible to `ServiceFinder` via `tagged_iterator`; the attribute supplies the lookup key. There is **no** `registerAttributeForAutoconfiguration`, so the attribute alone does nothing — users still tag in `services.yaml`. A tagged service without the attribute throws `RpcServiceKeyMissingException` at container-build/first-use time, not per request.
+- **Service discovery is two-part, and resolved at build time.** A class is exposed only if it carries the DI tag `nanofelis_json_rpc` *and* the `#[JsonRpcService('key')]` attribute. There is **no** `registerAttributeForAutoconfiguration`, so the attribute alone does nothing — users still tag in `services.yaml`. `RpcServicePass` (`src/DependencyInjection/Compiler/RpcServicePass.php`) reads the attribute during compilation, throws `RpcServiceKeyMissingException` for a tagged-but-unattributed service and rejects duplicate keys, then hands `ServiceFinder` a `ServiceLocator` keyed by service key. **Do not go back to `tagged_iterator` here**: iterating it instantiates every tagged service on every request, which is what this design exists to avoid. `tests/Action/RpcTest::testUnusedServicesAreNotInstantiated` is the regression guard.
+- **The pass runs at `TYPE_OPTIMIZE`, not the usual `TYPE_BEFORE_OPTIMIZATION`.** A kernel implementing `CompilerPassInterface` is registered by Symfony at `BEFORE_OPTIMIZATION` priority `-10000`, i.e. last in that stage — so a bundle pass there cannot see services such a kernel registers (exactly what `tests/TestKernel.php` does). Moving the pass earlier silently yields an empty locator and every call answering `-32601`.
+- **Method exposure is an allowlist.** `ServiceDescriptor::__construct` is the single choke point and rejects non-public, abstract and `__*` methods with `RpcMethodNotFoundException`. This is load-bearing security, not tidiness: reflection happily resolves `__construct`, and invoking it re-runs the constructor on the container-shared instance, overwriting injected dependencies for the rest of the request — or the worker process on FrankenPHP/RoadRunner. Non-public methods would otherwise raise a raw `\Error` and surface as a 500.
 - **Argument resolution reuses Symfony's controller machinery, including the kernel event.** `RpcRequestHandler` builds a synthetic `Request` with the RPC `params` in *both* `request` and `attributes`, plus a forced `CONTENT_TYPE: application/x-www-form-urlencoded`, then calls `argument_resolver`. It then dispatches a `ControllerArgumentsEvent` (`KernelEvents::CONTROLLER_ARGUMENTS`) and re-reads the controller and arguments back off the event. That dispatch is load-bearing, not decorative: `RequestPayloadValueResolver` does its work in `onKernelControllerArguments`, so `#[MapRequestPayload]` only functions because of it — hence the `HttpKernelInterface` injected as the handler's 5th constructor arg (`config/services.php`). Any change to param handling must preserve all three pieces (dual request/attributes population, content type, event dispatch) rather than bypassing the resolver.
 - **Result normalization is always on.** Every return value passes through the Symfony `serializer`. `#[RpcNormalizationContext([...])]` on the method supplies the normalization context, read reflectively via `ServiceDescriptor::getMethodAttribute()`.
 - **Only `AbstractRpcException` subclasses become JSON-RPC errors.** Anything else rethrows and surfaces as a real 500. Reserved codes and their default messages are constants on `AbstractRpcException`; `RpcApplicationException` guards against user codes falling in the reserved `-32099..-32000` range.
@@ -53,7 +57,9 @@ Key design points to preserve when changing things:
 
 ## Testing
 
-`tests/TestKernel.php` is a `MicroKernelTrait` kernel that registers FrameworkBundle and this bundle, imports `config/routes.php`, and — via its own `CompilerPassInterface` — registers `tests/Service/MockService.php` with the `nanofelis_json_rpc` tag. `KERNEL_CLASS` is set in `phpunit.xml.dist`.
+`tests/TestKernel.php` is a `MicroKernelTrait` kernel that registers FrameworkBundle and this bundle, imports `config/routes.php`, and — via its own `CompilerPassInterface` — registers `tests/Service/MockService.php` and `tests/Service/NeverInstantiatedService.php` with the `nanofelis_json_rpc` tag. `KERNEL_CLASS` is set in `phpunit.xml.dist`.
+
+`NeverInstantiatedService` exists purely to prove laziness: its constructor flips a static flag, and tests assert the flag stays false when another service is called. `MockService` carries a defaulted constructor arg, a `__toString` and a private method so the exposure guards are covered end-to-end.
 
 Add new exposable RPC methods to `MockService` when covering handler/resolver behaviour end-to-end (`tests/Action/RpcTest.php` uses `WebTestCase` + `KernelBrowser`); unit-level tests instantiate collaborators directly (`ServiceFinderTest`).
 

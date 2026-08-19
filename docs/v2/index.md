@@ -9,7 +9,8 @@ Import the main routing file or create a custom route:
 ```yaml
 # config/routes.yaml
 rpc:
-    resource: '@NanofelisJsonRpcBundle/Resources/config/routing.xml'
+    resource: '@NanofelisJsonRpcBundle/config/routes.php'
+    type: php
 ```  
 or
 ```yaml
@@ -18,12 +19,21 @@ rpc:
     path: /
     controller: nanofelis_json_rpc.action.rpc
     methods: POST
-
-rpc_doc:
-    path: /doc
-    controller: nanofelis_json_rpc.action.doc
-    methods: GET
 ```  
+
+Bundle options
+--------------
+The bundle works without any configuration. The only option limits how many requests a single
+batch call may contain:
+
+```yaml
+# config/packages/nanofelis_json_rpc.yaml
+nanofelis_json_rpc:
+    max_batch_size: 100    # default; set to 0 to disable the limit
+```
+
+Batches larger than the limit are rejected with an `-32600` (invalid request) error instead of
+being executed.
 
 Usage
 =====
@@ -31,6 +41,14 @@ Usage
 Simply Tag the services you want to expose and send a json-rpc payload to the RPC endpoint.
 
 The method parameter must follow the convention `{serviceKey}.{method}`
+
+A tagged service must carry the `#[JsonRpcService]` attribute; a missing attribute, or two
+services declaring the same key, fails at container build time rather than at request time.
+
+Only **public, non-magic, non-abstract** methods are reachable. Anything else — private or
+protected methods, `__construct` and other magic methods — answers `method not found`
+(`-32601`). Keep this in mind when exposing a service: every other public method on the class
+is part of your API surface, so prefer dedicated, narrow RPC service classes.
 
 ```yaml
 # config/services.yaml

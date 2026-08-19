@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Tests\Action;
 
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
+use Nanofelis\JsonRpcBundle\Tests\Service\NeverInstantiatedService;
 use Nanofelis\JsonRpcBundle\Tests\TestKernel;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -146,5 +147,73 @@ class RpcTest extends WebTestCase
             ['jsonrpc' => '2.0', 'method' => 'mockService.withMapRequest', 'params' => ['a' => 10, 'b' => 'alpha', 'c' => true]],
             ['jsonrpc' => '2.0', 'result' => ['a' => 10, 'b' => 'alpha', 'c' => true], 'id' => null],
         ];
+
+        $methodNotFound = [
+            'code' => AbstractRpcException::METHOD_NOT_FOUND,
+            'message' => AbstractRpcException::MESSAGES[AbstractRpcException::METHOD_NOT_FOUND],
+            'data' => null,
+        ];
+
+        // the constructor must not be remotely callable: doing so would overwrite the
+        // dependencies of the shared service instance
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.__construct', 'params' => ['dependency' => 'overwritten'], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => $methodNotFound, 'id' => 'test'],
+        ];
+
+        // no magic method is part of the rpc surface
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.__toString', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => $methodNotFound, 'id' => 'test'],
+        ];
+
+        // non-public methods are reported as unknown rather than raising a 500
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.privateMethod', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => $methodNotFound, 'id' => 'test'],
+        ];
+    }
+
+    public function testConstructorCallLeavesDependenciesIntact(): void
+    {
+        $uri = $this->router->generate('nanofelis_json_rpc.endpoint');
+
+        self::$client->request(method: 'POST', uri: $uri, content: json_encode(
+            ['jsonrpc' => '2.0', 'method' => 'mockService.__construct', 'params' => ['dependency' => 'overwritten'], 'id' => 'attack'],
+        ));
+
+        self::$client->request(method: 'POST', uri: $uri, content: json_encode(
+            ['jsonrpc' => '2.0', 'method' => 'mockService.readDependency', 'id' => 'check'],
+        ));
+
+        $this->assertSame(
+            ['jsonrpc' => '2.0', 'result' => 'injected', 'id' => 'check'],
+            json_decode(self::$client->getResponse()->getContent(), true),
+        );
+    }
+
+    public function testUnusedServicesAreNotInstantiated(): void
+    {
+        NeverInstantiatedService::$instantiated = false;
+
+        self::$client->request(
+            method: 'POST',
+            uri: $this->router->generate('nanofelis_json_rpc.endpoint'),
+            content: json_encode(['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'test']),
+        );
+
+        // assert the call actually resolved first: with an empty service locator — what a
+        // wrongly staged RpcServicePass produces — nothing is instantiated either, and the
+        // laziness assertion below would pass vacuously
+        $this->assertSame(
+            ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test'],
+            json_decode(self::$client->getResponse()->getContent(), true),
+            'The service locator must be populated by RpcServicePass.',
+        );
+
+        $this->assertFalse(
+            NeverInstantiatedService::$instantiated,
+            'Calling one rpc service must not instantiate the other tagged services.',
+        );
     }
 }

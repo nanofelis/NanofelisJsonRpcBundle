@@ -21,7 +21,11 @@ return static function (ContainerConfigurator $container): void {
             service('nanofelis_json_rpc.response.rpc_responder'),
         ]);
 
-    $services->set('nanofelis_json_rpc.request.parser', RpcRequestParser::class);
+    // max_batch_size is injected by NanofelisJsonRpcExtension from the bundle configuration
+    $services->set('nanofelis_json_rpc.request.parser', RpcRequestParser::class)
+        ->args([
+            abstract_arg('max batch size'),
+        ]);
 
     $services->set('nanofelis_json_rpc.request.handler', RpcRequestHandler::class)
         ->args([
@@ -32,13 +36,12 @@ return static function (ContainerConfigurator $container): void {
             service('kernel'),
         ]);
 
+    // the service locator argument is injected by RpcServicePass, which indexes every service
+    // tagged "nanofelis_json_rpc" by its #[JsonRpcService] key at container build time
     $services->set('nanofelis_json_rpc.service.finder', ServiceFinder::class)
         ->args([
-            tagged_iterator('nanofelis_json_rpc'),
+            abstract_arg('rpc services locator'),
         ]);
 
-    $services->set('nanofelis_json_rpc.response.rpc_responder', RpcResponder::class)
-        ->args([
-            service('event_dispatcher'),
-        ]);
+    $services->set('nanofelis_json_rpc.response.rpc_responder', RpcResponder::class);
 };

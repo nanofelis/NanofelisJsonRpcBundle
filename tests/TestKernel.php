@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Tests;
 
+use Nanofelis\JsonRpcBundle\DependencyInjection\Compiler\RpcServicePass;
 use Nanofelis\JsonRpcBundle\NanofelisJsonRpcBundle;
 use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
+use Nanofelis\JsonRpcBundle\Tests\Service\NeverInstantiatedService;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -53,7 +55,11 @@ class TestKernel extends Kernel implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $container->register(MockService::class, MockService::class)
-            ->addTag('nanofelis_json_rpc')
+            ->addTag(RpcServicePass::TAG)
+            ->setPublic(true);
+
+        $container->register(NeverInstantiatedService::class, NeverInstantiatedService::class)
+            ->addTag(RpcServicePass::TAG)
             ->setPublic(true);
     }
 
