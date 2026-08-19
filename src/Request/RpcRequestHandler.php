@@ -16,6 +16,9 @@ use Nanofelis\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -27,6 +30,7 @@ class RpcRequestHandler
         private ServiceFinder $serviceFinder,
         private NormalizerInterface $normalizer,
         private EventDispatcherInterface $eventDispatcher,
+        private HttpKernelInterface $kernel,
     ) {
     }
 
@@ -63,13 +67,21 @@ class RpcRequestHandler
         $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
 
         try {
-            $arguments = $this->argumentResolver->getArguments(
-                new Request(attributes: $rpcRequest->getParams() ?? []),
-                $callable
+            $rpcParams = $rpcRequest->getParams() ?? [];
+            $request = new Request(
+                request: $rpcParams,
+                attributes: $rpcParams,
+                server: ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'],
             );
+            $arguments = $this->argumentResolver->getArguments($request, $callable);
         } catch (\Exception $e) {
             throw new RpcInvalidParamsException(previous: $e);
         }
+
+        $event = new ControllerArgumentsEvent($this->kernel, $callable, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+        $this->eventDispatcher->dispatch($event, KernelEvents::CONTROLLER_ARGUMENTS);
+        $callable = $event->getController();
+        $arguments = $event->getArguments();
 
         try {
             $result = $callable(...$arguments);

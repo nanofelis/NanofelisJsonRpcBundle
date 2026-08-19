@@ -29,6 +29,7 @@ return static function (ContainerConfigurator $container): void {
             service('nanofelis_json_rpc.service.finder'),
             service('serializer'),
             service('event_dispatcher'),
+            service('kernel'),
         ]);
 
     $services->set('nanofelis_json_rpc.service.finder', ServiceFinder::class)
