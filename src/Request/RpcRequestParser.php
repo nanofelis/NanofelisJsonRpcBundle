@@ -67,16 +67,32 @@ class RpcRequestParser
 
             return $payload;
         }
+
+        // the spec requires a batch to be an array with at least one value; an empty one is a
+        // batch-level failure, answered with a single response rather than an array of them
+        if ([] === $data) {
+            throw new RpcInvalidRequestException();
+        }
+
         $payload->setIsBatch(true);
 
         $batchSize = \count($data);
 
+        // an oversized batch is a batch-level failure too, so this keeps propagating to parse()
         if ($this->maxBatchSize > 0 && $batchSize > $this->maxBatchSize) {
             throw new RpcInvalidRequestException(\sprintf('batch size %d exceeds the maximum of %d', $batchSize, $this->maxBatchSize));
         }
 
         foreach ($data as $subData) {
-            $payload->addRpcRequest($this->getRpcRequest((array) $subData));
+            $subData = (array) $subData;
+
+            // once the batch itself is recognised, a malformed entry only invalidates itself:
+            // its siblings must still run, and it gets its own error response
+            try {
+                $payload->addRpcRequest($this->getRpcRequest($subData));
+            } catch (AbstractRpcException $e) {
+                $payload->addRpcResponse(new RpcResponseError($e, $this->extractId($subData)));
+            }
         }
 
         return $payload;
@@ -89,7 +105,9 @@ class RpcRequestParser
      */
     private function getRpcRequest(array $data): RpcRequest
     {
-        if (RpcRequest::JSON_RPC_VERSION !== $data['jsonrpc']) {
+        // guarded: a non-object batch entry has no 'jsonrpc' key at all, and reading it blindly
+        // raises an "Undefined array key" warning before the invalid-request error is returned
+        if (RpcRequest::JSON_RPC_VERSION !== ($data['jsonrpc'] ?? null)) {
             throw new RpcInvalidRequestException();
         }
         $methodParts = explode('.', $data['method'] ?? '');
@@ -98,11 +116,30 @@ class RpcRequestParser
             throw new RpcInvalidRequestException();
         }
 
+        // RpcRequest types its id string|int|null, so a float or array id would raise a TypeError
+        // under strict_types — not an AbstractRpcException, hence an HTTP 500 rather than an error
+        if (null !== ($data['id'] ?? null) && null === $this->extractId($data)) {
+            throw new RpcInvalidRequestException('id must be a string or an integer');
+        }
+
         return new RpcRequest(
             serviceKey: $methodParts[0],
             methodKey: $methodParts[1],
-            id: $data['id'] ?? null,
+            id: $this->extractId($data),
             params: $data['params'] ?? null
         );
+    }
+
+    /**
+     * Best-effort id extraction for error responses: the spec mandates a null id whenever the id
+     * of a malformed request cannot be determined.
+     *
+     * @param array<string|int,mixed> $data
+     */
+    private function extractId(array $data): string|int|null
+    {
+        $id = $data['id'] ?? null;
+
+        return \is_string($id) || \is_int($id) ? $id : null;
     }
 }

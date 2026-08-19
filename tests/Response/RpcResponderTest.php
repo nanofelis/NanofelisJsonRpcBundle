@@ -68,4 +68,19 @@ class RpcResponderTest extends TestCase
             'id' => 1,
         ]];
     }
+
+    public function testBatchIsEncodedAsAJsonArrayNotAnObject(): void
+    {
+        // an assoc-array assertion cannot tell a JSON array from a JSON object, so assert on the
+        // raw json and on the decoded (non-assoc) type
+        $payload = new RpcPayload();
+        $payload->setIsBatch(true);
+        $payload->addRpcResponse(new RpcResponse('first', 1));
+        $payload->addRpcResponse(new RpcResponseError(new RpcApplicationException('bad', 99), 2));
+
+        $content = ($this->responder)($payload)->getContent();
+
+        $this->assertStringStartsWith('[', $content);
+        $this->assertIsArray(json_decode($content));
+    }
 }

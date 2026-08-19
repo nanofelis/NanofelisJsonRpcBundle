@@ -192,6 +192,71 @@ class RpcTest extends WebTestCase
         );
     }
 
+    public function testMixedBatchRunsValidEntriesAndIsolatesTheBadOne(): void
+    {
+        $content = $this->post([
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'first'],
+            ['jsonrpc' => '2.0', 'method' => 'noSeparator', 'id' => 'bad'],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 3, 'arg2' => 4], 'id' => 'third'],
+        ]);
+
+        $this->assertStringStartsWith('[', $content, 'a recognised batch must answer with an array');
+
+        // the spec allows any order within the array, so correlate on id rather than position
+        $byId = array_column(json_decode($content, true), null, 'id');
+        ksort($byId);
+
+        $this->assertSame([
+            'bad' => ['jsonrpc' => '2.0', 'error' => [
+                'code' => AbstractRpcException::INVALID_REQUEST,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_REQUEST],
+                'data' => null,
+            ], 'id' => 'bad'],
+            'first' => ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'first'],
+            'third' => ['jsonrpc' => '2.0', 'result' => 7, 'id' => 'third'],
+        ], $byId);
+    }
+
+    public function testBatchOfOnlyMalformedEntriesStillAnswersAnArray(): void
+    {
+        $content = $this->post([
+            ['method' => 'no.version'],
+            [1, 'x'],
+        ]);
+
+        $this->assertStringStartsWith('[', $content);
+        $this->assertCount(2, json_decode($content, true));
+    }
+
+    public function testEmptyBatchIsASingleError(): void
+    {
+        $content = $this->post([]);
+
+        $this->assertSame([
+            'jsonrpc' => '2.0',
+            'error' => [
+                'code' => AbstractRpcException::INVALID_REQUEST,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_REQUEST],
+                'data' => null,
+            ],
+            'id' => null,
+        ], json_decode($content, true));
+    }
+
+    /**
+     * @param array<int|string,mixed> $payload
+     */
+    private function post(array $payload): string
+    {
+        self::$client->request(
+            method: 'POST',
+            uri: $this->router->generate('nanofelis_json_rpc.endpoint'),
+            content: json_encode($payload),
+        );
+
+        return self::$client->getResponse()->getContent();
+    }
+
     public function testUnusedServicesAreNotInstantiated(): void
     {
         NeverInstantiatedService::$instantiated = false;

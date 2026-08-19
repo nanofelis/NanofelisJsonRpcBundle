@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Request;
 
 use Nanofelis\JsonRpcBundle\Attribute\RpcNormalizationContext;
-use Nanofelis\JsonRpcBundle\Event\RpcBeforeMethodEvent;
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\JsonRpcBundle\Exception\RpcInvalidParamsException;
 use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
@@ -64,8 +63,6 @@ class RpcRequestHandler
         /** @var callable $callable */
         $callable = [$service, $method];
 
-        $this->eventDispatcher->dispatch(new RpcBeforeMethodEvent($rpcRequest, $serviceDescriptor), RpcBeforeMethodEvent::NAME);
-
         try {
             $rpcParams = $rpcRequest->getParams() ?? [];
             $request = new Request(
@@ -78,7 +75,11 @@ class RpcRequestHandler
             throw new RpcInvalidParamsException(previous: $e);
         }
 
-        $event = new ControllerArgumentsEvent($this->kernel, $callable, $arguments, $request, HttpKernelInterface::MAIN_REQUEST);
+        // SUB_REQUEST: $request is a synthetic carrier for the rpc params, not the incoming HTTP
+        // request. It is deliberately NOT pushed onto the RequestStack — it has no URI, headers or
+        // client IP, so making it the current request would hide the real POST request from any
+        // service that injects RequestStack. No value resolver reads the stack, only this $request.
+        $event = new ControllerArgumentsEvent($this->kernel, $callable, $arguments, $request, HttpKernelInterface::SUB_REQUEST);
         $this->eventDispatcher->dispatch($event, KernelEvents::CONTROLLER_ARGUMENTS);
         $callable = $event->getController();
         $arguments = $event->getArguments();

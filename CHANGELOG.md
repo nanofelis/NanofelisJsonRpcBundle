@@ -7,6 +7,16 @@
   `#[JsonRpcService]` services exposed their `__construct` — letting a caller re-run it on the
   shared instance and overwrite injected dependencies — as well as other magic methods.
   Non-public methods previously raised an uncaught `\Error` and surfaced as HTTP 500.
+- A malformed entry in a batch call no longer discards the batch. Each entry now gets its own
+  response, and the valid entries are executed; previously one bad entry produced a single error
+  object — not an array — and silently dropped every sibling call. As the spec allows, responses
+  may be returned in any order within the array; correlate them on `id`. Clients relying on the
+  old collapse-to-one-error behaviour must be updated.
+- Removed `RpcBeforeMethodEvent` and the `nanofelis_json_rpc.before_method` event. RPC methods run
+  through Symfony's standard controller argument lifecycle, so listen to `kernel.controller_arguments`
+  instead — it gives access to the resolved, typed arguments rather than raw params.
+- An empty batch (`[]`) now answers `-32600` rather than an empty array, as the spec requires a
+  batch to be an array with at least one value.
 
 ### Added
 
@@ -14,6 +24,10 @@
   larger than the limit are rejected with `-32600` instead of being executed unbounded.
 - Duplicate `#[JsonRpcService]` keys are now detected at container build time. Previously the
   last tagged service silently won.
+- `#[JsonRpcService]` is registered for autoconfiguration, so an autoconfigured service carrying
+  the attribute no longer needs the `nanofelis_json_rpc` tag applied by hand. The tag still works
+  and remains required when autoconfiguration is disabled. Note this makes adding the attribute
+  alone sufficient to publish a service over HTTP.
 
 ### Fixed
 
@@ -24,6 +38,13 @@
   then reflected over to recover its key.
 - A service tagged `nanofelis_json_rpc` without the `#[JsonRpcService]` attribute now fails at
   container build time rather than throwing on every request, where it surfaced as an HTTP 500.
+- An `id` that is neither a string nor an integer (a float such as `1.5`, or an array) answers
+  `-32600` instead of raising a `TypeError` and surfacing as HTTP 500.
+- A request without a `jsonrpc` key no longer raises an "Undefined array key" PHP warning on its
+  way to the correct `-32600` response.
+- The synthetic request used to resolve method arguments is dispatched as a sub-request rather
+  than claiming to be the main request. It is deliberately not pushed onto the `RequestStack`, so
+  services injecting it still see the real incoming HTTP request.
 
 ## [2.0.0] - Unreleased
 

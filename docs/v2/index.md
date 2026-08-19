@@ -38,12 +38,15 @@ being executed.
 Usage
 =====
 
-Simply Tag the services you want to expose and send a json-rpc payload to the RPC endpoint.
+Add the `#[JsonRpcService]` attribute to the services you want to expose and send a json-rpc
+payload to the RPC endpoint.
 
 The method parameter must follow the convention `{serviceKey}.{method}`
 
-A tagged service must carry the `#[JsonRpcService]` attribute; a missing attribute, or two
-services declaring the same key, fails at container build time rather than at request time.
+The attribute is registered for autoconfiguration, so an autoconfigured service (the default in
+`services.yaml`) needs nothing else. Services with autoconfiguration disabled must be tagged
+`nanofelis_json_rpc` by hand. Either way the attribute is mandatory: a tagged service without it,
+or two services declaring the same key, fails at container build time rather than at request time.
 
 Only **public, non-magic, non-abstract** methods are reachable. Anything else — private or
 protected methods, `__construct` and other magic methods — answers `method not found`
@@ -53,9 +56,10 @@ is part of your API surface, so prefer dedicated, narrow RPC service classes.
 ```yaml
 # config/services.yaml
 
+# autoconfigure is enabled by default, so the attribute alone is enough;
+# add tag: ['nanofelis_json_rpc'] if you disable it
 App\RpcServices:
     resource: src/RpcServices
-    tag: ['nanofelis_json_rpc']         
 ```
 
 ```php
@@ -123,6 +127,36 @@ curl -d '[{"jsonrpc": "2.0", "method": "myService.add", "params": [1, 2], "id": 
 ]
 
 ```
+
+Errors are isolated per entry: a malformed entry does not affect its siblings, which are still
+executed. As the RFC allows, responses may come back in any order within the array — correlate them
+on `id`.
+
+```shell script
+# One bad entry among valid ones
+curl -d '[{"jsonrpc": "2.0", "method": "myService.add", "params": [1, 2], "id": "ok"}, {"jsonrpc": "2.0", "method": "noSeparator", "id": "bad"}]'  http://localhost | fx this
+
+[
+  {
+    "jsonrpc": "2.0",
+    "result": 3,
+    "id": "ok"
+  },
+  {
+    "jsonrpc": "2.0",
+    "error": {
+      "code": -32600,
+      "message": "invalid json-rpc payload",
+      "data": null
+    },
+    "id": "bad"
+  }
+]
+```
+
+Only a failure to recognise the batch *itself* produces a single error object instead of an array:
+invalid JSON, a payload that is not an array, an empty array, or a batch exceeding
+`max_batch_size`.
 
 Arguments Resolver
 ----------------
@@ -193,18 +227,30 @@ class ArticleNormalizer implements NormalizerInterface
 
 Events Hooks
 ------------
-You can hook to the following event in the rpc request lifecycle:
+This bundle exposes no event of its own. Because RPC methods go through Symfony's standard
+controller argument lifecycle, hook into `kernel.controller_arguments` instead — it is dispatched
+after the arguments are resolved and before the method is invoked, and it lets you inspect or
+replace the already-typed arguments rather than raw params.
 
-__nanofelis_json_rpc.before_method__  
-__Event Class__: RpcBeforeMethodEvent
-
-This event is dispatched just before the method execution. You can use it to alter the rpc request params.
 ```php
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
-public function onRpcBeforeMethod(RpcBeforeMethodEvent $event)
+class RpcArgumentsSubscriber implements EventSubscriberInterface
 {
-    $rpcRequest = $event->getRpcRequest();
-    $serviceDescriptor = $event->getServiceDescriptor();
+    public static function getSubscribedEvents(): array
+    {
+        return [KernelEvents::CONTROLLER_ARGUMENTS => 'onControllerArguments'];
+    }
+
+    public function onControllerArguments(ControllerArgumentsEvent $event): void
+    {
+        [$service, $method] = (array) $event->getController();
+
+        // narrow to your own rpc services, then adjust the resolved arguments
+        if ($service instanceof MyRpcService) {
+            $event->setArguments([...$event->getArguments(), $this->tenants->current()]);
+        }
+    }
 }
 ```

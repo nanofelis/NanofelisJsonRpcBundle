@@ -70,7 +70,7 @@ class ServiceFinderTest extends TestCase
         $this->serviceFinder->find(new RpcRequest(serviceKey: 'mockService', methodKey: $methodKey));
     }
 
-    public function provideUnreachableMethod(): \Generator
+    public static function provideUnreachableMethod(): \Generator
     {
         yield 'constructor' => ['__construct'];
         yield 'magic method' => ['__toString'];

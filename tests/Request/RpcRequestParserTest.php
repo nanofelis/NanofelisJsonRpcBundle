@@ -78,6 +78,87 @@ class RpcRequestParserTest extends TestCase
         $this->assertCount(50, $payload->getRpcRequests());
     }
 
+    public function testMalformedBatchEntryOnlyInvalidatesItself(): void
+    {
+        $payload = $this->parse([
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'id' => 'first'],
+            ['jsonrpc' => '2.0', 'method' => 'noSeparator', 'id' => 'bad'],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'id' => 'third'],
+        ]);
+
+        $this->assertTrue($payload->isBatch());
+
+        // the siblings survive: only the malformed entry is turned into an error
+        $this->assertCount(2, $payload->getRpcRequests());
+        $this->assertCount(1, $payload->getRpcResponses());
+
+        $error = $payload->getRpcResponses()[0];
+        $this->assertInstanceOf(RpcResponseError::class, $error);
+        $this->assertSame(AbstractRpcException::INVALID_REQUEST, $error->getRpcException()->getCode());
+        $this->assertSame('bad', $error->getContent()['id'], 'the failing entry id must be reported');
+    }
+
+    public function testBatchOfOnlyMalformedEntriesStaysABatch(): void
+    {
+        $payload = $this->parse([
+            ['method' => 'no.version'],
+            ['jsonrpc' => '1.0', 'method' => 'wrong.version'],
+        ]);
+
+        $this->assertTrue($payload->isBatch());
+        $this->assertEmpty($payload->getRpcRequests());
+        $this->assertCount(2, $payload->getRpcResponses());
+    }
+
+    /**
+     * A non-object entry has no 'jsonrpc' key at all. PHPUnit turns warnings into exceptions, so
+     * this fails if the key is read unguarded.
+     */
+    public function testNonObjectBatchEntriesRaiseNoWarning(): void
+    {
+        $payload = $this->parse([1, 'x', null]);
+
+        $this->assertEmpty($payload->getRpcRequests());
+        $this->assertCount(3, $payload->getRpcResponses());
+    }
+
+    public function testEmptyBatchIsRejected(): void
+    {
+        $payload = $this->parse([]);
+
+        $this->assertFalse($payload->isBatch(), 'an unrecognised batch gets a single response');
+        $this->assertEmpty($payload->getRpcRequests());
+        $this->assertCount(1, $payload->getRpcResponses());
+    }
+
+    /**
+     * @dataProvider provideNonConformingId
+     */
+    public function testNonConformingIdIsAnInvalidRequest(mixed $id): void
+    {
+        $payload = $this->parse(['jsonrpc' => '2.0', 'method' => 'mockService.add', 'id' => $id]);
+
+        $error = $payload->getRpcResponses()[0];
+        $this->assertInstanceOf(RpcResponseError::class, $error);
+        $this->assertSame(AbstractRpcException::INVALID_REQUEST, $error->getRpcException()->getCode());
+        $this->assertNull($error->getContent()['id']);
+    }
+
+    public function provideNonConformingId(): \Generator
+    {
+        yield 'float' => [1.5];
+        yield 'array' => [['nested']];
+        yield 'bool' => [true];
+    }
+
+    /**
+     * @param array<string|int,mixed> $data
+     */
+    private function parse(array $data): RpcPayload
+    {
+        return $this->parser->parse(Request::create(uri: '/', method: 'POST', content: json_encode($data)));
+    }
+
     private function createBatchRequest(int $size): Request
     {
         $batch = array_fill(0, $size, [
