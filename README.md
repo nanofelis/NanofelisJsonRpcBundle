@@ -7,7 +7,7 @@ Requires PHP >= 8.4 and Symfony 6.4 / 7 / 8.
 **5.0.0** — all RPC services must use the `#[JsonRpcService('serviceKey')]` attribute; the
 `getServiceKey()` method has been removed.
 
-**6.0.0 (unreleased)** — raises the floor to PHP 8.4 and Symfony 6.4, restricts the callable
+**6.0.0** — raises the floor to PHP 8.4 and Symfony 6.4, restricts the callable
 method surface to public non-magic methods, removes `RpcBeforeMethodEvent` in favour of Symfony's
 `kernel.controller_arguments`, and returns one response per batch entry.
 

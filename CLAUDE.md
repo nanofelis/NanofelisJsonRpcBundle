@@ -81,10 +81,10 @@ Booting the test kernel makes Symfony write `config/reference.php` — auto-gene
 
 ## Versioning
 
-`master` is the 5.x line. **5.0.0 is tagged and released** (2025-04-22, the commit that dropped `AbstractRpcService::getServiceKey()` in favour of `#[JsonRpcService]`). The work on top of it is breaking and targets **6.0.0**, which is what `dev-master` aliases to (`6.0-dev` in `composer.json`).
+`master` is the 6.x line. **6.0.0 is tagged and released** (2026-08-20 — the breaking release that raised the floor to PHP 8.4 / Symfony 6.4, restricted the callable method surface, dropped `RpcBeforeMethodEvent` and gave each batch entry its own response). The previous major, 5.0.0, was released 2025-04-22 with the commit that dropped `AbstractRpcService::getServiceKey()` in favour of `#[JsonRpcService]`. Work on top of the tag targets **6.1.0**, which is what `dev-master` aliases to (`6.1-dev` in `composer.json`); a further breaking change means bumping that alias to `7.0-dev` rather than shipping it as a minor.
 
 Git tags are the only version authority. Until recently the README and `docs/` used a private "v1/v2" numbering that matched no tag — 5.0.0 was documented and changelogged as "2.0.0". That has been corrected throughout; if you meet a stray "v1"/"v2" reference, "v1" means 4.x and earlier and "v2" means 5.0.0.
 
 Docs live in `docs/index.md` (current, tracks the tip) with 4.x-and-earlier kept at `docs/v4/index.md` and the per-major upgrade steps in `docs/migration.md`. Deliberately *not* one directory per release: the current doc set tracks the maintained line so it does not need renaming at every major.
 
-User-facing behaviour changes belong in `docs/index.md`, `docs/migration.md` (if they break anything) and `CHANGELOG.md`. `CHANGELOG.md` carries a single `## [6.0.0] - Unreleased` section at the top; append to it rather than starting a new version heading.
+User-facing behaviour changes belong in `docs/index.md`, `docs/migration.md` (if they break anything) and `CHANGELOG.md`. `CHANGELOG.md` heads each release with `## [X.Y.Z] - YYYY-MM-DD`, newest first. 6.0.0 is now stamped and closed, so the next user-facing change opens a fresh section for the version it will ship in and appends there — do not reopen a released heading.

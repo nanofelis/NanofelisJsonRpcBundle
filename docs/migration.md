@@ -3,12 +3,12 @@
 Breaking changes per major release. Version numbers here are the released git tags — the
 `docs/` tree used to label these releases "v1" and "v2", which never matched any tag.
 
-- [5.x → 6.0.0](#5x--600-unreleased) (unreleased)
+- [5.x → 6.0.0](#5x--600)
 - [4.x → 5.0.0](#4x--500)
 
 ---
 
-## 5.x → 6.0.0 (unreleased)
+## 5.x → 6.0.0
 
 ### 1. Only public, non-magic, non-abstract methods are callable
 
