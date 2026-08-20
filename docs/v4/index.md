@@ -43,10 +43,15 @@ App\RpcServices:
 ```php
 namespace App\RpcServices;
 
-use Nanofelis\JsonRpcBundle\Attribute\JsonRpcService;
+use Nanofelis\JsonRpcBundle\Service\AbstractRpcService;
 
-#[JsonRpcService('myService')]
-{    
+class MyService extends AbstractRpcService
+{
+    public static function getServiceKey(): string
+    {
+        return 'myService';
+    }
+    
     function add(int $a, int $b): int
     {
         return $a + $b;
@@ -80,7 +85,7 @@ curl -d '{"jsonrpc": 2.0, "method": "myService.add", "params": [1], "id": "test-
 
 ```
 
-Only exceptions that extend the [AbstractRpcException.php](../src/Exception/AbstractRpcException.php) will be cast
+Only exceptions that extend the [AbstractRpcException.php](../../src/Exception/AbstractRpcException.php) will be cast
 to a [JSON-RPC error](https://www.jsonrpc.org/specification#error_object).
 
 Batch Requests

@@ -10,6 +10,7 @@ use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Responder\RpcResponder;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class RpcResponderTest extends TestCase
@@ -21,9 +22,7 @@ class RpcResponderTest extends TestCase
         $this->responder = new RpcResponder();
     }
 
-    /**
-     * @dataProvider provideRpcPayload
-     */
+    #[DataProvider('provideRpcPayload')]
     public function testResponderBatch(RpcPayload $payload, array $expected)
     {
         $jsonResponse = ($this->responder)($payload);
@@ -31,7 +30,7 @@ class RpcResponderTest extends TestCase
         $this->assertSame($expected, json_decode($jsonResponse->getContent(), true));
     }
 
-    public function provideRpcPayload(): \Generator
+    public static function provideRpcPayload(): \Generator
     {
         $payload = new RpcPayload();
         $payload->setIsBatch(true);
@@ -67,5 +66,20 @@ class RpcResponderTest extends TestCase
             'result' => 'success',
             'id' => 1,
         ]];
+    }
+
+    public function testBatchIsEncodedAsAJsonArrayNotAnObject(): void
+    {
+        // an assoc-array assertion cannot tell a JSON array from a JSON object, so assert on the
+        // raw json and on the decoded (non-assoc) type
+        $payload = new RpcPayload();
+        $payload->setIsBatch(true);
+        $payload->addRpcResponse(new RpcResponse('first', 1));
+        $payload->addRpcResponse(new RpcResponseError(new RpcApplicationException('bad', 99), 2));
+
+        $content = ($this->responder)($payload)->getContent();
+
+        $this->assertStringStartsWith('[', $content);
+        $this->assertIsArray(json_decode($content));
     }
 }

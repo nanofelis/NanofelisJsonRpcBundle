@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Nanofelis\JsonRpcBundle\Tests\Action;
 
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
+use Nanofelis\JsonRpcBundle\Tests\Service\NeverInstantiatedService;
 use Nanofelis\JsonRpcBundle\Tests\TestKernel;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\RouterInterface;
@@ -20,6 +22,16 @@ class RpcTest extends WebTestCase
     {
         self::$client = static::createClient();
         $this->router = self::$client->getContainer()->get('router');
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        // booting the kernel registers Symfony's ErrorHandler via DebugHandlersListener, and
+        // shutting the kernel down does not unregister it — PHPUnit flags the leftover handler
+        // as a risky test. Nothing else in the suite boots a kernel, so this is the one place.
+        restore_exception_handler();
     }
 
     protected static function getKernelClass(): string
@@ -42,9 +54,7 @@ class RpcTest extends WebTestCase
         $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
     }
 
-    /**
-     * @dataProvider provideRpcRequest
-     */
+    #[DataProvider('provideRpcRequest')]
     public function testRpc(array $requestData, array $expected): void
     {
         self::$client->request(method: 'POST', uri: $this->router->generate('nanofelis_json_rpc.endpoint'), content: json_encode($requestData));
@@ -52,7 +62,7 @@ class RpcTest extends WebTestCase
         $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
     }
 
-    public function provideRpcRequest(): \Generator
+    public static function provideRpcRequest(): \Generator
     {
         // regular rpc request
         yield [
@@ -66,10 +76,10 @@ class RpcTest extends WebTestCase
             ['jsonrpc' => '2.0', 'result' => 4, 'id' => 'test'],
         ];
 
-        // request resolver
+        // request resolver: the injected Request is the real POST, not an invented GET carrier
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.requestValueResolver', 'params' => ['date' => '2017/01/01'], 'id' => 'test'],
-            ['jsonrpc' => '2.0', 'result' => 'GET', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'result' => 'POST', 'id' => 'test'],
         ];
 
         // batch of regular rpc request
@@ -142,10 +152,142 @@ class RpcTest extends WebTestCase
             ['jsonrpc' => '2.0', 'result' => ['a' => null, 'b' => 'beta'], 'id' => null],
         ];
 
-        // todo: MapRequestPayload annotation
-        //        yield [
-        //            ['jsonrpc' => '2.0', 'method' => 'mockService.withMapRequest', 'params' => ['a' => 10, 'b' => 'alpha', 'c' => true]],
-        //            ['jsonrpc' => '2.0', 'result' => ['a' => 10, 'b' => 'alpha', 'c' => true], 'id' => null],
-        //        ];
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.withMapRequest', 'params' => ['a' => 10, 'b' => 'alpha', 'c' => true]],
+            ['jsonrpc' => '2.0', 'result' => ['a' => 10, 'b' => 'alpha', 'c' => true], 'id' => null],
+        ];
+
+        $methodNotFound = [
+            'code' => AbstractRpcException::METHOD_NOT_FOUND,
+            'message' => AbstractRpcException::MESSAGES[AbstractRpcException::METHOD_NOT_FOUND],
+            'data' => null,
+        ];
+
+        // the constructor must not be remotely callable: doing so would overwrite the
+        // dependencies of the shared service instance
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.__construct', 'params' => ['dependency' => 'overwritten'], 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => $methodNotFound, 'id' => 'test'],
+        ];
+
+        // no magic method is part of the rpc surface
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.__toString', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => $methodNotFound, 'id' => 'test'],
+        ];
+
+        // non-public methods are reported as unknown rather than raising a 500
+        yield [
+            ['jsonrpc' => '2.0', 'method' => 'mockService.privateMethod', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'error' => $methodNotFound, 'id' => 'test'],
+        ];
+    }
+
+    public function testConstructorCallLeavesDependenciesIntact(): void
+    {
+        $uri = $this->router->generate('nanofelis_json_rpc.endpoint');
+
+        self::$client->request(method: 'POST', uri: $uri, content: json_encode(
+            ['jsonrpc' => '2.0', 'method' => 'mockService.__construct', 'params' => ['dependency' => 'overwritten'], 'id' => 'attack'],
+        ));
+
+        self::$client->request(method: 'POST', uri: $uri, content: json_encode(
+            ['jsonrpc' => '2.0', 'method' => 'mockService.readDependency', 'id' => 'check'],
+        ));
+
+        $this->assertSame(
+            ['jsonrpc' => '2.0', 'result' => 'injected', 'id' => 'check'],
+            json_decode(self::$client->getResponse()->getContent(), true),
+        );
+    }
+
+    public function testMixedBatchRunsValidEntriesAndIsolatesTheBadOne(): void
+    {
+        $content = $this->post([
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'first'],
+            ['jsonrpc' => '2.0', 'method' => 'noSeparator', 'id' => 'bad'],
+            ['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 3, 'arg2' => 4], 'id' => 'third'],
+        ]);
+
+        $this->assertStringStartsWith('[', $content, 'a recognised batch must answer with an array');
+
+        // the spec allows any order within the array, so correlate on id rather than position
+        $byId = array_column(json_decode($content, true), null, 'id');
+        ksort($byId);
+
+        $this->assertSame([
+            'bad' => ['jsonrpc' => '2.0', 'error' => [
+                'code' => AbstractRpcException::INVALID_REQUEST,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_REQUEST],
+                'data' => null,
+            ], 'id' => 'bad'],
+            'first' => ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'first'],
+            'third' => ['jsonrpc' => '2.0', 'result' => 7, 'id' => 'third'],
+        ], $byId);
+    }
+
+    public function testBatchOfOnlyMalformedEntriesStillAnswersAnArray(): void
+    {
+        $content = $this->post([
+            ['method' => 'no.version'],
+            [1, 'x'],
+        ]);
+
+        $this->assertStringStartsWith('[', $content);
+        $this->assertCount(2, json_decode($content, true));
+    }
+
+    public function testEmptyBatchIsASingleError(): void
+    {
+        $content = $this->post([]);
+
+        $this->assertSame([
+            'jsonrpc' => '2.0',
+            'error' => [
+                'code' => AbstractRpcException::INVALID_REQUEST,
+                'message' => AbstractRpcException::MESSAGES[AbstractRpcException::INVALID_REQUEST],
+                'data' => null,
+            ],
+            'id' => null,
+        ], json_decode($content, true));
+    }
+
+    /**
+     * @param array<int|string,mixed> $payload
+     */
+    private function post(array $payload): string
+    {
+        self::$client->request(
+            method: 'POST',
+            uri: $this->router->generate('nanofelis_json_rpc.endpoint'),
+            content: json_encode($payload),
+        );
+
+        return self::$client->getResponse()->getContent();
+    }
+
+    public function testUnusedServicesAreNotInstantiated(): void
+    {
+        NeverInstantiatedService::$instantiated = false;
+
+        self::$client->request(
+            method: 'POST',
+            uri: $this->router->generate('nanofelis_json_rpc.endpoint'),
+            content: json_encode(['jsonrpc' => '2.0', 'method' => 'mockService.add', 'params' => ['arg1' => 1, 'arg2' => 2], 'id' => 'test']),
+        );
+
+        // assert the call actually resolved first: with an empty service locator — what a
+        // wrongly staged RpcServicePass produces — nothing is instantiated either, and the
+        // laziness assertion below would pass vacuously
+        $this->assertSame(
+            ['jsonrpc' => '2.0', 'result' => 3, 'id' => 'test'],
+            json_decode(self::$client->getResponse()->getContent(), true),
+            'The service locator must be populated by RpcServicePass.',
+        );
+
+        $this->assertFalse(
+            NeverInstantiatedService::$instantiated,
+            'Calling one rpc service must not instantiate the other tagged services.',
+        );
     }
 }

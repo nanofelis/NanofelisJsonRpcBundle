@@ -1,8 +1,7 @@
-version: '3'
-
 services:
     php:
-        image: php:8.0.13
+        # Matches the composer.json floor (php >=8.4)
+        image: php:8.4-cli
         working_dir: /app
         volumes:
             - type: bind

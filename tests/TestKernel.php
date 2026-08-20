@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Nanofelis\JsonRpcBundle\Tests;
 
+use Nanofelis\JsonRpcBundle\DependencyInjection\Compiler\RpcServicePass;
 use Nanofelis\JsonRpcBundle\NanofelisJsonRpcBundle;
 use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
+use Nanofelis\JsonRpcBundle\Tests\Service\NeverInstantiatedService;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -31,14 +32,13 @@ class TestKernel extends Kernel implements CompilerPassInterface
     {
         return [
             new FrameworkBundle(),
-            new TwigBundle(),
             new NanofelisJsonRpcBundle(),
         ];
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
-        $routes->import(__DIR__.'/../config/routes.xml');
+        $routes->import(__DIR__.'/../config/routes.php');
     }
 
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
@@ -55,7 +55,11 @@ class TestKernel extends Kernel implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $container->register(MockService::class, MockService::class)
-            ->addTag('nanofelis_json_rpc')
+            ->addTag(RpcServicePass::TAG)
+            ->setPublic(true);
+
+        $container->register(NeverInstantiatedService::class, NeverInstantiatedService::class)
+            ->addTag(RpcServicePass::TAG)
             ->setPublic(true);
     }
 

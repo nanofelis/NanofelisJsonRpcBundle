@@ -12,10 +12,16 @@ use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Nanofelis\JsonRpcBundle\Tests\Service\MockService;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RpcRequestHandlerTest extends TestCase
@@ -24,24 +30,28 @@ class RpcRequestHandlerTest extends TestCase
 
     private NormalizerInterface|MockObject $normalizer;
 
-    private ArgumentResolverInterface|MockObject $argumentResolver;
+    private ArgumentResolverInterface|Stub $argumentResolver;
 
     protected function setUp(): void
     {
-        $services = new \ArrayIterator(['mockService' => new MockService()]);
-        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $eventDispatcher = $this->createStub(EventDispatcherInterface::class);
+        // the normalizer stays a mock: testNormalizationContext asserts the context it receives
         $this->normalizer = $this->createMock(NormalizerInterface::class);
-        $this->argumentResolver = $this->createMock(ArgumentResolverInterface::class);
+        $this->argumentResolver = $this->createStub(ArgumentResolverInterface::class);
 
-        $serviceFinder = new ServiceFinder($services);
-        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher);
+        $serviceFinder = new ServiceFinder(new ServiceLocator([
+            'mockService' => static fn () => new MockService(),
+        ]));
+        $kernel = $this->createStub(HttpKernelInterface::class);
+        // empty stack: exercises the no-incoming-request path
+        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher, $kernel, new RequestStack());
     }
 
     /**
-     * @dataProvider provideRpcRequest
-     *
      * @param null $expectedResult
      */
+    #[DataProvider('provideRpcRequest')]
+    #[AllowMockObjectsWithoutExpectations]
     public function testHandle(RpcRequest $rpcRequest, ?RpcResponse $expectedResult = null, ?RpcResponseError $expectedError = null): void
     {
         $this->argumentResolver->method('getArguments')->willReturn($rpcRequest->getParams() ?? []);
@@ -68,7 +78,7 @@ class RpcRequestHandlerTest extends TestCase
         $this->requestHandler->handle($rpcRequest);
     }
 
-    public function provideRpcRequest(): \Generator
+    public static function provideRpcRequest(): \Generator
     {
         $badTypeRpcRequest = new RpcRequest(serviceKey: 'mockService', methodKey: 'add', params: ['arg1' => '5', 'arg2' => 5]);
 
