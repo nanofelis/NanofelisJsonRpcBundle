@@ -1,4 +1,4 @@
-## Unreleased
+## [6.0.0]
 
 ### ⚠️ Breaking changes
 
@@ -20,6 +20,11 @@
 - An RPC method that injects `Symfony\Component\HttpFoundation\Request` now receives the incoming
   request rather than an empty stub, so `getMethod()` returns `POST` instead of `GET`. Methods
   asserting on the old stub must be updated.
+- Dropped support for Symfony 5.
+- Raised the minimum PHP version to 8.4.
+- Removed the `symfony/twig-bundle` and `ext-dom` requirements. Neither was used by
+  the bundle; projects relying on them being pulled in transitively must now require
+  them explicitly.
 
 ### Added
 
@@ -31,6 +36,7 @@
   the attribute no longer needs the `nanofelis_json_rpc` tag applied by hand. The tag still works
   and remains required when autoconfiguration is disabled. Note this makes adding the attribute
   alone sufficient to publish a service over HTTP.
+- Support for Symfony 8.
 
 ### Fixed
 
@@ -55,23 +61,14 @@
   sub-requests — a common guard, and often where authentication lives — run again. The duplicate is
   still not pushed onto the `RequestStack`, so services injecting it see the real incoming request.
 
-## [2.0.0] - Unreleased
+### Requirements
+
+- PHP >= 8.4, Symfony 6.4 / 7 / 8.
+
+## [5.0.0] - 2025-04-22
 
 ### ⚠️ Breaking changes
 
 - Removed support for `getServiceKey()` method.
 - All RPC services must now use the `#[JsonRpcService('serviceKey')]` attribute.
 - Introduced usage of PHP 8 attributes for service identification.
-- Dropped support for Symfony 5.
-- Raised the minimum PHP version to 8.4.
-- Removed the `symfony/twig-bundle` and `ext-dom` requirements. Neither was used by
-  the bundle; projects relying on them being pulled in transitively must now require
-  them explicitly.
-
-### Added
-
-- Support for Symfony 8.
-
-### Requirements
-
-- PHP >= 8.4, Symfony 6.4 / 7 / 8.

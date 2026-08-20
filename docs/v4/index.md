@@ -85,7 +85,7 @@ curl -d '{"jsonrpc": 2.0, "method": "myService.add", "params": [1], "id": "test-
 
 ```
 
-Only exceptions that extend the [AbstractRpcException.php](../src/Exception/AbstractRpcException.php) will be cast
+Only exceptions that extend the [AbstractRpcException.php](../../src/Exception/AbstractRpcException.php) will be cast
 to a [JSON-RPC error](https://www.jsonrpc.org/specification#error_object).
 
 Batch Requests

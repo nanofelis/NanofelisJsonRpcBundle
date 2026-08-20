@@ -71,6 +71,10 @@ Booting the test kernel makes Symfony write `config/reference.php` — auto-gene
 
 ## Versioning
 
-`master` is the 2.x line (`dev-master` → `2.0-dev`). v2 dropped `AbstractRpcService::getServiceKey()` in favour of `#[JsonRpcService]`; see `docs/migration.md`. Docs are split: `docs/v2/index.md` (current), `docs/v1/index.md` (legacy). User-facing behaviour changes belong in `docs/v2/index.md` and `CHANGELOG.md`.
+`master` is the 5.x line. **5.0.0 is tagged and released** (2025-04-22, the commit that dropped `AbstractRpcService::getServiceKey()` in favour of `#[JsonRpcService]`). The work on top of it is breaking and targets **6.0.0**, which is what `dev-master` aliases to (`6.0-dev` in `composer.json`).
 
-2.0.0 has not shipped yet. `CHANGELOG.md` carries a `## Unreleased` section above the still-undated `## [2.0.0] - Unreleased`; append to one of those rather than starting a new version heading.
+Git tags are the only version authority. Until recently the README and `docs/` used a private "v1/v2" numbering that matched no tag — 5.0.0 was documented and changelogged as "2.0.0". That has been corrected throughout; if you meet a stray "v1"/"v2" reference, "v1" means 4.x and earlier and "v2" means 5.0.0.
+
+Docs live in `docs/index.md` (current, tracks the tip) with 4.x-and-earlier kept at `docs/v4/index.md` and the per-major upgrade steps in `docs/migration.md`. Deliberately *not* one directory per release: the current doc set tracks the maintained line so it does not need renaming at every major.
+
+User-facing behaviour changes belong in `docs/index.md`, `docs/migration.md` (if they break anything) and `CHANGELOG.md`. `CHANGELOG.md` carries a single `## [6.0.0] - Unreleased` section at the top; append to it rather than starting a new version heading.

@@ -1,10 +1,17 @@
 The NanofelisJsonRpcBundle is a symfony friendly implementation of the  [JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification.
 
-⚠️ Version 2.x – Breaking Change  
-This version introduces a breaking change:  
-- All RPC services must now use the `#[JsonRpcService('serviceKey')]` attribute.  
-- The method `getServiceKey()` has been removed.  
-- PHP 8.0+ is required due to native attributes.
+Requires PHP >= 8.4 and Symfony 6.4 / 7 / 8.
+
+⚠️ **Breaking changes**
+
+**5.0.0** — all RPC services must use the `#[JsonRpcService('serviceKey')]` attribute; the
+`getServiceKey()` method has been removed.
+
+**6.0.0 (unreleased)** — raises the floor to PHP 8.4 and Symfony 6.4, restricts the callable
+method surface to public non-magic methods, removes `RpcBeforeMethodEvent` in favour of Symfony's
+`kernel.controller_arguments`, and returns one response per batch entry.
+
+See the [migration guide](docs/migration.md) and [CHANGELOG.md](CHANGELOG.md).
 
 Installation
 =============
@@ -51,6 +58,6 @@ return [
 Documentation
 =============
 
-- 📘 Documentation for version **2.x** (current): [docs/v2/index.md](docs/v2/index.md)
-- 📘 Documentation for version **1.x** (legacy): [docs/index.md](docs/v1/index.md)
-- 🔁 Upgrade from v1 to v2: [docs/migration.md](docs/migration.md).
+- 📘 Documentation (current): [docs/index.md](docs/index.md)
+- 📘 Documentation for **4.x and earlier** (legacy): [docs/v4/index.md](docs/v4/index.md)
+- 🔁 Upgrading between major versions: [docs/migration.md](docs/migration.md)
