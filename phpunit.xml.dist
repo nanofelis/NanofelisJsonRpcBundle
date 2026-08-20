@@ -2,19 +2,12 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          bootstrap="./vendor/autoload.php"
          colors="true"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd">
-  <coverage>
-    <include>
-      <directory>./src</directory>
-    </include>
-    <exclude>
-      <directory>./Resources</directory>
-      <directory>./tests</directory>
-      <directory>./vendor</directory>
-    </exclude>
-  </coverage>
+         cacheDirectory=".phpunit.cache"
+         failOnDeprecation="true"
+         failOnNotice="true"
+         failOnWarning="true"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd">
   <php>
-    <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
     <env name="KERNEL_CLASS" value="Nanofelis\JsonRpcBundle\Tests\TestKernel"/>
   </php>
   <testsuites>
@@ -22,4 +15,25 @@
       <directory suffix="Test.php">./tests</directory>
     </testsuite>
   </testsuites>
+  <!--
+    Replaces SYMFONY_DEPRECATIONS_HELPER=max[self]=0, which came with the phpunit-bridge:
+    only deprecations attributable to this bundle's own code fail the suite, while those
+    coming from Symfony itself or from deeper in the tree are reported but tolerated.
+    Two attributes below are load-bearing. ignoreSuppressionOfDeprecations: trigger_deprecation()
+    raises its deprecation through @trigger_error(), and without this PHPUnit honours the @ and
+    never sees it. deprecationTrigger: without it every deprecation Symfony raises through
+    trigger_deprecation() is blamed on Symfony's own frame rather than on the src/ caller, and so
+    is dismissed as "direct". Break either and the guard silently passes everything — probe it by
+    putting a trigger_deprecation() call in src/ and checking that the suite turns red.
+  -->
+  <source ignoreDirectDeprecations="true"
+          ignoreIndirectDeprecations="true"
+          ignoreSuppressionOfDeprecations="true">
+    <include>
+      <directory>./src</directory>
+    </include>
+    <deprecationTrigger>
+      <function>trigger_deprecation</function>
+    </deprecationTrigger>
+  </source>
 </phpunit>

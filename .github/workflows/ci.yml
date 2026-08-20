@@ -39,7 +39,7 @@ jobs:
                   SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
             - name: Run tests
-              run: vendor/bin/simple-phpunit -v
+              run: vendor/bin/phpunit
 
     prefer-lowest-tests:
         name: "Test: prefer-lowest"
@@ -63,7 +63,7 @@ jobs:
                   composer-options: --prefer-dist
 
             - name: Run tests
-              run: vendor/bin/simple-phpunit -v
+              run: vendor/bin/phpunit
 
     composer-validate:
         name: Validate composer.json

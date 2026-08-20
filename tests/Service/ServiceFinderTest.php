@@ -7,6 +7,7 @@ namespace Nanofelis\JsonRpcBundle\Tests\Service;
 use Nanofelis\JsonRpcBundle\Exception\RpcMethodNotFoundException;
 use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
@@ -60,9 +61,7 @@ class ServiceFinderTest extends TestCase
         $this->serviceFinder->find(new RpcRequest(serviceKey: 'mockService', methodKey: 'unknown'));
     }
 
-    /**
-     * @dataProvider provideUnreachableMethod
-     */
+    #[DataProvider('provideUnreachableMethod')]
     public function testFindUnreachableMethod(string $methodKey): void
     {
         $this->expectException(RpcMethodNotFoundException::class);

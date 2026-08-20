@@ -8,6 +8,7 @@ use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\JsonRpcBundle\Request\RpcPayload;
 use Nanofelis\JsonRpcBundle\Request\RpcRequestParser;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -131,9 +132,7 @@ class RpcRequestParserTest extends TestCase
         $this->assertCount(1, $payload->getRpcResponses());
     }
 
-    /**
-     * @dataProvider provideNonConformingId
-     */
+    #[DataProvider('provideNonConformingId')]
     public function testNonConformingIdIsAnInvalidRequest(mixed $id): void
     {
         $payload = $this->parse(['jsonrpc' => '2.0', 'method' => 'mockService.add', 'id' => $id]);
@@ -144,7 +143,7 @@ class RpcRequestParserTest extends TestCase
         $this->assertNull($error->getContent()['id']);
     }
 
-    public function provideNonConformingId(): \Generator
+    public static function provideNonConformingId(): \Generator
     {
         yield 'float' => [1.5];
         yield 'array' => [['nested']];

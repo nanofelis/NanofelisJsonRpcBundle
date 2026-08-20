@@ -7,6 +7,7 @@ namespace Nanofelis\JsonRpcBundle\Tests\Action;
 use Nanofelis\JsonRpcBundle\Exception\AbstractRpcException;
 use Nanofelis\JsonRpcBundle\Tests\Service\NeverInstantiatedService;
 use Nanofelis\JsonRpcBundle\Tests\TestKernel;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\RouterInterface;
@@ -21,6 +22,16 @@ class RpcTest extends WebTestCase
     {
         self::$client = static::createClient();
         $this->router = self::$client->getContainer()->get('router');
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        // booting the kernel registers Symfony's ErrorHandler via DebugHandlersListener, and
+        // shutting the kernel down does not unregister it — PHPUnit flags the leftover handler
+        // as a risky test. Nothing else in the suite boots a kernel, so this is the one place.
+        restore_exception_handler();
     }
 
     protected static function getKernelClass(): string
@@ -43,9 +54,7 @@ class RpcTest extends WebTestCase
         $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
     }
 
-    /**
-     * @dataProvider provideRpcRequest
-     */
+    #[DataProvider('provideRpcRequest')]
     public function testRpc(array $requestData, array $expected): void
     {
         self::$client->request(method: 'POST', uri: $this->router->generate('nanofelis_json_rpc.endpoint'), content: json_encode($requestData));
@@ -53,7 +62,7 @@ class RpcTest extends WebTestCase
         $this->assertSame($expected, json_decode(self::$client->getResponse()->getContent(), true));
     }
 
-    public function provideRpcRequest(): \Generator
+    public static function provideRpcRequest(): \Generator
     {
         // regular rpc request
         yield [

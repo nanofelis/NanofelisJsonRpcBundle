@@ -13,10 +13,10 @@ Requires PHP >= 8.4 and Symfony `^6.4|^7.0|^8.0`. The PHP floor is set by Symfon
 Dependencies must be installed first (`composer install`); `vendor/` is not committed.
 
 ```bash
-# Tests (phpunit-bridge wrapper — installs its own PHPUnit on first run)
-vendor/bin/simple-phpunit
-vendor/bin/simple-phpunit --filter testMethodName
-vendor/bin/simple-phpunit tests/Request/RpcRequestHandlerTest.php
+# Tests
+vendor/bin/phpunit
+vendor/bin/phpunit --filter testMethodName
+vendor/bin/phpunit tests/Request/RpcRequestHandlerTest.php
 
 # Coding standards (@Symfony + @Symfony:risky, declare_strict_types enforced)
 # Scope is the whole repo minus var/, vendor/ and the generated config/reference.php
@@ -65,7 +65,17 @@ Key design points to preserve when changing things:
 
 Add new exposable RPC methods to `MockService` when covering handler/resolver behaviour end-to-end (`tests/Action/RpcTest.php` uses `WebTestCase` + `KernelBrowser`); unit-level tests instantiate collaborators directly (`ServiceFinderTest`).
 
-`SYMFONY_DEPRECATIONS_HELPER=max[self]=0` — deprecations triggered by this bundle's own code fail the suite.
+Deprecations triggered by this bundle's own code fail the suite; those coming from Symfony or
+from deeper in the tree do not. That policy used to be `SYMFONY_DEPRECATIONS_HELPER=max[self]=0`
+from `symfony/phpunit-bridge`; it is now expressed natively in `phpunit.xml.dist` via
+`failOnDeprecation` plus a `<source>` block that ignores direct and indirect deprecations. Two
+details there are load-bearing and easy to undo by accident: `ignoreSuppressionOfDeprecations`
+(Symfony's `trigger_deprecation()` calls `@trigger_error()`, and without this PHPUnit honours the
+`@` and sees nothing at all), and the `deprecationTrigger` entry naming `trigger_deprecation`
+(without it every Symfony deprecation is blamed on Symfony's own frame rather than on the `src/`
+caller, and is therefore ignored as "direct"). Break either one and the guard silently passes
+everything — probe it by putting a `trigger_deprecation()` call in `src/` and checking the suite
+turns red.
 
 Booting the test kernel makes Symfony write `config/reference.php` — auto-generated app-only scaffolding, not part of the bundle. It is gitignored and excluded from php-cs-fixer; leave both guards in place rather than formatting or committing the file.
 

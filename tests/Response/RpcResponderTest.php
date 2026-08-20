@@ -10,6 +10,7 @@ use Nanofelis\JsonRpcBundle\Request\RpcRequest;
 use Nanofelis\JsonRpcBundle\Responder\RpcResponder;
 use Nanofelis\JsonRpcBundle\Response\RpcResponse;
 use Nanofelis\JsonRpcBundle\Response\RpcResponseError;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class RpcResponderTest extends TestCase
@@ -21,9 +22,7 @@ class RpcResponderTest extends TestCase
         $this->responder = new RpcResponder();
     }
 
-    /**
-     * @dataProvider provideRpcPayload
-     */
+    #[DataProvider('provideRpcPayload')]
     public function testResponderBatch(RpcPayload $payload, array $expected)
     {
         $jsonResponse = ($this->responder)($payload);
@@ -31,7 +30,7 @@ class RpcResponderTest extends TestCase
         $this->assertSame($expected, json_decode($jsonResponse->getContent(), true));
     }
 
-    public function provideRpcPayload(): \Generator
+    public static function provideRpcPayload(): \Generator
     {
         $payload = new RpcPayload();
         $payload->setIsBatch(true);
