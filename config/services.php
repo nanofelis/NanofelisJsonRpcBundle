@@ -34,6 +34,7 @@ return static function (ContainerConfigurator $container): void {
             service('serializer'),
             service('event_dispatcher'),
             service('kernel'),
+            service('request_stack'),
         ]);
 
     // the service locator argument is injected by RpcServicePass, which indexes every service

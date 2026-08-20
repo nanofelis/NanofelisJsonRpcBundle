@@ -164,6 +164,13 @@ This bundle supports the built-in [Argument Resolver](https://symfony.com/doc/cu
 
 RPC methods use the same controller argument lifecycle as regular Symfony controllers. Once arguments have been resolved, the bundle dispatches Symfony's `kernel.controller_arguments` event before invoking the RPC method. Framework and application listeners can therefore inspect, validate or replace the resolved arguments through the standard Symfony extension points.
 
+The request carried by that event is a duplicate of the incoming HTTP request with the RPC `params`
+substituted, so it keeps the real headers, cookies, session, client IP, query string and route
+attributes; and the event is dispatched with the incoming request's type, so it is a main-request
+event for a normal POST. Listeners that read the request or guard on `$event->isMainRequest()` —
+authentication and authorization commonly do both — therefore behave exactly as they do for a
+regular controller.
+
 Dates and Doctrine entities, for example, are automatically converted if a parameter's name matches a method argument with the correct type hinting or attribute. JSON-RPC parameters are also exposed through the request used by Symfony's argument resolver.
 
 ```php

@@ -14,6 +14,7 @@ use Nanofelis\JsonRpcBundle\Response\RpcResponseInterface;
 use Nanofelis\JsonRpcBundle\Service\ServiceDescriptor;
 use Nanofelis\JsonRpcBundle\Service\ServiceFinder;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -30,6 +31,7 @@ class RpcRequestHandler
         private NormalizerInterface $normalizer,
         private EventDispatcherInterface $eventDispatcher,
         private HttpKernelInterface $kernel,
+        private RequestStack $requestStack,
     ) {
     }
 
@@ -63,23 +65,26 @@ class RpcRequestHandler
         /** @var callable $callable */
         $callable = [$service, $method];
 
+        // outside the try: only argument resolution maps to invalid params, building the request does not
+        $request = $this->createArgumentResolutionRequest($rpcRequest);
+
         try {
-            $rpcParams = $rpcRequest->getParams() ?? [];
-            $request = new Request(
-                request: $rpcParams,
-                attributes: $rpcParams,
-                server: ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'],
-            );
             $arguments = $this->argumentResolver->getArguments($request, $callable);
         } catch (\Exception $e) {
             throw new RpcInvalidParamsException(previous: $e);
         }
 
-        // SUB_REQUEST: $request is a synthetic carrier for the rpc params, not the incoming HTTP
-        // request. It is deliberately NOT pushed onto the RequestStack — it has no URI, headers or
-        // client IP, so making it the current request would hide the real POST request from any
-        // service that injects RequestStack. No value resolver reads the stack, only this $request.
-        $event = new ControllerArgumentsEvent($this->kernel, $callable, $arguments, $request, HttpKernelInterface::SUB_REQUEST);
+        // Mirror the incoming request's type rather than asserting one: app listeners on
+        // kernel.controller_arguments commonly early-return on !isMainRequest(), and auth is often
+        // one of them, so hardcoding SUB_REQUEST disables them silently. getParentRequest() is null
+        // for both the main request and an empty stack, which is the answer wanted in either case.
+        $requestType = null === $this->requestStack->getParentRequest()
+            ? HttpKernelInterface::MAIN_REQUEST
+            : HttpKernelInterface::SUB_REQUEST;
+
+        // $request is deliberately NOT pushed onto the RequestStack: that would shadow the real
+        // incoming request with a copy whose attributes carry rpc params.
+        $event = new ControllerArgumentsEvent($this->kernel, $callable, $arguments, $request, $requestType);
         $this->eventDispatcher->dispatch($event, KernelEvents::CONTROLLER_ARGUMENTS);
         $callable = $event->getController();
         $arguments = $event->getArguments();
@@ -94,6 +99,39 @@ class RpcRequestHandler
         }
 
         return $this->normalizeResult($result, $serviceDescriptor);
+    }
+
+    private function createArgumentResolutionRequest(RpcRequest $rpcRequest): Request
+    {
+        $rpcParams = $rpcRequest->getParams() ?? [];
+
+        // Stand in for the incoming request rather than inventing a bare one: listeners on
+        // kernel.controller_arguments — auth among them — read the headers, cookies, session and
+        // client ip off it, and duplicate() carries all of that over. Outside an http request
+        // (direct invocation) there is nothing to stand in for, so an empty request is the base.
+        $request = ($this->requestStack->getCurrentRequest() ?? new Request())->duplicate(request: $rpcParams);
+        $request->attributes->add($rpcParams);
+
+        // The resolver reads params out of the request bag, which requires a form content type: the
+        // real one is application/json, which would send RequestPayloadValueResolver looking for the
+        // payload in the body instead. Set on the headers rather than by handing duplicate() a server
+        // array — that re-derives every header from $_SERVER, measured 7x slower on this path, and
+        // would let a proxy-supplied HTTP_CONTENT_TYPE win over ours.
+        $request->headers->set('CONTENT_TYPE', 'application/x-www-form-urlencoded');
+
+        // The params are the payload, so the json-rpc envelope shared with the incoming request must
+        // not stay reachable through getContent(): RequestPayloadValueResolver falls back to it when
+        // the request bag is empty, which would turn a nullable #[MapRequestPayload] argument into a
+        // 400 where it should resolve to null. Request exposes no setter for the body, hence the
+        // closure bound into its scope — the shape Symfony itself uses in InlineFragmentRenderer.
+        // initialize() would do it too, at that same 7x cost.
+        static $blankBody;
+        $blankBody ??= \Closure::bind(static function (Request $request): void {
+            $request->content = '';
+        }, null, Request::class);
+        $blankBody($request);
+
+        return $request;
     }
 
     private function isInvalidParamsException(\TypeError $e, ServiceDescriptor $serviceDescriptor): bool

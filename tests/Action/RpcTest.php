@@ -67,10 +67,10 @@ class RpcTest extends WebTestCase
             ['jsonrpc' => '2.0', 'result' => 4, 'id' => 'test'],
         ];
 
-        // request resolver
+        // request resolver: the injected Request is the real POST, not an invented GET carrier
         yield [
             ['jsonrpc' => '2.0', 'method' => 'mockService.requestValueResolver', 'params' => ['date' => '2017/01/01'], 'id' => 'test'],
-            ['jsonrpc' => '2.0', 'result' => 'GET', 'id' => 'test'],
+            ['jsonrpc' => '2.0', 'result' => 'POST', 'id' => 'test'],
         ];
 
         // batch of regular rpc request

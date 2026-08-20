@@ -17,6 +17,9 @@
   instead — it gives access to the resolved, typed arguments rather than raw params.
 - An empty batch (`[]`) now answers `-32600` rather than an empty array, as the spec requires a
   batch to be an array with at least one value.
+- An RPC method that injects `Symfony\Component\HttpFoundation\Request` now receives the incoming
+  request rather than an empty stub, so `getMethod()` returns `POST` instead of `GET`. Methods
+  asserting on the old stub must be updated.
 
 ### Added
 
@@ -42,9 +45,15 @@
   `-32600` instead of raising a `TypeError` and surfacing as HTTP 500.
 - A request without a `jsonrpc` key no longer raises an "Undefined array key" PHP warning on its
   way to the correct `-32600` response.
-- The synthetic request used to resolve method arguments is dispatched as a sub-request rather
-  than claiming to be the main request. It is deliberately not pushed onto the `RequestStack`, so
-  services injecting it still see the real incoming HTTP request.
+- The request used to resolve method arguments is now a duplicate of the incoming HTTP request —
+  headers, cookies, session, client IP, query string and route attributes included — with the RPC
+  `params` and a form content type swapped in and the body emptied. It was an empty carrier before,
+  so a `kernel.controller_arguments` listener could not read an `Authorization` header, a cookie or
+  the client IP off it.
+- The `kernel.controller_arguments` event now mirrors the incoming request's type instead of
+  claiming to be a sub-request, so it is `MAIN_REQUEST` for a normal POST. App listeners that skip
+  sub-requests — a common guard, and often where authentication lives — run again. The duplicate is
+  still not pushed onto the `RequestStack`, so services injecting it see the real incoming request.
 
 ## [2.0.0] - Unreleased
 

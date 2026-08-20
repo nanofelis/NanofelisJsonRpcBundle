@@ -16,6 +16,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -38,7 +39,8 @@ class RpcRequestHandlerTest extends TestCase
             'mockService' => static fn () => new MockService(),
         ]));
         $kernel = $this->createMock(HttpKernelInterface::class);
-        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher, $kernel);
+        // empty stack: exercises the no-incoming-request path
+        $this->requestHandler = new RpcRequestHandler($this->argumentResolver, $serviceFinder, $this->normalizer, $eventDispatcher, $kernel, new RequestStack());
     }
 
     /**
